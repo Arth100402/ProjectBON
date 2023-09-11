@@ -17,23 +17,11 @@
     @if (session('status'))
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
-
-
-    <div class="table-responsive" style="overflow: scroll">
-        <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-
-            </tbody>
-        </table>
-    </div>
+    @if (Auth::user()->jabatan_id == 1)
+        {{-- Staff --}}
+    @elseif ()
+        {{-- Selain Staff --}}
+    @endif
 @endsection
 @section('javascript')
     <script>
