@@ -15,7 +15,7 @@ use PHPUnit\TextUI\XmlConfiguration\Group;
 |
 */
 
+Auth::routes();
 Route::middleware("auth")->group(function () {
     Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
-Auth::routes();

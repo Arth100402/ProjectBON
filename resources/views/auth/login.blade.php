@@ -72,6 +72,7 @@ License: You must have a valid license purchased only from themeforest(the above
     <div class="content">
         <!-- BEGIN LOGIN FORM -->
         <form class="login-form" action="{{ route('login') }}" method="post">
+            @csrf
             <h3 class="form-title">Login to your account</h3>
             <div class="alert alert-danger display-hide">
                 <button class="close" data-close="alert"></button>
@@ -118,7 +119,7 @@ License: You must have a valid license purchased only from themeforest(the above
     <!-- END LOGIN -->
     <!-- BEGIN COPYRIGHT -->
     <div class="copyright">
-        2013 &copy; Conquer. Admin Dashboard Template.
+        2013 &copy; Conquer. Intern bois.
     </div>
     <!-- END COPYRIGHT -->
     <!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
