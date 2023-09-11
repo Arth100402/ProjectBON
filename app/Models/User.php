@@ -11,6 +11,27 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+    protected $table = "users";
+
+    function department()
+    {
+        return $this->belongsTo(Department::class, "departement_id", "id");
+    }
+
+    function bon()
+    {
+        return $this->hasMany(Bon::class, "users_id", "id");
+    }
+
+    function detailbon()
+    {
+        return $this->hasMany(DetailBon::class, "users_id", "id");
+    }
+
+    function acc()
+    {
+        return $this->hasMany(Acc::class, "users_id", "id");
+    }
 
     /**
      * The attributes that are mass assignable.
