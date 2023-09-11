@@ -71,7 +71,8 @@
             <!-- BEGIN LOGO -->
             <div class="page-logo">
                 <a href="/">
-                    <img src="{{ asset('assets/img/logPOG.jpg') }}" style="height:25px;width:auto" alt="logo" />
+                    <img src="{{ asset('assets/img/logPOG.jpg') }}" style="height:25px;width:auto; border-radius:2px;"
+                        alt="logo" />
                 </a>
             </div>
             <!-- END LOGO -->
@@ -150,15 +151,15 @@
                     </li>
                     <li class="start">
                         <a href="/">
-                            <i class="icon-home"></i>
-                            <span class="title">Dashboard 2</span>
+                            <i class="fa fa-book"></i>
+                            <span class="title">Book</span>
                             <span class="selected"></span>
                         </a>
                     </li>
                     <li class="start">
                         <a href="/">
-                            <i class="icon-home"></i>
-                            <span class="title">Dashboard 3</span>
+                            <i class="fa fa-user"></i>
+                            <span class="title">Profile</span>
                             <span class="selected"></span>
                         </a>
                     </li>
