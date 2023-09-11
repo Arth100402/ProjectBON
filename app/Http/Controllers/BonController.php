@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Bon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class BonController extends Controller
 {
@@ -17,6 +18,7 @@ class BonController extends Controller
     {
         return view('home');
     }
+
     public function jsonShowIndexAdmin()
     {
         // Get all bons
@@ -30,6 +32,7 @@ class BonController extends Controller
             'data' => $data
         ]);
     }
+    
     public function getDetail(Request $request)
     {
         $id = $request->get('id');
