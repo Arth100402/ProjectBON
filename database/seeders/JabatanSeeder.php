@@ -14,8 +14,8 @@ class JabatanSeeder extends Seeder
      */
     public function run()
     {
-        $roles = ["Karyawan", "Supervisor", "Super Admin"];
-        for ($i = 0; $i <= 2; $i++) {
+        $roles = ["Karyawan", "Supervisor", "Manager", "General Manager", "Wakil Direktur", "Direktur", "Super Admin"];
+        for ($i = 0; $i <= 6; $i++) {
             DB::table('jabatans')->insert([
                 [
                     "name" => $roles[$i]
