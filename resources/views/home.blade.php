@@ -19,32 +19,188 @@
     @endif
     @if (Auth::user()->jabatan_id == 1)
         {{-- Staff --}}
-        <p>s</p>
+        <div class="table-responsive" style="overflow: scroll">
+            <table id="myTableStaff" class="table table-striped table-bordered" style="table-layout: fixed">
+                <thead>
+                    <tr>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Pengaju</th>
+                        <th>Project</th>
+                        <th>Total Nominal</th>
+                        <th>Status Kasir</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="modal fade" id="modalEditB" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog modal-wide">
+                <div class="modal-content">
+                    <div class="modal-body" id="modalContentB">
+                        <!--loading animated gif can put here-->
+                    </div>
+                </div>
+            </div>
+        </div>
     @elseif(Auth::user()->jabatan_id != 1)
-        {{-- Selain Staff --}}
-        <p>a</p>
+        <div class="table-responsive" style="overflow: scroll">
+            <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Departemen</th>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Total Biaya Perjalanan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="modal fade" id="modalEditA" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog modal-wide">
+                <div class="modal-content">
+                    <div class="modal-body" id="modalContent">
+                        <!--loading animated gif can put here-->
+                    </div>
+                </div>
+            </div>
+        </div>
     @endif
 @endsection
 @section('javascript')
-    <script>
-        $(document).ready(function() {
-            $('#myTable').DataTable({
-                paging: false,
-                scrollCollapse: true,
-                scrollY: '445px',
-                columns: [{
-                        data: "idOpti"
+    @if (Auth::user()->jabatan_id == 1)
+        <script>
+            function getDetail(id) {
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ route('home.getDetail') }}',
+                    data: {
+                        '_token': '<?php echo csrf_token(); ?>',
+                        'id': id
                     },
-                    {
-                        data: "namaOpti"
-                    } {
-                        data: "tglRealisasi"
-                    },
-                    {
-                        data: "deadline"
+                    success: function(data) {
+                        $('#modalContentB').html(data.msg)
                     }
-                ]
+                });
+            }
+            $(document).ready(function() {
+                var table = $('#myTableStaff').DataTable({
+                    paging: false,
+                    scrollCollapse: true,
+                    scrollY: '445px',
+                    columns: [{
+                            data: "tglPengajuan"
+                        },
+                        {
+                            data: "uname"
+                        },
+                        {
+                            data: "pidOpti"
+                        },
+                        {
+                            data: "total",
+                            render: function(data, type, row, meta) {
+                                // Format "total" as Rupiah
+                                const rupiah = new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR'
+                                }).format(data);
+                                return rupiah;
+                            }
+                        },
+                        {
+                            data: "status"
+                        },
+                        {
+                            data: null,
+                            render: (data, type, row, meta) => {
+                                return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal"
+                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>`
+                            }
+                        },
+                    ]
+                });
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    url: "{{ route('index') }}",
+                    success: function(data) {
+                        table.clear().draw()
+                        table.rows.add(data["data"]).draw()
+                    }
+                });
             });
-        });
-    </script>
+        </script>
+    @elseif(Auth::user()->jabatan_id != 1)
+        <script>
+            function getDetail(id) {
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('bon.getDetail') }}",
+                    data: {
+                        '_token': '<?php echo csrf_token(); ?>',
+                        'id': id
+                    },
+                    success: function(data) {
+                        $('#modalContent').html(data.msg)
+                    }
+                });
+            }
+            $(document).ready(function() {
+                var table = $('#myTable').DataTable({
+                    paging: false,
+                    scrollCollapse: true,
+                    scrollY: '445px',
+                    columns: [{
+                            data: "name"
+                        },
+                        {
+                            data: "dname"
+                        },
+                        {
+                            data: "tglPengajuan"
+                        },
+                        {
+                            data: "total",
+                            render: function(data, type, row, meta) {
+                                // Format "total" as Rupiah
+                                const rupiah = new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR'
+                                }).format(data);
+                                return rupiah;
+                            }
+                        },
+                        {
+                            data: "status"
+                        },
+                        {
+                            data: null,
+                            render: (data, type, row, meta) => {
+                                return `<a class="btn btn-success" href="#modalEditA" data-toggle="modal"
+                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a><br>`;
+                            }
+                        },
+                    ]
+                });
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    url: "{{ route('bon.jsonShowIndexAdmin') }}",
+                    success: function(data) {
+                        console.log(data);
+                        table.clear().draw()
+                        table.rows.add(data["data"]).draw()
+                    },
+                    error: function(error) {
+                        console.log("Error: ");
+                        console.log(error);
+                    }
+                });
+            });
+        </script>
+    @endif
 @endsection
