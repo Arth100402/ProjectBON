@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class BonController extends Controller
@@ -23,7 +25,7 @@ class BonController extends Controller
      */
     public function create()
     {
-        //
+        return view('formCreate');
     }
 
     /**
@@ -80,5 +82,19 @@ class BonController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function loadSales(Request $request)
+    {
+        $data = User::join("departements AS d", "d.id", "users.departement_id")
+            ->where("d.id", "5")
+            ->where("users.name", "LIKE", "%$request->q%")
+            ->get(["users.name", "users.id"]);
+        return response()->json(["data" => $data]);
+    }
+    public function  loadPPC(Request $request)
+    {
+        $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti"]);
+        return response()->json(["data" => $data]);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BonController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\TextUI\XmlConfiguration\Group;
@@ -18,4 +19,8 @@ use PHPUnit\TextUI\XmlConfiguration\Group;
 Auth::routes();
 Route::middleware("auth")->group(function () {
     Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::resource('bon', BonController::class);
+    Route::get("/loadppc", [BonController::class, "loadPPC"])->name("loadPPC");
+    Route::get("/loadsales", [BonController::class, "loadSales"])->name("loadSales");
 });
+Route::get("/test", [BonController::class, "loadSales"]);

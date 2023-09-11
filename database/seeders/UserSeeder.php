@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
                     "password" => Hash::make("user" . ($i)),
                     "jabatan_id" => rand(1, 2),
                     "username" => "User" . ($i),
-                    "departement_id" => 4
+                    "departement_id" => rand(4, 5)
                 ]
             ]);
         }
