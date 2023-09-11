@@ -17,6 +17,7 @@ class DetailBonSeeder extends Seeder
         for ($i = 1; $i <= 5; $i++) {
             DB::table('detailbons')->insert([
                 [
+                    "bons_id" => ($i),
                     "tglMulai" => now(),
                     "tglAkhir" => now(),
                     "asalKota" => "Surabaya",

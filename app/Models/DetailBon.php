@@ -14,4 +14,9 @@ class DetailBon extends Model
     {
         return $this->belongsTo(User::class, "users_id", "id");
     }
+    
+    function bon()
+    {
+        return $this->belongsTo(Bon::class, "bons_id", "id");
+    }
 }

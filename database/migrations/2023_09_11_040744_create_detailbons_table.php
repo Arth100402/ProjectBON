@@ -15,6 +15,8 @@ class CreateDetailbonsTable extends Migration
     {
         Schema::create('detailbons', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('bons_id');
+            $table->foreign('bons_id')->references('id')->on('bons')->onDelete('cascade');
             $table->date("tglMulai");
             $table->date("tglAkhir");
             $table->string("asalKota");
