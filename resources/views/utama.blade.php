@@ -149,20 +149,6 @@
                             <span class="selected"></span>
                         </a>
                     </li>
-                    <li class="start">
-                        <a href="/">
-                            <i class="fa fa-book"></i>
-                            <span class="title">Book</span>
-                            <span class="selected"></span>
-                        </a>
-                    </li>
-                    <li class="start">
-                        <a href="/">
-                            <i class="fa fa-user"></i>
-                            <span class="title">Profile</span>
-                            <span class="selected"></span>
-                        </a>
-                    </li>
                 </ul>
 
                 <!-- END SIDEBAR MENU -->
