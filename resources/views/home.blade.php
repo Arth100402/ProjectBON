@@ -19,8 +19,10 @@
     @endif
     @if (Auth::user()->jabatan_id == 1)
         {{-- Staff --}}
-    @elseif ()
+        <p>s</p>
+    @elseif(Auth::user()->jabatan_id != 1)
         {{-- Selain Staff --}}
+        <p>a</p>
     @endif
 @endsection
 @section('javascript')
