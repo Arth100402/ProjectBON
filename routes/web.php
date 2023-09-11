@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BonController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\TextUI\XmlConfiguration\Group;
@@ -18,4 +19,7 @@ use PHPUnit\TextUI\XmlConfiguration\Group;
 Auth::routes();
 Route::middleware("auth")->group(function () {
     Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/jsonShowIndexAdmin',[BonController::class,'jsonShowIndexAdmin'])->name('bon.jsonShowIndexAdmin');
+    Route::post('/getDetail', [BonController::class, 'getDetail'])->name('bon.getDetail');
+
 });

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Bon;
+use Illuminate\Support\Facades\DB;
 
 class BonController extends Controller
 {
@@ -13,7 +15,28 @@ class BonController extends Controller
      */
     public function index()
     {
-        //
+        return view('home');
+    }
+    public function jsonShowIndexAdmin()
+    {
+        // Get all bons
+        $data = DB::table('bons')
+            ->join('detailbons', 'bons.id', '=', 'detailbons.bons_id')
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->join('projects', 'bons.projects_id', '=', 'projects.id')
+            ->join('departements','users.departement_id','=','departements.id')
+            ->get(['bons.id', 'bons.tglPengajuan', 'bons.users_id', 'users.name', 'departements.name as dname' ,'bons.total', 'bons.projects_id', 'projects.idOpti', 'bons.status']);
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+    public function getDetail(Request $request)
+    {
+        $id = $request->get('id');
+        return response()->json(array(
+            'status' => 'oke',
+            'msg' => view('detail')->render()
+        ));
     }
 
     /**

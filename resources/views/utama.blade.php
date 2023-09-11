@@ -320,8 +320,6 @@
             Index.initKnowElements();
             Index.initDashboardDaterange();
             Tasks.initDashboardWidget();
-            $('#myTable').DataTable();
-
         });
     </script>
     @yield('javascript')
