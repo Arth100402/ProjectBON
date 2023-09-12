@@ -53,7 +53,7 @@
     <div class="panel card-background-color">
         <h3>Detail Bon</h3>
         <div class="table-wrapper table-responsive" style="height:30vh; overflow-y:scroll">
-            <table class="table table-bordered" style="background-color: white">
+            <table id="detailTableAcc" class="table table-bordered" style="background-color: white">
                 <thead>
                     <tr>
                         <th>Mulai Tanggal</th>
@@ -71,14 +71,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($data as $d)
+                    @foreach ($detail as $d)
                         <tr>
                             <td>{{ $d->tglMulai }}</td>
                             <td>{{ $d->tglAkhir }}</td>
                             <td>{{ $d->asalKota }}</td>
                             <td>{{ $d->tujuan }}</td>
-                            <td>{{ $d->user->id }}</td>
-                            <td>{{ $d->project->idOpti }}</td>
+                            <td>{{ $d->name }}</td>
+                            <td>{{ $d->idOpti }}</td>
                             <td>{{ $d->agenda }}</td>
                             <td>{{ $d->keterangan }}</td>
                             <td>{{ $d->kredit }}</td>

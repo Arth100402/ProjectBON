@@ -31,4 +31,4 @@ Route::middleware("auth")->group(function () {
     Route::get('/index', [HomeController::class, 'showIndex'])->name('index');
     Route::post('/index/getDetail', [HomeController::class, 'getDetail'])->name('home.getDetail');
 });
-Route::get("/test", [BonController::class, "loadSales"]);
+Route::get("/test", [BonController::class, "getDetail"]);
