@@ -21,5 +21,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ProjectSeeder::class);
         $this->call(BonSeeder::class);
         $this->call(DetailBonSeeder::class);
+        $this->call(AccAccessSeeder::class);
     }
 }
