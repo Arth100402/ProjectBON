@@ -23,7 +23,6 @@ class BonController extends Controller
 
     public function jsonShowIndexAdmin()
     {
-        // Get all bons
         $data = DB::table('bons')
             ->join('detailbons', 'bons.id', '=', 'detailbons.bons_id')
             ->join('users', 'bons.users_id', '=', 'users.id')
@@ -34,7 +33,6 @@ class BonController extends Controller
             'data' => $data
         ]);
     }
-
     public function getDetail(Request $request)
     {
         $id = $request->get('id');
