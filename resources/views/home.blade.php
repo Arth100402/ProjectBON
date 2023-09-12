@@ -242,7 +242,7 @@
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a><br>`;
                             },
                             width: "4%"
-                        },
+                        }
                     ]
                 });
                 $.ajax({
