@@ -154,34 +154,53 @@
                     scrollCollapse: true,
                     scrollY: '445px',
                     columns: [{
-                            data: "name"
+                            data: "name",
+                            width: "10%"
                         },
                         {
                             data: "dname"
                         },
                         {
-                            data: "tglPengajuan"
-                        },
-                        {
-                            data: "total",
-                            render: function(data, type, row, meta) {
-                                // Format "total" as Rupiah
-                                const rupiah = new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR'
-                                }).format(data);
-                                return rupiah;
+                            data: "tglPengajuan",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    var date = new Date(data);
+                                    var options = {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    };
+                                    return date.toLocaleDateString('id-ID', options);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
                             }
                         },
                         {
-                            data: "status"
+                            data: "total",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    return new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR'
+                                    }).format(data);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: "status",
+                            defaultContent: '<p>Menunggu</p>'
                         },
                         {
                             data: null,
                             render: (data, type, row, meta) => {
                                 return `<a class="btn btn-success" href="#modalEditA" data-toggle="modal"
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a><br>`;
-                            }
+                            },
+                            width: "4%"
                         },
                     ]
                 });
