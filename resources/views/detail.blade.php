@@ -10,14 +10,12 @@
                         <th>Akhir Tanggal</th>
                         <th>Asal Kota</th>
                         <th>Tujuan</th>
-                        <th>Sales</th>
-                        <th>No PPC</th>
+                        <th>Project</th>
+                        <th>Pengaju</th>
+                        <th>No Paket</th>
                         <th>Agenda</th>
-                        <th>Keterangan</th>
-                        <th>Kredit</th>
-                        <th>Debit</th>
-                        <th>Total Pengeluaran</th>
-                        <th>Saldo</th>
+                        <th>Penggunaan</th>
+                        <th>Biaya</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,14 +25,12 @@
                             <td>{{ $d->tglAkhir }}</td>
                             <td>{{ $d->asalKota }}</td>
                             <td>{{ $d->tujuan }}</td>
-                            <td>{{ $d->user->id }}</td>
                             <td>{{ $d->project->idOpti }}</td>
+                            <td>{{ $d->user->name }}</td>
+                            <td>{{ $d->noPaket }}</td>
                             <td>{{ $d->agenda }}</td>
-                            <td>{{ $d->keterangan }}</td>
-                            <td>{{ $d->kredit }}</td>
-                            <td>{{ $d->debit }}</td>
-                            <td>{{ $d->totalPengeluaran }}</td>
-                            <td>{{ $d->saldo }}</td>
+                            <td>{{ sprintf('Rp %s', number_format($d->penggunaan, 0, ',', '.')) }}</td>
+                            <td>{{ sprintf('Rp %s', number_format($d->biaya, 0, ',', '.')) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -60,14 +56,12 @@
                         <th>Akhir Tanggal</th>
                         <th>Asal Kota</th>
                         <th>Tujuan</th>
-                        <th>Sales</th>
-                        <th>No PPC</th>
+                        <th>Project</th>
+                        <th>Pengaju</th>
+                        <th>No Paket</th>
                         <th>Agenda</th>
-                        <th>Keterangan</th>
-                        <th>Kredit</th>
-                        <th>Debit</th>
-                        <th>Total Pengeluaran</th>
-                        <th>Saldo</th>
+                        <th>Penggunaan</th>
+                        <th>Biaya</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -77,14 +71,12 @@
                             <td>{{ $d->tglAkhir }}</td>
                             <td>{{ $d->asalKota }}</td>
                             <td>{{ $d->tujuan }}</td>
-                            <td>{{ $d->name }}</td>
                             <td>{{ $d->idOpti }}</td>
+                            <td>{{ $d->name }}</td>
+                            <td>{{ $d->noPaket }}</td>
                             <td>{{ $d->agenda }}</td>
-                            <td>{{ $d->keterangan }}</td>
-                            <td>{{ $d->kredit }}</td>
-                            <td>{{ $d->debit }}</td>
-                            <td>{{ $d->totalPengeluaran }}</td>
-                            <td>{{ $d->saldo }}</td>
+                            <td>{{ sprintf('Rp %s', number_format($d->penggunaan, 0, ',', '.')) }}</td>
+                            <td>{{ sprintf('Rp %s', number_format($d->biaya, 0, ',', '.')) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

@@ -25,7 +25,7 @@ class DetailBonSeeder extends Seeder
                     "users_id" => ($i),
                     "projects_id" => ($i),
                     "agenda" => "agenda".($i),
-                    "keterangan" => "keterangan".($i),
+                    "biaya" => 1000000*$i
                 ]
             ]);
         }
