@@ -30,7 +30,13 @@ class BonController extends Controller
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('users.jabatan_id', '<', Auth::user()->jabatan_id)
             ->where('users.departement_id', '=', Auth::user()->departement_id)
-            ->get(['bons.id', 'bons.tglPengajuan', 'bons.users_id', 'users.name', 'departements.name as dname', 'bons.total', 'detailbons.projects_id', 'projects.idOpti', 'bons.status']);
+            ->get([
+                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name',
+                'departements.name as dname',
+                'detailbons.projects_id',
+                'projects.idOpti'
+            ]);
         return response()->json([
             'data' => $data
         ]);
@@ -46,7 +52,7 @@ class BonController extends Controller
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', $id)
             ->get([
-                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.keterangan', 'detailbons.kredit', 'detailbons.debit', 'detailbons.totalPengeluaran', 'detailbons.saldo', 'detailbons.projects_id',
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id','detailbons.penggunaan','detailbons.noPaket',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
                 'projects.idOpti'
