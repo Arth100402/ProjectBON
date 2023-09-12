@@ -88,8 +88,7 @@
                         $('#modalContentB').html(data.msg);
                         $('#modalEditB').modal('show');
                     },
-                    error: function(err)
-                    {
+                    error: function(err) {
                         console.log(err);
                     }
                 });
@@ -155,6 +154,10 @@
                     },
                     success: function(data) {
                         $('#modalContent').html(data.msg)
+                        console.log(data);
+                    },
+                    error: function(err) {
+                        console.log(err);
                     }
                 });
             }
@@ -171,6 +174,7 @@
                             return 4;
                     }
                 };
+
                 var table = $('#myTable').DataTable({
                     paging: false,
                     scrollCollapse: true,
@@ -251,7 +255,6 @@
                     async: false,
                     url: "{{ route('bon.jsonShowIndexAdmin') }}",
                     success: function(data) {
-                        console.log(data);
                         table.clear().draw()
                         table.rows.add(data["data"]).draw()
                     },
