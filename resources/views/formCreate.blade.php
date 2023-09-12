@@ -121,7 +121,7 @@
     <br>
     <button id="addDetail" class="btn btn-info btn-block">Tambahkan</button><br>
     <form method="POST" action="{{ route('bon.store') }}">
-        <input type="hidden" name="userId" value="{{ Auth::user()->id }}">
+        @csrf
         <div class="table-responsive" style="overflow: scroll">
             <table id="myTable" class="table table-striped table-bordered">
                 <thead>
@@ -145,12 +145,22 @@
             </table>
         </div>
 
+        <div class="form-group">
+            <label for="saldo">Total Biaya Perjalanan: </label>
+            <input type="number" value="0" name="biayaPerjalanan" class="form-control" id="biayaPerjalanan"
+                readonly>
+            @error('debit')
+                <span class="text-danger">{{ $message }}</span>
+            @enderror
+        </div>
+
         <button type="submit" class="btn btn-success" id="submit" disabled>Ajukan</button>
         <a class="btn btn-danger" href="">Batal Ajukan</a>
     </form>
 @endsection
 @section('javascript')
     <script>
+        const biayaPerjalanan = 0;
         const appendDate = (option, id) => {
             var date = $(id).data("DateTimePicker").date()
             switch (option) {
@@ -244,29 +254,33 @@
                 $("#submit").attr("disabled", false);
                 var rows = `
                     <tr>
-                        <td>${$("#tglMulai").val()}<input type="hidden" name="tglMulai" value="${$("#tglMulai").val()}"></td>
-                        <td>${$("#tglAkhir").val()}<input type="hidden" name="tglAkhir" value="${$("#tglAkhir").val()}"></td>
-                        <td>${asal}<input type="hidden" name="asalKota" value="${asal}"></td>
-                        <td>${tujuan}<input type="hidden" name="tujuan" value="${tujuan}"></td>
-                        <td>${$("#select-sales option:selected").text()}<input type="hidden" name="select-sales" value="${$("#select-sales").val()}"></td>
-                        <td>${$("#select-ppc option:selected").text()}<input type="hidden" name="select-ppc" value="${$("#select-ppc").val()}"></td>
-                        <td>${agenda}<input type="hidden" name="agenda" value="${agenda}"></td>
-                        <td>${keter}<input type="hidden" name="keterangan" value="${keter}"></td>
-                        <td>${$("#kredit").val()}<input type="hidden" name="kredit" value="${$("#kredit").val()}"></td>
-                        <td>${$("#debit").val()}<input type="hidden" name="debit" value="${$("#debit").val()}"></td>
-                        <td>${diff}<input type="hidden" name="totalPengeluaran" value="${diff}"></td>
-                        <td>${$("#saldo").val()}<input type="hidden" name="saldo" value="${$("#saldo").val()}"></td>
+                        <td>${$("#tglMulai").val()}<input type="hidden" name="tglMulai[]" value="${$("#tglMulai").val()}"></td>
+                        <td>${$("#tglAkhir").val()}<input type="hidden" name="tglAkhir[]" value="${$("#tglAkhir").val()}"></td>
+                        <td>${asal}<input type="hidden" name="asalKota[]" value="${asal}"></td>
+                        <td>${tujuan}<input type="hidden" name="tujuan[]" value="${tujuan}"></td>
+                        <td>${$("#select-sales option:selected").text()}<input type="hidden" name="select-sales[]" value="${$("#select-sales").val()}"></td>
+                        <td>${$("#select-ppc option:selected").text()}<input type="hidden" name="select-ppc[]" value="${$("#select-ppc").val()}"></td>
+                        <td>${agenda}<input type="hidden" name="agenda[]" value="${agenda}"></td>
+                        <td>${keter}<input type="hidden" name="keterangan[]" value="${keter}"></td>
+                        <td>${$("#kredit").val()}<input type="hidden" name="kredit[]" value="${$("#kredit").val()}"></td>
+                        <td>${$("#debit").val()}<input type="hidden" name="debit[]" value="${$("#debit").val()}"></td>
+                        <td>${diff}<input type="hidden" name="totalPengeluaran[]" id="totalPengeluaran" value="${diff}"></td>
+                        <td>${$("#saldo").val()}<input type="hidden" name="saldo[]" value="${$("#saldo").val()}"></td>
                         <td><a class="btn btn-danger btn-block" id="deleteRow"><i class="fa fa-trash-o"></i></a></td>
                     </tr>`
                 $("#table-container").append(rows);
-                $("#asalKota").val("")
-                $("#tujuan").val("")
-                $("#keterangan").val("")
-                $("#kredit").val(0)
-                $("#kredit").val(0)
-                $("#saldo").val(0)
+                // $("#asalKota").val("")
+                // $("#tujuan").val("")
+                // $("#keterangan").val("")
+                // $("#kredit").val(0)
+                // $("#debit").val(0)
+                // $("#saldo").val(0)
+                $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) + parseInt(diff));
             });
             $(document).on("click", "#deleteRow", function() {
+                const totalPengeluaran = $(this).parent().parent().find("#totalPengeluaran").val()
+                $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) - parseInt(
+                    totalPengeluaran));
                 $(this).parent().parent().remove()
                 if ($("#table-container tr").length < 1) {
                     $("#submit").attr("disabled", true);

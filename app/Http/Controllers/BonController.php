@@ -79,6 +79,31 @@ class BonController extends Controller
      */
     public function store(Request $request)
     {
+        $user = User::find($request->get("userId"));
+        $bon = DB::table('bons')->insertGetId([
+            "tglPengajuan" => now(),
+            "users_id" => $user->id,
+            "total" => $request->get("biayaPerjalanan"),
+            "status" => null
+        ]);
+        foreach ($request->get("select-ppc") as $key => $value) {
+            DB::table('detailbons')->insert([
+                "bons_id" => $bon,
+                "tglMulai" => $request->get("tglMulai")[$key],
+                "tglAkhir" => $request->get("tglAkhir")[$key],
+                "asalKota" => $request->get("asalKota")[$key],
+                "tujuan" => $request->get("tujuan")[$key],
+                "users_id" => $request->get("select-sales")[$key],
+                "projects_id" => $value,
+                "agenda" => $request->get("agenda")[$key],
+                "keterangan" => $request->get("keterangan")[$key],
+                "kredit" => $request->get("kredit")[$key],
+                "debit" => $request->get("debit")[$key],
+                "totalPengeluaran" => $request->get("totalPengeluaran")[$key],
+                "saldo" => $request->get("saldo")[$key],
+            ]);
+        }
+        return redirect(route('bon.index'));
     }
 
     /**
@@ -138,5 +163,9 @@ class BonController extends Controller
     {
         $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti"]);
         return response()->json(["data" => $data]);
+    }
+    public function test(Request $request)
+    {
+        return view("test", ["data" => $request]);
     }
 }
