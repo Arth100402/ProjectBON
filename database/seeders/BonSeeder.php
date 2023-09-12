@@ -19,8 +19,7 @@ class BonSeeder extends Seeder
                 [
                     "tglPengajuan" => now(),
                     "users_id" => ($i),
-                    "total" => 10000*$i,
-                    "projects_id" => ($i)
+                    "total" => 10000*$i
                 ]
             ]);
         }
