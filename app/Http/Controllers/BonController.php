@@ -43,19 +43,15 @@ class BonController extends Controller
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', $id)
             ->get([
-                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.keterangan', 'detailbons.kredit', 'detailbons.debit', 'detailbons.totalPengeluaran', 'detailbons.saldo','detailbons.projects_id',
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.keterangan', 'detailbons.kredit', 'detailbons.debit', 'detailbons.totalPengeluaran', 'detailbons.saldo', 'detailbons.projects_id',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
                 'departements.name as dname',
                 'projects.idOpti'
             ]);
-        $acc = DB::table('accs')
-            ->join('users', 'accs.users_id', '=', 'users.id')
-            ->where('accs.bons_id', $id)
-            ->get(['accs.id', 'users.name', 'bons_id as bid', 'accs.status']);
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc'))->render()
+            'msg' => view('detail', compact('detail'))->render()
         ));
     }
 
