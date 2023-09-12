@@ -26,9 +26,9 @@ class BonController extends Controller
         $data = DB::table('bons')
             ->join('detailbons', 'bons.id', '=', 'detailbons.bons_id')
             ->join('users', 'bons.users_id', '=', 'users.id')
-            ->join('projects', 'bons.projects_id', '=', 'projects.id')
+            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
-            ->get(['bons.id', 'bons.tglPengajuan', 'bons.users_id', 'users.name', 'departements.name as dname', 'bons.total', 'bons.projects_id', 'projects.idOpti', 'bons.status']);
+            ->get(['bons.id', 'bons.tglPengajuan', 'bons.users_id', 'users.name', 'departements.name as dname', 'bons.total', 'detailbons.projects_id', 'projects.idOpti', 'bons.status']);
         return response()->json([
             'data' => $data
         ]);
@@ -39,12 +39,12 @@ class BonController extends Controller
         $detail = DB::table('detailbons')
             ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
             ->join('users', 'bons.users_id', '=', 'users.id')
-            ->join('projects', 'bons.projects_id', '=', 'projects.id')
+            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', $id)
             ->get([
-                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.keterangan', 'detailbons.kredit', 'detailbons.debit', 'detailbons.totalPengeluaran', 'detailbons.saldo',
-                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.projects_id', 'bons.status',
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.keterangan', 'detailbons.kredit', 'detailbons.debit', 'detailbons.totalPengeluaran', 'detailbons.saldo','detailbons.projects_id',
+                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
                 'departements.name as dname',
                 'projects.idOpti'
