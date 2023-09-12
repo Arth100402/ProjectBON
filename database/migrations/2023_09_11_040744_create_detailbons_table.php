@@ -23,6 +23,8 @@ class CreateDetailbonsTable extends Migration
             $table->string("tujuan");
             $table->unsignedBigInteger('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('projects_id');
+            $table->foreign('projects_id')->references('id')->on('projects')->onDelete('cascade');
             $table->text('agenda');
             $table->text('keterangan');
             $table->integer('kredit')->nullable();

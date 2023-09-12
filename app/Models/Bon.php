@@ -14,11 +14,6 @@ class Bon extends Model
         return $this->belongsTo(User::class, "users_id", "id");
     }
 
-    function project()
-    {
-        return $this->belongsTo(Project::class, "projects_id", "id");
-    }
-
     function acc()
     {
         return $this->hasMany(Acc::class, "bons_id", "id");

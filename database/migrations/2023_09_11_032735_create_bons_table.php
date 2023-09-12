@@ -19,8 +19,6 @@ class CreateBonsTable extends Migration
             $table->unsignedBigInteger('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->double('total');
-            $table->unsignedBigInteger('projects_id');
-            $table->foreign('projects_id')->references('id')->on('projects')->onDelete('cascade');
             $table->enum('status', ['Terima','Tolak'])->nullable();
             $table->timestamps();
         });
