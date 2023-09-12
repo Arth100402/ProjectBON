@@ -23,11 +23,11 @@
             <table id="myTableStaff" class="table table-striped table-bordered" style="table-layout: fixed">
                 <thead>
                     <tr>
+                        <th>Nama</th>
+                        <th>Departemen</th>
                         <th>Tanggal Pengajuan</th>
-                        <th>Pengaju</th>
-                        <th>Project</th>
-                        <th>Total Nominal</th>
-                        <th>Status Kasir</th>
+                        <th>Total Biaya Perjalanan</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -80,7 +80,12 @@
                         'id': id
                     },
                     success: function(data) {
-                        $('#modalContentB').html(data.msg)
+                        $('#modalContentB').html(data.msg);
+                        $('#modalEditB').modal('show');
+                    },
+                    error: function(err)
+                    {
+                        console.log(err);
                     }
                 });
             }
@@ -90,13 +95,13 @@
                     scrollCollapse: true,
                     scrollY: '445px',
                     columns: [{
-                            data: "tglPengajuan"
-                        },
-                        {
                             data: "uname"
                         },
                         {
-                            data: "pidOpti"
+                            data: "dname"
+                        },
+                        {
+                            data: "tglPengajuan"
                         },
                         {
                             data: "total",
@@ -118,7 +123,7 @@
                                 return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal"
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>`
                             }
-                        },
+                        }
                     ]
                 });
                 $.ajax({
