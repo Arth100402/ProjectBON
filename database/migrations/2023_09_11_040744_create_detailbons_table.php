@@ -21,16 +21,14 @@ class CreateDetailbonsTable extends Migration
             $table->date("tglAkhir");
             $table->string("asalKota");
             $table->string("tujuan");
-            $table->unsignedBigInteger('users_id');
-            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedBigInteger('projects_id');
             $table->foreign('projects_id')->references('id')->on('projects')->onDelete('cascade');
+            $table->unsignedBigInteger('users_id');
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
+            $table->string("noPaket")->nullable();
             $table->text('agenda');
-            $table->text('keterangan');
-            $table->integer('kredit')->nullable();
-            $table->integer('debit')->nullable();
-            $table->integer('totalPengeluaran')->nullable();
-            $table->integer('saldo')->nullable();
+            $table->integer('penggunaan')->nullable();
+            $table->integer('biaya');
             $table->timestamps();
         });
     }
