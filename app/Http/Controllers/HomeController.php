@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bon;
+use App\Models\DetailBon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,11 +32,10 @@ class HomeController extends Controller
     public function showIndex()
     {
         $data = Bon::join('users', 'bons.users_id', '=', 'users.id')
-            ->join('projects', 'bons.projects_id', '=', 'projects.id')
+            ->join('departements','users.departement_id','=','departements.id')
             ->where('bons.users_id', '=', Auth::user()->id)
             ->get([
-                'bons.*', 'users.id as uid', 'users.name as uname', 'projects.id as pid', 'projects.idOpti as pidOpti',
-                'projects.namaOpti as pnamaOpti'
+                'bons.*', 'users.id as uid', 'users.name as uname','departements.name as dname'
             ]);
         return response()->json(["data" => $data]);
     }
@@ -43,9 +43,10 @@ class HomeController extends Controller
     public function getDetail(Request $request)
     {
         $id = $request->get('id');
+        $data = DetailBon::where('bons_id','=',$id)->get();
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail')->render()
+            'msg' => view('detail',compact('data'))->render()
         ));
     }
 }

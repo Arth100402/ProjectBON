@@ -5,6 +5,11 @@
 @endsection
 
 @section('isi')
+    <style>
+        .wrap {
+            word-wrap: break-word !important;
+        }
+    </style>
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul>
@@ -23,11 +28,11 @@
             <table id="myTableStaff" class="table table-striped table-bordered" style="table-layout: fixed">
                 <thead>
                     <tr>
+                        <th>Nama</th>
+                        <th>Departemen</th>
                         <th>Tanggal Pengajuan</th>
-                        <th>Pengaju</th>
-                        <th>Project</th>
-                        <th>Total Nominal</th>
-                        <th>Status Kasir</th>
+                        <th>Total Biaya Perjalanan</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -80,7 +85,12 @@
                         'id': id
                     },
                     success: function(data) {
-                        $('#modalContentB').html(data.msg)
+                        $('#modalContentB').html(data.msg);
+                        $('#modalEditB').modal('show');
+                    },
+                    error: function(err)
+                    {
+                        console.log(err);
                     }
                 });
             }
@@ -90,13 +100,13 @@
                     scrollCollapse: true,
                     scrollY: '445px',
                     columns: [{
-                            data: "tglPengajuan"
-                        },
-                        {
                             data: "uname"
                         },
                         {
-                            data: "pidOpti"
+                            data: "dname"
+                        },
+                        {
+                            data: "tglPengajuan"
                         },
                         {
                             data: "total",
@@ -118,7 +128,7 @@
                                 return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal"
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>`
                             }
-                        },
+                        }
                     ]
                 });
                 $.ajax({
@@ -149,16 +159,46 @@
                 });
             }
             $(document).ready(function() {
+                $.fn.dataTable.ext.type.order['status-order-pre'] = function(d) {
+                    switch (d) {
+                        case 'Menunggu':
+                            return 1;
+                        case 'Diterima':
+                            return 2;
+                        case 'Ditolak':
+                            return 3;
+                        default:
+                            return 4;
+                    }
+                };
                 var table = $('#myTable').DataTable({
                     paging: false,
                     scrollCollapse: true,
                     scrollY: '445px',
-                    columns: [{
-                            data: "name",
-                            width: "10%"
+                    order: [
+                        [4, 'asc'],
+                        [1, 'desc']
+                    ],
+                    columnDefs: [{
+                            searchable: true,
+                            targets: [0, 1, 2, 3, 4]
                         },
                         {
-                            data: "dname"
+                            className: "wrap",
+                            targets: [0, 1, 2, 3, 4]
+                        },
+                        {
+                            type: 'status-order',
+                            targets: 4
+                        },
+                    ],
+                    columns: [{
+                            data: "name"
+
+                        },
+                        {
+                            data: "dname",
+                            width: "10%"
                         },
                         {
                             data: "tglPengajuan",
@@ -192,7 +232,8 @@
                         },
                         {
                             data: "status",
-                            defaultContent: '<p>Menunggu</p>'
+                            defaultContent: '<p>Menunggu</p>',
+                            width: "5%"
                         },
                         {
                             data: null,
