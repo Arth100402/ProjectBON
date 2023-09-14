@@ -68,6 +68,23 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="modalEditC" tabindex="-1" role="basic" aria-hidden="true">
+        <div class="modal-dialog modal-wide">
+            <div class="modal-content">
+                <div class="modal-body" id="modalContentC">
+                    <form id="kirimTolak" method="POST">
+                        @csrf
+                        <div class="form-group">
+                            <label for="nama">Alasan Tolak</label>
+                            <input type="text" class="form-control" name="tolak" id="tolak"
+                                placeholder="Masukkan Alasan Penolakan">
+                        </div>
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('javascript')
     <script>
@@ -188,7 +205,7 @@
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
                                 <br>
                                 <a class="btn btn-success" href=""><i class="fa fa-check-circle"></i></a>
-                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick=""><i class="fa fa-times"></i></a>`;
+                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
                         },
                         width: "4%"
                     }
@@ -300,10 +317,9 @@
                 }
             });
         });
-        function tolak(id) 
-            {
-                $("#kirimTolak").attr("action", "/index/decBon/" + id);
-            }
+
+        function tolak(id) {
+            $("#kirimTolak").attr("action", "/decBon/" + id);
+        }
     </script>
-    @endif
 @endsection

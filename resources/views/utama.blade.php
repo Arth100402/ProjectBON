@@ -149,25 +149,6 @@
                             <span class="selected"></span>
                         </a>
                     </li>
-                    <li id="bon">
-                        <a href="/">
-                            <i class="icon-home"></i>
-                            <span class="title">Bon</span>
-                            <span class="selected"></span>
-                        </a>
-                        <ul class="sub-menu">
-                            <li id="acc-page">
-                                <a href="/bon">
-                                    <i class="icon-calendar"></i>
-                                    Acc Page</a>
-                            </li>
-                            <li id="show-page">
-                                <a href="/">
-                                    <i class="icon-calendar"></i>
-                                    Show Page</a>
-                            </li>
-                        </ul>
-                    </li>
                 </ul>
 
                 <!-- END SIDEBAR MENU -->

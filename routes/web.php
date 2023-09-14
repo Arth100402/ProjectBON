@@ -20,18 +20,13 @@ use PHPUnit\TextUI\XmlConfiguration\Group;
 Auth::routes();
 Route::middleware("auth")->group(function () {
     // BON Controller
-    Route::resource('bon', BonController::class);
+    Route::resource('/', BonController::class);
     Route::get("/loadppc", [BonController::class, "loadPPC"])->name("loadPPC");
     Route::get("/loadsales", [BonController::class, "loadSales"])->name("loadSales");
     Route::post('/getDetail', [BonController::class, 'getDetail'])->name('bon.getDetail');
     Route::get('/jsonShowIndexAdmin', [BonController::class, 'jsonShowIndexAdmin'])->name('bon.jsonShowIndexAdmin');
     Route::get('/getDetailSelf', [BonController::class, 'getDetailSelf'])->name('bon.getDetailSelf');
     Route::get('/jsonShowIndexSelf', [BonController::class, 'jsonShowIndexSelf'])->name('bon.jsonShowIndexSelf');
-
-    // Home Controller
-    Route::get('/', [HomeController::class, 'index'])->name('home');
-    Route::get('/index', [HomeController::class, 'showIndex'])->name('index');
-    Route::post('/index/getDetail', [HomeController::class, 'getDetail'])->name('home.getDetail');
-    Route::post('/index/decBon/{id}', [HomeController::class, 'decBon'])->name('home.decBon');
+    Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
 });
 // Route::get("/test", [BonController::class, "getDetail"]);
