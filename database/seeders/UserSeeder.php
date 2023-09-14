@@ -30,7 +30,7 @@ class UserSeeder extends Seeder
                 "name" => "Kasir",
                 "email" => "kasir@gmail.com",
                 "password" => Hash::make("kasir"),
-                "jabatan_id" => 3,
+                "jabatan_id" => 8,
                 "username" => "kasir",
                 "departement_id" => 8
             ]
