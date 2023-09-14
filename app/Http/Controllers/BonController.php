@@ -160,7 +160,7 @@ class BonController extends Controller
                 "biaya" => $request->get("biaya")[$key],
             ]);
         }
-        return redirect(route('bon.index'));
+        return redirect(route('index'));
     }
 
     /**

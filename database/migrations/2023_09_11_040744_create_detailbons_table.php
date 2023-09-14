@@ -27,7 +27,7 @@ class CreateDetailbonsTable extends Migration
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->string("noPaket")->nullable();
             $table->text('agenda');
-            $table->integer('penggunaan')->nullable();
+            $table->string('penggunaan')->nullable();
             $table->integer('biaya');
             $table->timestamps();
         });
