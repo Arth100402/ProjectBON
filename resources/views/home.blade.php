@@ -213,7 +213,7 @@
                             return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
                                 <br>
-                                <a class="btn btn-success" href=""><i class="fa fa-check-circle"></i></a>
+                                <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
                                 <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
                         },
                         width: "5%"
