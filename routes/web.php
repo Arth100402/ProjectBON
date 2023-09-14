@@ -31,11 +31,6 @@ Route::middleware("auth")->group(function () {
     Route::get('/accBont/{id}', [BonController::class, 'accBon'])->name('bon.accBon');
     Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
 
-    // Home Controller
-    Route::get('/', [HomeController::class, 'index'])->name('home');
-    Route::get('/index', [HomeController::class, 'showIndex'])->name('index');
-    Route::post('/index/getDetail', [HomeController::class, 'getDetail'])->name('home.getDetail');
-
     // Setting Controller
     Route::get("/hierarchy", [SettingController::class, "index"])->name('setting.index');
     Route::get('/loadHierarchyJabatan', [SettingController::class, "loadJabatan"])->name('setting.loadJabatan');
