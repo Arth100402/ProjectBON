@@ -41,6 +41,25 @@ class BonController extends Controller
             'data' => $data
         ]);
     }
+    public function jsonShowIndexSelf()
+    {
+        $data = DB::table('bons')
+            ->join('detailbons', 'bons.id', '=', 'detailbons.bons_id')
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->join('departements', 'users.departement_id', '=', 'departements.id')
+            ->where('users.id', '=', Auth::user()->id)
+            ->get([
+                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name',
+                'departements.name as dname',
+                'detailbons.projects_id',
+                'projects.idOpti'
+            ]);
+        return response()->json([
+            'data' => $data
+        ]);
+    }
     public function getDetail(Request $request)
     {
         $id = $request->get('id');
@@ -52,11 +71,32 @@ class BonController extends Controller
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', $id)
             ->get([
-                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id','detailbons.penggunaan','detailbons.noPaket',
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
                 'projects.idOpti'
             ]);
+            // dd($detail);
+        return response()->json(array(
+            'status' => 'oke',
+            'msg' => view('detail', compact('detail'))->render()
+        ));
+    }
+    public function getDetailSelf()
+    {
+        $detail = DB::table('detailbons')
+            ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->join('departements', 'users.departement_id', '=', 'departements.id')
+            ->where('users.id', Auth::user()->id)
+            ->get([
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
+                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name',
+                'projects.idOpti'
+            ]);
+            // dd($detail);
         return response()->json(array(
             'status' => 'oke',
             'msg' => view('detail', compact('detail'))->render()

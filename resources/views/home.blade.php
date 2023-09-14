@@ -49,7 +49,7 @@
         </div>
     @elseif(Auth::user()->jabatan_id != 1)
         <div class="table-responsive" style="overflow: scroll">
-            <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
+            <table id="myTableSelf" class="table table-striped table-bordered" style="table-layout: fixed">
                 <thead>
                     <tr>
                         <th>Nama</th>
@@ -65,7 +65,30 @@
         <div class="modal fade" id="modalEditA" tabindex="-1" role="basic" aria-hidden="true">
             <div class="modal-dialog modal-wide">
                 <div class="modal-content">
-                    <div class="modal-body" id="modalContent">
+                    <div class="modal-body" id="modalContentA">
+                        <!--loading animated gif can put here-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive" style="overflow: scroll">
+            <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Departemen</th>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Total Biaya Perjalanan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="modal fade" id="modalEditB" tabindex="-1" role="basic" aria-hidden="true">
+            <div class="modal-dialog modal-wide">
+                <div class="modal-content">
+                    <div class="modal-body" id="modalContentB">
                         <!--loading animated gif can put here-->
                     </div>
                 </div>
@@ -153,11 +176,26 @@
                         'id': id
                     },
                     success: function(data) {
-                        $('#modalContent').html(data.msg)
-                        console.log(data);
+                        $('#modalContentA').html(data.msg);
                     },
                     error: function(err) {
                         console.log(err);
+                    }
+                });
+            }
+
+            function getDetailSelf() {
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    url: "{{ route('bon.getDetailSelf') }}",
+                    success: function(data) {
+                        $('#modalContentB').html(data.msg);
+                    },
+                    error: function(error) {
+                        console.log("Error: ");
+                        console.log(error);
                     }
                 });
             }
@@ -254,6 +292,94 @@
                     dataType: "json",
                     async: false,
                     url: "{{ route('bon.jsonShowIndexAdmin') }}",
+                    success: function(data) {
+                        table.clear().draw()
+                        table.rows.add(data["data"]).draw()
+                    },
+                    error: function(error) {
+                        console.log("Error: ");
+                        console.log(error);
+                    }
+                });
+                var table = $('#myTableSelf').DataTable({
+                    paging: false,
+                    scrollCollapse: true,
+                    scrollY: '445px',
+                    order: [
+                        [4, 'asc'],
+                        [1, 'desc']
+                    ],
+                    columnDefs: [{
+                            searchable: true,
+                            targets: [0, 1, 2, 3, 4]
+                        },
+                        {
+                            className: "wrap",
+                            targets: [0, 1, 2, 3, 4]
+                        },
+                        {
+                            type: 'status-order',
+                            targets: 4
+                        },
+                    ],
+                    columns: [{
+                            data: "name"
+
+                        },
+                        {
+                            data: "dname",
+                            width: "10%"
+                        },
+                        {
+                            data: "tglPengajuan",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    var date = new Date(data);
+                                    var options = {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    };
+                                    return date.toLocaleDateString('id-ID', options);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: "total",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    return new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR'
+                                    }).format(data);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: "status",
+                            defaultContent: '<p>Menunggu</p>',
+                            width: "5%"
+                        },
+                        {
+                            data: null,
+                            render: (data, type, row, meta) => {
+                                return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal"
+                                onclick="getDetailSelf()"><i class="fa fa-info-circle"></i></a><br>`;
+                            },
+                            width: "4%"
+                        }
+                    ]
+                });
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    url: "{{ route('bon.jsonShowIndexSelf') }}",
                     success: function(data) {
                         table.clear().draw()
                         table.rows.add(data["data"]).draw()
