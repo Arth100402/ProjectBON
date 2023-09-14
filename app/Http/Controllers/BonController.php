@@ -44,7 +44,6 @@ class BonController extends Controller
     public function getDetail(Request $request)
     {
         $id = $request->get('id');
-
         $detail = DB::table('detailbons')
             ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
             ->join('users', 'bons.users_id', '=', 'users.id')
@@ -52,11 +51,16 @@ class BonController extends Controller
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', $id)
             ->get([
-                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id','detailbons.penggunaan','detailbons.noPaket',
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
+                'departements.name as dname',
                 'projects.idOpti'
             ]);
+        $acc = DB::table('accs')
+            ->join('users', 'accs.users_id', '=', 'users.id')
+            ->where('accs.bons_id', $id)
+            ->get(['accs.id', 'users.name', 'bons_id as bid', 'accs.status']);
         return response()->json(array(
             'status' => 'oke',
             'msg' => view('bon.detailAcc', compact('detail'))->render()
@@ -81,6 +85,29 @@ class BonController extends Controller
      */
     public function store(Request $request)
     {
+        $user = User::find(Auth::user()->id);
+        $bon = DB::table('bons')->insertGetId([
+            "tglPengajuan" => now(),
+            "users_id" => $user->id,
+            "total" => $request->get("biayaPerjalanan"),
+            "status" => null
+        ]);
+        foreach ($request->get("select-ppc") as $key => $value) {
+            DB::table('detailbons')->insert([
+                "bons_id" => $bon,
+                "tglMulai" => $this->convertDTPtoDatabaseDT($request->get("tglMulai")[$key]),
+                "tglAkhir" => $this->convertDTPtoDatabaseDT($request->get("tglAkhir")[$key]),
+                "asalKota" => $request->get("asalKota")[$key],
+                "tujuan" => $request->get("tujuan")[$key],
+                "users_id" => $request->get("select-sales")[$key],
+                "projects_id" => $value,
+                "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : "tesst",
+                "agenda" => $request->get("agenda")[$key],
+                "penggunaan" => $request->get("keterangan")[$key],
+                "biaya" => $request->get("biaya")[$key],
+            ]);
+        }
+        return redirect(route('bon.index'));
     }
 
     /**
@@ -140,5 +167,13 @@ class BonController extends Controller
     {
         $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti"]);
         return response()->json(["data" => $data]);
+    }
+    public function test(Request $request)
+    {
+        return view("test", ["data" => $request]);
+    }
+    private function convertDTPtoDatabaseDT($date)
+    {
+        return date("Y-m-d", strtotime(str_replace(" ", "", explode(",", $date)[1])));
     }
 }
