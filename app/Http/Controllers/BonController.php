@@ -32,19 +32,19 @@ class BonController extends Controller
                     $query->select('bons_id')->from('accs');
                 })
                     ->whereIn('b.users_id', function ($query) {
-                        $query->select('id')->from('users')->where('jabatan_id', 3)->where('departement_id', 4);
+                        $query->select('id')->from('users')->where('jabatan_id', (Auth::user()->jabatan_id-1))->where('departement_id', (Auth::user()->departement_id));
                     });
             })
             ->orWhere(function ($query) {
                 $query->where('a.status', 'Terima')
                     ->whereIn('a.users_id', function ($query) {
-                        $query->select('id')->from('users')->where('jabatan_id', 3)->where('departement_id', 4);
+                        $query->select('id')->from('users')->where('jabatan_id', (Auth::user()->jabatan_id-1))->where('departement_id', (Auth::user()->departement_id));
                     })
                     ->whereNotIn('b.id', function ($query) {
                         $query->select('ac.bons_id')
                             ->from('accs AS ac')
                             ->join('users AS us', 'ac.users_id', '=', 'us.id')
-                            ->where('us.jabatan_id', 4);
+                            ->where('us.jabatan_id', (Auth::user()->jabatan_id));
                     });
             })->get([
                 'b.id', 'b.tglPengajuan', 'b.users_id', 'b.total', 'b.status',
@@ -216,18 +216,31 @@ class BonController extends Controller
             ->get(["users.name", "users.id"]);
         return response()->json(["data" => $data]);
     }
+
     public function  loadPPC(Request $request)
     {
         $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti"]);
         return response()->json(["data" => $data]);
     }
+
     public function test(Request $request)
     {
         return view("test", ["data" => $request]);
     }
+
     private function convertDTPtoDatabaseDT($date)
     {
         return date("Y-m-d", strtotime(str_replace(" ", "", explode(",", $date)[1])));
+    }
+
+    public function accBon($id)
+    {
+        $data = new Acc();
+        $data->bons_id = $id;
+        $data->users_id = Auth::user()->id;
+        $data->status = 'Terima';
+        $data->save();
+        return redirect()->route('index')->with('status', 'Bon telah di terima');
     }
 
     public function decBon(Request $request, $id)
@@ -239,6 +252,6 @@ class BonController extends Controller
         $data->status = 'Tolak';
         $data->keteranganTolak = $confirmationInput;
         $data->save();
-        return redirect()->route('index')->with('status', 'Peminjaman telah di tolak');
+        return redirect()->route('index')->with('status', 'Bon telah di tolak');
     }
 }
