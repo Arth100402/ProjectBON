@@ -33,6 +33,11 @@ Route::middleware("auth")->group(function () {
     Route::get('/index', [HomeController::class, 'showIndex'])->name('index');
     Route::post('/index/getDetail', [HomeController::class, 'getDetail'])->name('home.getDetail');
 });
+<<<<<<< HEAD
 // Route::get("/test", [BonController::class, "getDetailSelf"]);
 // Route::get("/test2", [BonController::class, "getDetail"]);
 
+=======
+// Route::get("/test", [BonController::class, "test"]);
+Route::get("/test", [BonController::class, "getDetail"]);
+>>>>>>> d9f0c1a2e3ff721910bf5576894345559f3f75b1

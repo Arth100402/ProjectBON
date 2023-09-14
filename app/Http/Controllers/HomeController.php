@@ -46,7 +46,7 @@ class HomeController extends Controller
         $data = DetailBon::where('bons_id','=',$id)->get();
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail',compact('data'))->render()
+            'msg' => view('bon.detail',compact('data'))->render()
         ));
     }
 }
