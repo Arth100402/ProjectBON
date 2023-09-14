@@ -95,7 +95,7 @@
         @enderror
     </div>
     <div class="form-group">
-        <label for="keterangan">Keterangan: </label><br>
+        <label for="keterangan">Penggunaan: </label><br>
         <input type="text" name="keterangan" id="keterangan" class="form-control"
             placeholder="Masukkan Keterangan Kegiatan" required>
         @error('keterangan')
@@ -126,7 +126,7 @@
                         <th>No PPC</th>
                         <th>No Paket/SO/SQ</th>
                         <th>Agenda</th>
-                        <th>Keterangan</th>
+                        <th>Penggunaan</th>
                         <th>Biaya</th>
                         <th>Action</th>
                     </tr>
@@ -226,8 +226,8 @@
                 // Validation
                 const asal = $("#asalKota").val();
                 const tujuan = $("#tujuan").val();
-                const agenda = $("#asalKota").val()
-                const keter = $("#asalKota").val()
+                const agenda = $("#agenda").val()
+                const keter = $("#keterangan").val()
 
                 if (!asal || !tujuan || !agenda || !keter || asal == '' || tujuan == '' || agenda == '' ||
                     keter == '') {

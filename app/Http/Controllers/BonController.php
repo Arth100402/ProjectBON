@@ -28,8 +28,6 @@ class BonController extends Controller
             ->join('users', 'bons.users_id', '=', 'users.id')
             ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
-            ->where('users.jabatan_id', '<', Auth::user()->jabatan_id)
-            ->where('users.departement_id', '=', Auth::user()->departement_id)
             ->get(['bons.id', 'bons.tglPengajuan', 'bons.users_id', 'users.name', 'departements.name as dname', 'bons.total', 'detailbons.projects_id', 'projects.idOpti', 'bons.status']);
         return response()->json([
             'data' => $data
@@ -38,7 +36,6 @@ class BonController extends Controller
     public function getDetail(Request $request)
     {
         $id = $request->get('id');
-
         $detail = DB::table('detailbons')
             ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
             ->join('users', 'bons.users_id', '=', 'users.id')
@@ -49,11 +46,16 @@ class BonController extends Controller
                 'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.keterangan', 'detailbons.kredit', 'detailbons.debit', 'detailbons.totalPengeluaran', 'detailbons.saldo', 'detailbons.projects_id',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
+                'departements.name as dname',
                 'projects.idOpti'
             ]);
+        $acc = DB::table('accs')
+            ->join('users', 'accs.users_id', '=', 'users.id')
+            ->where('accs.bons_id', $id)
+            ->get(['accs.id', 'users.name', 'bons_id as bid', 'accs.status']);
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail'))->render()
+            'msg' => view('detail', compact('detail', 'acc'))->render()
         ));
     }
 
@@ -75,7 +77,7 @@ class BonController extends Controller
      */
     public function store(Request $request)
     {
-        $user = User::find($request->get("userId"));
+        $user = User::find(Auth::user()->id);
         $bon = DB::table('bons')->insertGetId([
             "tglPengajuan" => now(),
             "users_id" => $user->id,
@@ -85,18 +87,16 @@ class BonController extends Controller
         foreach ($request->get("select-ppc") as $key => $value) {
             DB::table('detailbons')->insert([
                 "bons_id" => $bon,
-                "tglMulai" => $request->get("tglMulai")[$key],
-                "tglAkhir" => $request->get("tglAkhir")[$key],
+                "tglMulai" => $this->convertDTPtoDatabaseDT($request->get("tglMulai")[$key]),
+                "tglAkhir" => $this->convertDTPtoDatabaseDT($request->get("tglAkhir")[$key]),
                 "asalKota" => $request->get("asalKota")[$key],
                 "tujuan" => $request->get("tujuan")[$key],
                 "users_id" => $request->get("select-sales")[$key],
                 "projects_id" => $value,
+                "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : "tesst",
                 "agenda" => $request->get("agenda")[$key],
-                "keterangan" => $request->get("keterangan")[$key],
-                "kredit" => $request->get("kredit")[$key],
-                "debit" => $request->get("debit")[$key],
-                "totalPengeluaran" => $request->get("totalPengeluaran")[$key],
-                "saldo" => $request->get("saldo")[$key],
+                "penggunaan" => $request->get("keterangan")[$key],
+                "biaya" => $request->get("biaya")[$key],
             ]);
         }
         return redirect(route('bon.index'));
@@ -163,5 +163,9 @@ class BonController extends Controller
     public function test(Request $request)
     {
         return view("test", ["data" => $request]);
+    }
+    private function convertDTPtoDatabaseDT($date)
+    {
+        return date("Y-m-d", strtotime(str_replace(" ", "", explode(",", $date)[1])));
     }
 }
