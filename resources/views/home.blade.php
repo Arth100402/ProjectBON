@@ -9,6 +9,9 @@
         .wrap {
             word-wrap: break-word !important;
         }
+        .setAlign{
+            text-align: right;
+        }
     </style>
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -22,6 +25,9 @@
     @if (session('status'))
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
+    <div>
+        <h3>Pengajuan saya</h3>
+    </div>
     <div class="table-responsive" style="overflow: scroll">
         <table id="myTableSelf" class="table table-striped table-bordered" style="table-layout: fixed">
             <thead>
@@ -35,6 +41,9 @@
                 </tr>
             </thead>
         </table>
+    </div>
+    <div>
+        <h3>Terima Tolak Pengajuan</h3>
     </div>
     <div class="table-responsive" style="overflow: scroll">
         <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
@@ -104,7 +113,6 @@
                 }
             });
         }
-
         function getDetailSelf() {
             $.ajax({
                 type: "GET",
@@ -135,6 +143,7 @@
             };
 
             var table = $('#myTable').DataTable({
+                info:false,
                 paging: false,
                 scrollCollapse: true,
                 scrollY: '445px',
@@ -207,7 +216,7 @@
                                 <a class="btn btn-success" href=""><i class="fa fa-check-circle"></i></a>
                                 <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
                         },
-                        width: "4%"
+                        width: "5%"
                     }
                 ]
             });
@@ -227,6 +236,7 @@
             });
 
             var table = $('#myTableSelf').DataTable({
+                info:false,
                 paging: false,
                 scrollCollapse: true,
                 scrollY: '445px',
@@ -298,7 +308,7 @@
                                 </a>
                                 <br>`;
                         },
-                        width: "4%"
+                        width: "5%"
                     }
                 ]
             });
