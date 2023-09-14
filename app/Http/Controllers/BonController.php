@@ -59,7 +59,7 @@ class BonController extends Controller
             ]);
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail'))->render()
+            'msg' => view('bon.detailAcc', compact('detail'))->render()
         ));
     }
 

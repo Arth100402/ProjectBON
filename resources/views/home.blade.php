@@ -22,7 +22,6 @@
     @if (session('status'))
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
-    @if (Auth::user()->jabatan_id == 1)
         {{-- Staff --}}
         <div class="table-responsive" style="overflow: scroll">
             <table id="myTableStaff" class="table table-striped table-bordered" style="table-layout: fixed">
@@ -47,7 +46,7 @@
                 </div>
             </div>
         </div>
-    @elseif(Auth::user()->jabatan_id != 1)
+    @if(Auth::user()->jabatan_id != 1)
         <div class="table-responsive" style="overflow: scroll">
             <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
                 <thead>
@@ -74,9 +73,8 @@
     @endif
 @endsection
 @section('javascript')
-    @if (Auth::user()->jabatan_id == 1)
         <script>
-            function getDetail(id) {
+            function getDetailSelf(id) {
                 $.ajax({
                     type: 'POST',
                     url: '{{ route('home.getDetail') }}',
@@ -125,7 +123,7 @@
                             data: null,
                             render: (data, type, row, meta) => {
                                 return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal"
-                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>`
+                                onclick="getDetailSelf(${data.id})"><i class="fa fa-info-circle"></i></a>`
                             }
                         }
                     ]
@@ -142,7 +140,7 @@
                 });
             });
         </script>
-    @elseif(Auth::user()->jabatan_id != 1)
+    @if(Auth::user()->jabatan_id != 1)
         <script>
             function getDetail(id) {
                 $.ajax({
@@ -242,8 +240,11 @@
                         {
                             data: null,
                             render: (data, type, row, meta) => {
-                                return `<a class="btn btn-success" href="#modalEditA" data-toggle="modal"
-                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a><br>`;
+                                return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
+                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a><br><a class="btn btn-success" href=""><i
+                                        class="fa fa-check-circle"></i></a>
+                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal"
+                                onclick=""><i class="fa fa-times"></i></a>`;
                             },
                             width: "4%"
                         }
