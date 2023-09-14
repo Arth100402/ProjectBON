@@ -112,7 +112,7 @@
     </div>
     <br>
     <button id="addDetail" class="btn btn-info btn-block">Tambahkan</button><br>
-    <form method="POST" action="{{ route('bon.store') }}">
+    <form method="POST" action="{{ route('store') }}">
         @csrf
         <div class="table-responsive" style="overflow: scroll">
             <table id="myTable" class="table table-striped table-bordered">
