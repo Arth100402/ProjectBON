@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Acc;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -22,20 +23,34 @@ class BonController extends Controller
 
     public function jsonShowIndexAdmin()
     {
-        $data = DB::table('bons')
-            ->join('detailbons', 'bons.id', '=', 'detailbons.bons_id')
-            ->join('users', 'bons.users_id', '=', 'users.id')
-            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
-            ->join('departements', 'users.departement_id', '=', 'departements.id')
-            ->where('users.jabatan_id', '<', Auth::user()->jabatan_id)
-            ->where('users.departement_id', '=', Auth::user()->departement_id)
-            ->get([
-                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
-                'users.name',
-                'departements.name as dname',
-                'detailbons.projects_id',
-                'projects.idOpti'
+        $data = DB::table('bons AS b')
+            ->leftJoin('accs AS a', 'b.id', '=', 'a.bons_id')
+            ->leftJoin('users AS u', 'u.id', '=', 'b.users_id')
+            ->leftJoin('departements AS d', 'd.id', '=', 'u.departement_id')
+            ->where(function ($query) {
+                $query->whereNotIn('b.id', function ($query) {
+                    $query->select('bons_id')->from('accs');
+                })
+                    ->whereIn('b.users_id', function ($query) {
+                        $query->select('id')->from('users')->where('jabatan_id', 3)->where('departement_id', 4);
+                    });
+            })
+            ->orWhere(function ($query) {
+                $query->where('a.status', 'Terima')
+                    ->whereIn('a.users_id', function ($query) {
+                        $query->select('id')->from('users')->where('jabatan_id', 3)->where('departement_id', 4);
+                    })
+                    ->whereNotIn('b.id', function ($query) {
+                        $query->select('ac.bons_id')
+                            ->from('accs AS ac')
+                            ->join('users AS us', 'ac.users_id', '=', 'us.id')
+                            ->where('us.jabatan_id', 4);
+                    });
+            })->get([
+                'b.id', 'b.tglPengajuan', 'b.users_id', 'b.total', 'b.status',
+                'u.name as name', 'd.name as dname'
             ]);
+
         return response()->json([
             'data' => $data
         ]);
@@ -94,7 +109,7 @@ class BonController extends Controller
                 'users.name',
                 'projects.idOpti'
             ]);
-            // dd($detail);
+        // dd($detail);
         // $acc = DB::table('accs')
         //     ->join('users', 'accs.users_id', '=', 'users.id')
         //     ->where('accs.bons_id', $id)
@@ -213,5 +228,17 @@ class BonController extends Controller
     private function convertDTPtoDatabaseDT($date)
     {
         return date("Y-m-d", strtotime(str_replace(" ", "", explode(",", $date)[1])));
+    }
+
+    public function decBon(Request $request, $id)
+    {
+        $data = new Acc();
+        $confirmationInput = $request->get('tolak');
+        $data->bons_id = $id;
+        $data->users_id = Auth::user()->id;
+        $data->status = 'Tolak';
+        $data->keteranganTolak = $confirmationInput;
+        $data->save();
+        return redirect()->route('index')->with('status', 'Peminjaman telah di tolak');
     }
 }
