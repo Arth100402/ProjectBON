@@ -300,5 +300,10 @@
                 }
             });
         });
+        function tolak(id) 
+            {
+                $("#kirimTolak").attr("action", "/index/decBon/" + id);
+            }
     </script>
+    @endif
 @endsection

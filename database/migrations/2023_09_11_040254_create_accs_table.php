@@ -20,6 +20,7 @@ class CreateAccsTable extends Migration
             $table->unsignedBigInteger('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->enum('status', ['Terima','Diproses','Tolak'])->nullable();
+            $table->string('keteranganTolak')->nullable();
             $table->timestamps();
         });
     }
