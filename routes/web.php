@@ -26,16 +26,18 @@ Route::middleware("auth")->group(function () {
     Route::get("/loadsales", [BonController::class, "loadSales"])->name("loadSales");
     Route::post('/getDetail', [BonController::class, 'getDetail'])->name('bon.getDetail');
     Route::get('/jsonShowIndexAdmin', [BonController::class, 'jsonShowIndexAdmin'])->name('bon.jsonShowIndexAdmin');
+    Route::get('/getDetailSelf', [BonController::class, 'getDetailSelf'])->name('bon.getDetailSelf');
+    Route::get('/jsonShowIndexSelf', [BonController::class, 'jsonShowIndexSelf'])->name('bon.jsonShowIndexSelf');
 
     // Home Controller
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/index', [HomeController::class, 'showIndex'])->name('index');
     Route::post('/index/getDetail', [HomeController::class, 'getDetail'])->name('home.getDetail');
+    Route::post('/index/decBon/{id}', [HomeController::class, 'decBon'])->name('home.decBon');
 
     // Setting Controller
     Route::get("/hierarchy", [SettingController::class, "index"])->name('setting.index');
     Route::get('/loadHierarchyJabatan', [SettingController::class, "loadJabatan"])->name('setting.loadJabatan');
     Route::post('/populateTable', [SettingController::class, 'populateTable'])->name("setting.populateTable");
 });
-// Route::get("/test", [BonController::class, "test"]);
-Route::get("/test", [BonController::class, "getDetail"]);
+// Route::get("/test", [BonController::class, "getDetail"]);

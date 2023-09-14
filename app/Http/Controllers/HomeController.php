@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Acc;
 use App\Models\Bon;
 use App\Models\DetailBon;
 use Illuminate\Http\Request;
@@ -48,5 +49,15 @@ class HomeController extends Controller
             'status' => 'oke',
             'msg' => view('bon.detail',compact('data'))->render()
         ));
+    }
+
+    public function decBon(Request $request, $id)
+    {
+        $data = Acc::where('bons_id','=',$id);
+        $confirmationInput = $request->get('tolak');
+        $data->status = 'Tolak';
+        $data->keteranganTolak = $confirmationInput;
+        $data->save();
+        return redirect()->route('vehicle.historyRentAdmin')->with('status', 'Peminjaman telah di tolak');
     }
 }

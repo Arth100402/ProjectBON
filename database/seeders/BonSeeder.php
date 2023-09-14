@@ -14,7 +14,7 @@ class BonSeeder extends Seeder
      */
     public function run()
     {
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 4; $i <= 10; $i++) {
             DB::table('bons')->insert([
                 [
                     "tglPengajuan" => now(),

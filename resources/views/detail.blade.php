@@ -34,6 +34,15 @@
             </tbody>
         </table>
     </div>
+    <div class="panel card-background-color">
+        <div class="panel-heading">
+            <h3>Status Acc</h3>
+        </div>
+        <div class="panel-body">
+
+        </div>
+    </div>
     <div class="setAlign">
         <button type="button" class="btn btn-danger" id="btnClose" data-dismiss="modal">Tutup</button>
     </div>
+</div>
