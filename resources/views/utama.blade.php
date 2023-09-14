@@ -151,7 +151,7 @@
                     </li>
                     <li id="bon">
                         <a href="/">
-                            <i class="icon-home"></i>
+                            <i class="fa fa-book"></i>
                             <span class="title">Bon</span>
                             <span class="selected"></span>
                         </a>
@@ -165,6 +165,21 @@
                                 <a href="/">
                                     <i class="icon-calendar"></i>
                                     Show Page</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li id="setting">
+                        <a href="/">
+                            <i class="fa fa-gear"></i>
+                            <span class="title">Setting</span>
+                            <span class="selected"></span>
+                        </a>
+                        <ul class="sub-menu">
+                            <li id="hierarchy">
+                                <a href="/hierarchy">
+                                    <i class="fa fa-sitemap"></i>
+                                    Configure Hierarchy
+                                </a>
                             </li>
                         </ul>
                     </li>

@@ -145,7 +145,7 @@
         </div>
 
         <button type="submit" class="btn btn-success" id="submit" disabled>Ajukan</button>
-        <a class="btn btn-danger" href="">Batal Ajukan</a>
+        <a class="btn btn-danger" href="/">Batal Ajukan</a>
     </form>
 @endsection
 @section('javascript')

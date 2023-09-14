@@ -74,7 +74,7 @@ class BonController extends Controller
      */
     public function create()
     {
-        return view('formCreate');
+        return view('bon.formCreate');
     }
 
     /**

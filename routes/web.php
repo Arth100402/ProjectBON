@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BonController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\TextUI\XmlConfiguration\Group;
@@ -30,6 +31,11 @@ Route::middleware("auth")->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/index', [HomeController::class, 'showIndex'])->name('index');
     Route::post('/index/getDetail', [HomeController::class, 'getDetail'])->name('home.getDetail');
+
+    // Setting Controller
+    Route::get("/hierarchy", [SettingController::class, "index"])->name('setting.index');
+    Route::get('/loadHierarchyJabatan', [SettingController::class, "loadJabatan"])->name('setting.loadJabatan');
+    Route::post('/populateTable', [SettingController::class, 'populateTable'])->name("setting.populateTable");
 });
 // Route::get("/test", [BonController::class, "test"]);
 Route::get("/test", [BonController::class, "getDetail"]);

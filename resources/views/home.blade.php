@@ -1,7 +1,7 @@
 @extends('utama')
 
 @section('title')
-    Pengajuan Perjalanan Dinas
+    Pengajuan Bon Sementara
 @endsection
 
 @section('isi')
@@ -22,31 +22,35 @@
     @if (session('status'))
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
-        {{-- Staff --}}
-        <div class="table-responsive" style="overflow: scroll">
-            <table id="myTableStaff" class="table table-striped table-bordered" style="table-layout: fixed">
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>Departemen</th>
-                        <th>Tanggal Pengajuan</th>
-                        <th>Total Biaya Perjalanan</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-            </table>
-        </div>
-        <div class="modal fade" id="modalEditB" tabindex="-1" role="basic" aria-hidden="true">
-            <div class="modal-dialog modal-wide">
-                <div class="modal-content">
-                    <div class="modal-body" id="modalContentB">
-                        <!--loading animated gif can put here-->
-                    </div>
+    <div class="topdiv">
+        <a href="{{ route('bon.create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
+    </div>
+    <h2>History Pengajuan: </h2>
+    <div class="table-responsive" style="overflow: scroll">
+        <table id="myTableStaff" class="table table-striped table-bordered" style="table-layout: fixed">
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Departemen</th>
+                    <th>Tanggal Pengajuan</th>
+                    <th>Total Biaya Perjalanan</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div class="modal fade" id="modalEditB" tabindex="-1" role="basic" aria-hidden="true">
+        <div class="modal-dialog modal-wide">
+            <div class="modal-content">
+                <div class="modal-body" id="modalContentB">
+                    <!--loading animated gif can put here-->
                 </div>
             </div>
         </div>
-    @if(Auth::user()->jabatan_id != 1)
+    </div>
+    @if (Auth::user()->jabatan_id != 1)
+        <h2>Daftar Acc Pengajuan BS: </h2>
         <div class="table-responsive" style="overflow: scroll">
             <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
                 <thead>
@@ -73,74 +77,74 @@
     @endif
 @endsection
 @section('javascript')
-        <script>
-            function getDetailSelf(id) {
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route('home.getDetail') }}',
-                    data: {
-                        '_token': '<?php echo csrf_token(); ?>',
-                        'id': id
-                    },
-                    success: function(data) {
-                        $('#modalContentB').html(data.msg);
-                        $('#modalEditB').modal('show');
-                    },
-                    error: function(err) {
-                        console.log(err);
-                    }
-                });
-            }
-            $(document).ready(function() {
-                var table = $('#myTableStaff').DataTable({
-                    paging: false,
-                    scrollCollapse: true,
-                    scrollY: '445px',
-                    columns: [{
-                            data: "uname"
-                        },
-                        {
-                            data: "dname"
-                        },
-                        {
-                            data: "tglPengajuan"
-                        },
-                        {
-                            data: "total",
-                            render: function(data, type, row, meta) {
-                                // Format "total" as Rupiah
-                                const rupiah = new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR'
-                                }).format(data);
-                                return rupiah;
-                            }
-                        },
-                        {
-                            data: "status"
-                        },
-                        {
-                            data: null,
-                            render: (data, type, row, meta) => {
-                                return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal"
-                                onclick="getDetailSelf(${data.id})"><i class="fa fa-info-circle"></i></a>`
-                            }
-                        }
-                    ]
-                });
-                $.ajax({
-                    type: "GET",
-                    dataType: "json",
-                    async: false,
-                    url: "{{ route('index') }}",
-                    success: function(data) {
-                        table.clear().draw()
-                        table.rows.add(data["data"]).draw()
-                    }
-                });
+    <script>
+        function getDetailSelf(id) {
+            $.ajax({
+                type: 'POST',
+                url: '{{ route('home.getDetail') }}',
+                data: {
+                    '_token': '<?php echo csrf_token(); ?>',
+                    'id': id
+                },
+                success: function(data) {
+                    $('#modalContentB').html(data.msg);
+                    $('#modalEditB').modal('show');
+                },
+                error: function(err) {
+                    console.log(err);
+                }
             });
-        </script>
-    @if(Auth::user()->jabatan_id != 1)
+        }
+        $(document).ready(function() {
+            var table = $('#myTableStaff').DataTable({
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '445px',
+                columns: [{
+                        data: "uname"
+                    },
+                    {
+                        data: "dname"
+                    },
+                    {
+                        data: "tglPengajuan"
+                    },
+                    {
+                        data: "total",
+                        render: function(data, type, row, meta) {
+                            // Format "total" as Rupiah
+                            const rupiah = new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR'
+                            }).format(data);
+                            return rupiah;
+                        }
+                    },
+                    {
+                        data: "status"
+                    },
+                    {
+                        data: null,
+                        render: (data, type, row, meta) => {
+                            return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal"
+                                onclick="getDetailSelf(${data.id})"><i class="fa fa-info-circle"></i></a>`
+                        }
+                    }
+                ]
+            });
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                async: false,
+                url: "{{ route('index') }}",
+                success: function(data) {
+                    table.clear().draw()
+                    table.rows.add(data["data"]).draw()
+                }
+            });
+        });
+    </script>
+    @if (Auth::user()->jabatan_id != 1)
         <script>
             function getDetail(id) {
                 $.ajax({
