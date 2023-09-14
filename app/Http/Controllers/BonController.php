@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\User;
-use App\Models\Bon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -96,13 +95,13 @@ class BonController extends Controller
                 'projects.idOpti'
             ]);
             // dd($detail);
-        $acc = DB::table('accs')
-            ->join('users', 'accs.users_id', '=', 'users.id')
-            ->where('accs.bons_id', $id)
-            ->get(['accs.id', 'users.name', 'bons_id as bid', 'accs.status']);
+        // $acc = DB::table('accs')
+        //     ->join('users', 'accs.users_id', '=', 'users.id')
+        //     ->where('accs.bons_id', $id)
+        //     ->get(['accs.id', 'users.name', 'bons_id as bid', 'accs.status']);
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('bon.detailAcc', compact('detail'))->render()
+            'msg' => view('detail', compact('detail'))->render()
         ));
     }
 

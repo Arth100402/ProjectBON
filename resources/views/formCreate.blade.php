@@ -234,7 +234,7 @@
                     alert("Terdapat bagian yang belum terisi!")
                     return
                 }
-                // Add to Table 
+                // Add to Table
                 $("#submit").attr("disabled", false);
                 var rows = `
                     <tr>
