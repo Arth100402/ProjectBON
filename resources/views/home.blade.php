@@ -27,7 +27,7 @@
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
     <div class="topdiv">
-        <a href="{{ route('bon.create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
+        <a href="{{ route('create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
     </div>
     <h2>Pengajuan saya: </h2>
     <div class="table-responsive" style="overflow: scroll">

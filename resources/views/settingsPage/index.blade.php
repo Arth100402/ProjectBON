@@ -72,7 +72,8 @@
 
             $("#select-jabatan").on("change", function() {
                 const table = $("#myTable");
-                let header = `<thead></tr>`
+                let header = `<thead><tr>`
+                let body = `<tbody>`
                 $.ajax({
                     type: "POST",
                     url: "{{ route('setting.populateTable') }}",

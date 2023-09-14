@@ -149,25 +149,6 @@
                             <span class="selected"></span>
                         </a>
                     </li>
-                    <li id="bon">
-                        <a href="/">
-                            <i class="fa fa-book"></i>
-                            <span class="title">Bon</span>
-                            <span class="selected"></span>
-                        </a>
-                        <ul class="sub-menu">
-                            <li id="acc-page">
-                                <a href="/bon">
-                                    <i class="icon-calendar"></i>
-                                    Acc Page</a>
-                            </li>
-                            <li id="show-page">
-                                <a href="/">
-                                    <i class="icon-calendar"></i>
-                                    Show Page</a>
-                            </li>
-                        </ul>
-                    </li>
                     <li id="setting">
                         <a href="/">
                             <i class="fa fa-gear"></i>
