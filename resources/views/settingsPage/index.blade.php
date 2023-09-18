@@ -72,26 +72,70 @@
 
             $("#select-jabatan").on("change", function() {
                 const table = $("#myTable");
+                const jabatanID = $(this).val();
                 let header = `<thead><tr>`
-                let body = `<tbody>`
+                let body = `<tbody><tr>`
                 $.ajax({
                     type: "POST",
                     url: "{{ route('setting.populateTable') }}",
                     data: {
                         "_token": "{{ csrf_token() }}",
                         "idDepart": $("#select-department").val(),
-                        "idJabatan": $(this).val()
+                        "idJabatan": jabatanID
                     },
                     success: function(response) {
                         const jabatans = response.jabatans
-                        console.log(jabatans);
-                        for (const iterator of jabatans) {
-                            header +=
-                                `
+                        const status = response.status
+
+                        parent:
+                            for (const iterator of jabatans) {
+                                header +=
+                                    `
                             <th>${iterator.name}</th>
                             `
-                        }
+                                for (const row of status) {
+                                    if (row.jabatanAcc == iterator.id && row.status ==
+                                        "enable") {
+                                        body += `
+                                        <td><input id="switch-${iterator.id}" type="checkbox" class="make-switch" checked data-on-color="primary" data-off-color="info" data-value="${jabatanID}-${iterator.id}"></td>    
+                                    `
+                                        temp = true
+                                        continue parent;
+                                    }
+                                }
+                                body += `
+                                <td><input id="switch-${iterator.id}" type="checkbox" class="make-switch" data-on-color="primary" data-off-color="info" data-value="${jabatanID}-${iterator.id}"></td>    
+                            `
+                            }
                         header += `</tr></thead>`
+                        body += `</tr></tbody>`
+                        table.html(header + body);
+                        $(".make-switch").bootstrapSwitch();
+                    }
+                });
+
+            });
+
+            var cont = 0;
+            $("#myTable").on("switchChange.bootstrapSwitch", ".make-switch", function() {
+                const d = $("#select-department").val()
+                const [aj, ac] = $(this).attr("data-value").split("-")
+                const st = $(this).is(":checked");
+                console.log(aj);
+                console.log(ac);
+                console.log(d);
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('setting.checked') }}",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "depart": d,
+                        "aju": aj,
+                        "acc": ac,
+                        "stat": st
+                    },
+                    success: function(response) {
+                        console.log(response);
                     }
                 });
 

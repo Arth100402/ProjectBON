@@ -39,6 +39,7 @@
     <link href="{{ asset('assets/css/themes/default.css') }}" rel="stylesheet" type="text/css" id="style_color" />
     <link href="{{ asset('assets/css/custom.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('css/jquery.dataTables.css') }}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap-switch.min.css') }}" />
     <link rel="stylesheet" type="text/css"
         href="https://cdn.datatables.net/rowgroup/1.1.3/css/rowGroup.dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/select2.css') }}">
@@ -304,6 +305,8 @@
     </script>
     <script src="{{ asset('assets/plugins/jquery.sparkline.min.js') }} " type="text/javascript"></script>
     <!-- END PAGE LEVEL PLUGINS -->
+
+    <script src="{{ asset('js/bootstrap-switch.min.js') }}" type="text/javascript"></script>
 
     <!-- BEGIN PAGE LEVEL SCRIPTS -->
     <script src="{{ asset('assets/scripts/app.js') }} " type="text/javascript"></script>

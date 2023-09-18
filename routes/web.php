@@ -35,5 +35,6 @@ Route::middleware("auth")->group(function () {
     Route::get("/hierarchy", [SettingController::class, "index"])->name('setting.index');
     Route::get('/loadHierarchyJabatan', [SettingController::class, "loadJabatan"])->name('setting.loadJabatan');
     Route::post('/populateTable', [SettingController::class, 'populateTable'])->name("setting.populateTable");
+    ROUTE::post("/changeCheck", [SettingController::class, 'checked'])->name("setting.checked");
 });
 // Route::get("/test", [BonController::class, "getDetail"]);
