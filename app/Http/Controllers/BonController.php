@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Acc;
+use App\Models\Bon;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -32,13 +33,13 @@ class BonController extends Controller
                     $query->select('bons_id')->from('accs');
                 })
                     ->whereIn('b.users_id', function ($query) {
-                        $query->select('id')->from('users')->where('jabatan_id', (Auth::user()->jabatan_id-1))->where('departement_id', (Auth::user()->departement_id));
+                        $query->select('id')->from('users')->where('jabatan_id', (Auth::user()->jabatan_id - 1))->where('departement_id', (Auth::user()->departement_id));
                     });
             })
             ->orWhere(function ($query) {
                 $query->where('a.status', 'Terima')
                     ->whereIn('a.users_id', function ($query) {
-                        $query->select('id')->from('users')->where('jabatan_id', (Auth::user()->jabatan_id-1))->where('departement_id', (Auth::user()->departement_id));
+                        $query->select('id')->from('users')->where('jabatan_id', (Auth::user()->jabatan_id - 1))->where('departement_id', (Auth::user()->departement_id));
                     })
                     ->whereNotIn('b.id', function ($query) {
                         $query->select('ac.bons_id')
@@ -95,28 +96,31 @@ class BonController extends Controller
             'msg' => view('detail', compact('detail'))->render()
         ));
     }
-    public function getDetailSelf()
+    public function getDetailSelf(Request $request)
     {
+        $id = $request->get('id');
         $detail = DB::table('detailbons')
             ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
             ->join('users', 'bons.users_id', '=', 'users.id')
             ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
-            ->where('users.id', Auth::user()->id)
+            ->where('detailbons.bons_id', '=', $id)
             ->get([
                 'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
                 'projects.idOpti'
             ]);
-        // dd($detail);
-        // $acc = DB::table('accs')
-        //     ->join('users', 'accs.users_id', '=', 'users.id')
-        //     ->where('accs.bons_id', $id)
-        //     ->get(['accs.id', 'users.name', 'bons_id as bid', 'accs.status']);
+        $acc = DB::table('accs')
+            ->join('bons', 'accs.bons_id', '=', 'bons.id')
+            ->join('users', 'accs.users_id', '=', 'users.id')
+            ->join('jabatans', 'users.jabatan_id', '=', 'jabatans.id')
+            ->join('departements', 'users.departement_id', '=', 'departements.id')
+            ->where('accs.bons_id', '=', $id)
+            ->get(['users.name as name', 'jabatans.name as jabatan', 'departements.name as departement','accs.status as status','accs.keteranganTolak as keteranganTolak']);
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail'))->render()
+            'msg' => view('detail', compact('detail','acc'))->render()
         ));
     }
 
@@ -252,6 +256,9 @@ class BonController extends Controller
         $data->status = 'Tolak';
         $data->keteranganTolak = $confirmationInput;
         $data->save();
+        $bon = Bon::find($id);
+        $bon->status = "Tolak";
+        $bon->save();
         return redirect()->route('index')->with('status', 'Bon telah di tolak');
     }
 }
