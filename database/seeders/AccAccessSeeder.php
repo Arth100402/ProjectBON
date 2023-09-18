@@ -15,7 +15,7 @@ class AccAccessSeeder extends Seeder
     public function run()
     {
         $department = ["Super", "Operation", "TXN", "Technical", "Sales IT",  "Warehouse", "HRD"];
-        $roles = ["Staff", "Supervisor", "Manager", "General Manager", "Wakil Direktur", "Direktur", "Super Admin"];
+        $roles = ["Staff", "Supervisor", "Manager", "General Manager", "Wakil Direktur", "Direktur", "Super Admin", "Kasir"];
         for ($i = 1; $i <= count($department); $i++) {
             for ($j = 1; $j <= count($roles); $j++) {
                 for ($k = 1; $k <= count($roles); $k++) {

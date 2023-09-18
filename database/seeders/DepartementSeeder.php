@@ -14,7 +14,7 @@ class DepartementSeeder extends Seeder
      */
     public function run()
     {
-        $department = ["Super", "Operation", "TXN", "Technical", "Sales IT", "Warehouse", "HRD", "Finance"];
+        $department = ["Super", "Operation", "TXN", "Technical", "Sales IT", "Warehouse", "HRD", "Finance", "Kasir"];
         for ($i = 0; $i < count($department); $i++) {
             DB::table('departements')->insert([
                 [

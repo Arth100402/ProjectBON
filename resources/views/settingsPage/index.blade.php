@@ -89,6 +89,7 @@
 
                         parent:
                             for (const iterator of jabatans) {
+                                if (iterator.id <= jabatanID) continue;
                                 header +=
                                     `
                             <th>${iterator.name}</th>
@@ -111,19 +112,20 @@
                         body += `</tr></tbody>`
                         table.html(header + body);
                         $(".make-switch").bootstrapSwitch();
+                        reDisable()
+                    },
+                    error: function(err) {
+                        console.log(err);
                     }
                 });
 
             });
 
-            var cont = 0;
-            $("#myTable").on("switchChange.bootstrapSwitch", ".make-switch", function() {
+            $("#myTable").on("switchChange.bootstrapSwitch", ".make-switch", function(e) {
+                const ch = $(this);
                 const d = $("#select-department").val()
                 const [aj, ac] = $(this).attr("data-value").split("-")
-                const st = $(this).is(":checked");
-                console.log(aj);
-                console.log(ac);
-                console.log(d);
+                const st = ($(this).is(":checked") ? "true" : "false")
                 $.ajax({
                     type: "POST",
                     url: "{{ route('setting.checked') }}",
@@ -135,7 +137,19 @@
                         "stat": st
                     },
                     success: function(response) {
-                        console.log(response);
+                        reDisable();
+                        const id = $(ch).attr("id").split('-')
+                        if (st == "true" && !$("#switch-" + (parseInt(id[1]) + 1)).is(
+                                ":checked")) {
+                            $("#switch-" + (parseInt(id[1]) + 1)).bootstrapSwitch("disabled",
+                                false);
+                        }
+                        if (st == "false" && $("#switch-" + (parseInt(id[1]) - 1)).attr(
+                                "disabled")) {
+                            console.log($("#switch-" + (parseInt(id[1]) - 1)));
+                            $("#switch-" + (parseInt(id[1]) - 1)).bootstrapSwitch("disabled",
+                                false);
+                        }
                     }
                 });
 
@@ -163,6 +177,15 @@
             });
             $("#setting").addClass("active");
             $("#hierarchy").addClass("active");
+
+            const reDisable = () => {
+                for (const el of $(".make-switch:not(:checked)").slice(1)) {
+                    $(el).bootstrapSwitch("disabled", true);
+                }
+                for (const el of $(".make-switch:checked").slice(0, $(".make-switch:checked").length - 1)) {
+                    $(el).bootstrapSwitch("disabled", true);
+                }
+            }
         });
     </script>
 @endsection
