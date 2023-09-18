@@ -26,7 +26,7 @@ Route::middleware("auth")->group(function () {
     Route::get("/loadsales", [BonController::class, "loadSales"])->name("loadSales");
     Route::post('/getDetail', [BonController::class, 'getDetail'])->name('bon.getDetail');
     Route::get('/jsonShowIndexAdmin', [BonController::class, 'jsonShowIndexAdmin'])->name('bon.jsonShowIndexAdmin');
-    Route::get('/getDetailSelf', [BonController::class, 'getDetailSelf'])->name('bon.getDetailSelf');
+    Route::post('/getDetailSelf', [BonController::class, 'getDetailSelf'])->name('bon.getDetailSelf');
     Route::get('/jsonShowIndexSelf', [BonController::class, 'jsonShowIndexSelf'])->name('bon.jsonShowIndexSelf');
     Route::get('/accBont/{id}', [BonController::class, 'accBon'])->name('bon.accBon');
     Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
