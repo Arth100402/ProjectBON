@@ -30,6 +30,7 @@ Route::middleware("auth")->group(function () {
     Route::get('/jsonShowIndexSelf', [BonController::class, 'jsonShowIndexSelf'])->name('bon.jsonShowIndexSelf');
     Route::get('/accBont/{id}', [BonController::class, 'accBon'])->name('bon.accBon');
     Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
+    Route::get('/HistoryAcc', [BonController::class, 'HistoryAcc'])->name('bon.HistoryAcc');
 
     // Setting Controller
     Route::get("/hierarchy", [SettingController::class, "index"])->name('setting.index');

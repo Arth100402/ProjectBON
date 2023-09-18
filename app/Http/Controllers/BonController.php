@@ -242,6 +242,14 @@ class BonController extends Controller
         $data->save();
         return redirect()->route('index')->with('status', 'Bon telah di terima');
     }
+    public function HistoryAcc(){
+        $data = DB::table('accs')
+        ->join('bons','accs.bons_id','=','bons.id')
+        ->join('users', 'users.id', '=', 'bons.users_id')
+        ->where('accs.users_id','=',Auth::user()->id)
+        ->get(['bons.tglPengajuan','users.name','bons.total', 'accs.status','accs.keteranganTolak','accs.created_at']);
+        return response()->json(["data" => $data]);
+    }
 
     public function decBon(Request $request, $id)
     {

@@ -29,7 +29,7 @@
     <div class="topdiv">
         <a href="{{ route('create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
     </div>
-    <h2>Pengajuan saya: </h2>
+    <h3>Pengajuan saya: </h3>
     <div class="table-responsive" style="overflow: scroll">
         <table id="myTableSelf" class="table table-striped table-bordered" style="table-layout: fixed">
             <thead>
@@ -57,6 +57,23 @@
                     <th>Total Biaya Perjalanan</th>
                     <th>Status</th>
                     <th>Aksi</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div>
+        <h3>Riwayat Penerimaan dan Penolakan Saya</h3>
+    </div>
+    <div class="table-responsive" style="overflow: scroll">
+        <table id="myTableAccDec" class="table table-striped table-bordered" style="table-layout: fixed">
+            <thead>
+                <tr>
+                    <th>Tanggal Pengajuan</th>
+                    <th>Nama Pengaju</th>
+                    <th>Nominal Yang Diajukan</th>
+                    <th>Status</th>
+                    <th>Keterangan</th>
+                    <th>Diterima/Ditolak Pada</th>
                 </tr>
             </thead>
         </table>
@@ -217,6 +234,7 @@
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
                                 <br>
                                 <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
+                                <br>
                                 <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
                         },
                         width: "5%"
@@ -323,6 +341,100 @@
                 success: function(data) {
                     table.clear().draw()
                     table.rows.add(data["data"]).draw()
+                },
+                error: function(error) {
+                    console.log("Error: ");
+                    console.log(error);
+                }
+            });
+            var table3 = $('#myTableAccDec').DataTable({
+                info: false,
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '445px',
+                order: [
+                    [5, 'asc']
+                ],
+                columnDefs: [{
+                        searchable: true,
+                        targets: [0, 1, 2, 3, 4, 5]
+                    },
+                    {
+                        className: "wrap",
+                        targets: [0, 1, 2, 3, 4, 5]
+                    },
+                ],
+                columns: [{
+                        data: "tglPengajuan",
+                        render: function(data, type, row) {
+                            if (data !== null) {
+                                var date = new Date(data);
+                                var options = {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                };
+                                return date.toLocaleDateString('id-ID', options);
+                            } else {
+                                return "Data tidak tersedia";
+                            }
+                        }
+
+                    },
+                    {
+                        data: "name",
+                        width: "10%"
+                    },
+                    {
+                        data: "total",
+                        render: function(data, type, row) {
+                            if (data !== null) {
+                                return new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR'
+                                }).format(data);
+                            } else {
+                                return "Data tidak tersedia";
+                            }
+                        }
+                    },
+                    {
+                        data: "status",
+                        width: "5%"
+                    },
+                    {
+                        data: "keteranganTolak",
+                        defaultContent: '<p>-</p>',
+                    },
+                    {
+                        data: "created_at",
+                        render: function(data, type, row) {
+                            if (data !== null) {
+                                var date = new Date(data);
+                                var options = {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                };
+                                return date.toLocaleDateString('id-ID', options);
+                            } else {
+                                return "Data tidak tersedia";
+                            }
+                        }
+
+                    },
+                ]
+            });
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                async: false,
+                url: "{{ route('bon.HistoryAcc') }}",
+                success: function(data) {
+                    table3.clear().draw()
+                    table3.rows.add(data["data"]).draw()
                 },
                 error: function(error) {
                     console.log("Error: ");
