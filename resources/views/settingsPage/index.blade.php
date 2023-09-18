@@ -68,6 +68,8 @@
             // Event Listener
             $("#select-department").on("change", function() {
                 $("#select-jabatan").attr("disabled", false);
+                $("#select-jabatan").empty()
+                $("#myTable").html("");
             });
 
             $("#select-jabatan").on("change", function() {
@@ -118,7 +120,6 @@
                         console.log(err);
                     }
                 });
-
             });
 
             $("#myTable").on("switchChange.bootstrapSwitch", ".make-switch", function(e) {
