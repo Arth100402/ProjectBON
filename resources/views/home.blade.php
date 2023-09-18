@@ -133,17 +133,18 @@
             });
         }
 
-        function getDetailSelf() {
+        function getDetailSelf(id) {
             $.ajax({
-                type: "GET",
-                dataType: "json",
-                async: false,
+                type: "POST",
                 url: "{{ route('bon.getDetailSelf') }}",
+                data: {
+                    '_token': '<?php echo csrf_token(); ?>',
+                    'id': id
+                },
                 success: function(data) {
                     $('#modalContentB').html(data.msg);
                 },
                 error: function(error) {
-                    console.log("Error: ");
                     console.log(error);
                 }
             });
@@ -324,7 +325,7 @@
                     {
                         data: null,
                         render: (data, type, row, meta) => {
-                            return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf()">
+                            return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
                                 <i class="fa fa-info-circle"></i>
                                 </a>
                                 <br>`;

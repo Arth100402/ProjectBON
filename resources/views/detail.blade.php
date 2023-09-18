@@ -39,7 +39,30 @@
             <h3>Status Acc</h3>
         </div>
         <div class="panel-body">
-
+            <table id="statusAcc" class="table table-bordered" style="background-color: white">
+                <thead>
+                    <tr>
+                        <th>Penyetuju</th>
+                        <th>Jabatan</th>
+                        <th>Departement</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($acc as $a)
+                        <tr>
+                            <td>{{ $a->name }}</td>
+                            <td>{{ $a->jabatan }}</td>
+                            <td>{{ $a->departement }}</td>
+                            @if ($a->status == "Tolak")
+                            <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
+                            @else
+                            <td>{{ $a->status }}</td>
+                            @endif
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
     <div class="setAlign">
