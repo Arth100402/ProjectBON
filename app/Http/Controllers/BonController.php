@@ -91,9 +91,16 @@ class BonController extends Controller
                 'departements.name as dname',
                 'projects.idOpti'
             ]);
+        $acc = DB::table('accs')
+            ->join('bons', 'accs.bons_id', '=', 'bons.id')
+            ->join('users', 'accs.users_id', '=', 'users.id')
+            ->join('jabatans', 'users.jabatan_id', '=', 'jabatans.id')
+            ->join('departements', 'users.departement_id', '=', 'departements.id')
+            ->where('accs.bons_id', '=', $id)
+            ->get(['users.name as name', 'jabatans.name as jabatan', 'departements.name as departement', 'accs.status as status', 'accs.keteranganTolak as keteranganTolak']);
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail'))->render()
+            'msg' => view('detail', compact('detail', 'acc'))->render()
         ));
     }
     public function getDetailSelf(Request $request)
@@ -117,10 +124,10 @@ class BonController extends Controller
             ->join('jabatans', 'users.jabatan_id', '=', 'jabatans.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('accs.bons_id', '=', $id)
-            ->get(['users.name as name', 'jabatans.name as jabatan', 'departements.name as departement','accs.status as status','accs.keteranganTolak as keteranganTolak']);
+            ->get(['users.name as name', 'jabatans.name as jabatan', 'departements.name as departement', 'accs.status as status', 'accs.keteranganTolak as keteranganTolak']);
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail','acc'))->render()
+            'msg' => view('detail', compact('detail', 'acc'))->render()
         ));
     }
 
@@ -246,12 +253,13 @@ class BonController extends Controller
         $data->save();
         return redirect()->route('index')->with('status', 'Bon telah di terima');
     }
-    public function HistoryAcc(){
+    public function HistoryAcc()
+    {
         $data = DB::table('accs')
-        ->join('bons','accs.bons_id','=','bons.id')
-        ->join('users', 'users.id', '=', 'bons.users_id')
-        ->where('accs.users_id','=',Auth::user()->id)
-        ->get(['bons.tglPengajuan','users.name','bons.total', 'accs.status','accs.keteranganTolak','accs.created_at']);
+            ->join('bons', 'accs.bons_id', '=', 'bons.id')
+            ->join('users', 'users.id', '=', 'bons.users_id')
+            ->where('accs.users_id', '=', Auth::user()->id)
+            ->get(['bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.created_at']);
         return response()->json(["data" => $data]);
     }
 

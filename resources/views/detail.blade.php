@@ -34,6 +34,7 @@
             </tbody>
         </table>
     </div>
+
     <div class="panel card-background-color">
         <div class="panel-heading">
             <h3>Status Acc</h3>
@@ -54,10 +55,10 @@
                             <td>{{ $a->name }}</td>
                             <td>{{ $a->jabatan }}</td>
                             <td>{{ $a->departement }}</td>
-                            @if ($a->status == "Tolak")
-                            <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
+                            @if ($a->status == 'Tolak')
+                                <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
                             @else
-                            <td>{{ $a->status }}</td>
+                                <td>{{ $a->status }}</td>
                             @endif
                         </tr>
                     @endforeach
@@ -65,6 +66,7 @@
             </table>
         </div>
     </div>
+
     <div class="setAlign">
         <button type="button" class="btn btn-danger" id="btnClose" data-dismiss="modal">Tutup</button>
     </div>
