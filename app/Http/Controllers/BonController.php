@@ -98,7 +98,7 @@ class BonController extends Controller
             ->join('jabatans', 'users.jabatan_id', '=', 'jabatans.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('accs.bons_id', '=', $id)
-            ->get(['users.name as name', 'jabatans.name as jabatan', 'departements.name as departement', 'accs.status as status', 'accs.keteranganTolak as keteranganTolak']);
+            ->get(['users.name as uname', 'jabatans.name as jname', 'departements.name as dname', 'accs.status as astatus', 'accs.keteranganTolak as aketeranganTolak']);
         return response()->json(array(
             'status' => 'oke',
             'msg' => view('detail', compact('detail', 'acc'))->render()
