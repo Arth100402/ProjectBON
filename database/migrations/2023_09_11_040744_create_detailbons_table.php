@@ -28,7 +28,7 @@ class CreateDetailbonsTable extends Migration
             $table->string("noPaket")->nullable();
             $table->text('agenda');
             $table->string('penggunaan')->nullable();
-            $table->integer('biaya');
+            $table->double('biaya');
             $table->timestamps();
         });
     }
