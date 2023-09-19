@@ -6,6 +6,7 @@ use App\Models\Acc;
 use App\Models\Bon;
 use App\Models\Project;
 use App\Models\User;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -111,16 +112,21 @@ class BonController extends Controller
                 'users.name',
                 'projects.idOpti'
             ]);
-        $acc = DB::table('accs')
-            ->join('bons', 'accs.bons_id', '=', 'bons.id')
-            ->join('users', 'accs.users_id', '=', 'users.id')
-            ->join('jabatans', 'users.jabatan_id', '=', 'jabatans.id')
-            ->join('departements', 'users.departement_id', '=', 'departements.id')
-            ->where('accs.bons_id', '=', $id)
-            ->get(['users.name as name', 'jabatans.name as jabatan', 'departements.name as departement','accs.status as status','accs.keteranganTolak as keteranganTolak']);
+        $acc = DB::table('acc_access')
+            ->leftJoin('users', function (JoinClause $join) {
+                $join->on('users.jabatan_id', '=', 'acc_access.jabatanAcc')
+                    ->on('users.departement_id', '=', 'acc_access.departId');
+            })
+            ->leftJoin('accs', 'accs.users_id', '=', 'users.id')
+            ->leftJoin('jabatans', 'acc_access.jabatanAcc', '=', 'jabatans.id')
+            ->leftJoin('departements', 'acc_access.departId', '=', 'departements.id')
+            ->where('acc_access.departId', '=', Auth::user()->departement_id)
+            ->where('acc_access.jabatanPengaju', '=', Auth::user()->jabatan_id)
+            ->where('acc_access.status', '=', 'enable')
+            ->get(['users.name as uname', 'jabatans.name as jname', 'departements.name as dname', 'accs.status as astatus', 'accs.keteranganTolak as aketeranganTolak']);
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail','acc'))->render()
+            'msg' => view('detail', compact('detail', 'acc'))->render()
         ));
     }
 
@@ -246,12 +252,13 @@ class BonController extends Controller
         $data->save();
         return redirect()->route('index')->with('status', 'Bon telah di terima');
     }
-    public function HistoryAcc(){
+    public function HistoryAcc()
+    {
         $data = DB::table('accs')
-        ->join('bons','accs.bons_id','=','bons.id')
-        ->join('users', 'users.id', '=', 'bons.users_id')
-        ->where('accs.users_id','=',Auth::user()->id)
-        ->get(['bons.tglPengajuan','users.name','bons.total', 'accs.status','accs.keteranganTolak','accs.created_at']);
+            ->join('bons', 'accs.bons_id', '=', 'bons.id')
+            ->join('users', 'users.id', '=', 'bons.users_id')
+            ->where('accs.users_id', '=', Auth::user()->id)
+            ->get(['bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.created_at']);
         return response()->json(["data" => $data]);
     }
 

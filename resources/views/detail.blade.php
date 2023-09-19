@@ -51,13 +51,13 @@
                 <tbody>
                     @foreach ($acc as $a)
                         <tr>
-                            <td>{{ $a->name }}</td>
-                            <td>{{ $a->jabatan }}</td>
-                            <td>{{ $a->departement }}</td>
-                            @if ($a->status == "Tolak")
-                            <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
+                            <td>{{ $a->uname }}</td>
+                            <td>{{ $a->jname }}</td>
+                            <td>{{ $a->dname }}</td>
+                            @if ($a->astatus == "Tolak")
+                            <td>{{ $a->astatus }}, Karena {{ $a->aketeranganTolak }}</td>
                             @else
-                            <td>{{ $a->status }}</td>
+                            <td>{{ $a->astatus }}</td>
                             @endif
                         </tr>
                     @endforeach
