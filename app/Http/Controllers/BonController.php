@@ -283,4 +283,36 @@ class BonController extends Controller
         $bon->save();
         return redirect()->route('index')->with('status', 'Bon telah di tolak');
     }
+    public function fmAcc()
+    {
+        $bonsFMAccArray = [];
+
+        $dataBons = DB::table('bons')
+            ->join('users', 'users.id', '=', 'bons.users_id')
+            ->get(['bons.id as bid', 'bons.users_id as idAju', 'users.name as pengaju', 'users.jabatan_id', 'users.departement_id', 'bons.tglPengajuan', 'bons.total']);
+        for ($i = 0; $i < count($dataBons); $i++) {
+            $dataAcc = DB::table('accs as a')
+                ->join('users as uacc', 'uacc.id', '=', 'a.users_id')
+                ->where('a.status', 'Terima')
+                ->where('a.bons_id', $dataBons[$i]->bid)
+                ->count();
+
+            $dataAccess = DB::table('acc_access as aa')
+                ->where('aa.departId', $dataBons[$i]->departement_id)
+                ->where('aa.status', 'enable')
+                ->where('aa.jabatanPengaju', $dataBons[$i]->jabatan_id)
+                ->count();
+            $comparison_result = $dataAcc === $dataAccess ? 'true' : 'false';
+            if ($dataAcc > 0 && $dataAccess > 0 && $comparison_result === 'true') {
+                $bonsAdd = [
+                    'bid' => $dataBons[$i]->bid,
+                    'pengaju' => $dataBons[$i]->pengaju,
+                    'tglPengajuan' => $dataBons[$i]->tglPengajuan,
+                    'total' => $dataBons[$i]->total
+                ];
+                array_push($bonsFMAccArray, $bonsAdd);
+            }
+        }
+        return response()->json(["data" => $bonsFMAccArray]);
+    }
 }
