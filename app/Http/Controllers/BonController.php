@@ -60,17 +60,13 @@ class BonController extends Controller
     public function jsonShowIndexSelf()
     {
         $data = DB::table('bons')
-            ->join('detailbons', 'bons.id', '=', 'detailbons.bons_id')
             ->join('users', 'bons.users_id', '=', 'users.id')
-            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('users.id', '=', Auth::user()->id)
             ->get([
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
-                'departements.name as dname',
-                'detailbons.projects_id',
-                'projects.idOpti'
+                'departements.name as dname'
             ]);
         return response()->json([
             'data' => $data
@@ -92,13 +88,7 @@ class BonController extends Controller
                 'departements.name as dname',
                 'projects.idOpti'
             ]);
-        $acc = DB::table('accs')
-            ->join('bons', 'accs.bons_id', '=', 'bons.id')
-            ->join('users', 'accs.users_id', '=', 'users.id')
-            ->join('jabatans', 'users.jabatan_id', '=', 'jabatans.id')
-            ->join('departements', 'users.departement_id', '=', 'departements.id')
-            ->where('accs.bons_id', '=', $id)
-            ->get(['users.name as uname', 'jabatans.name as jname', 'departements.name as dname', 'accs.status as astatus', 'accs.keteranganTolak as aketeranganTolak']);
+        $acc = null;
         return response()->json(array(
             'status' => 'oke',
             'msg' => view('detail', compact('detail', 'acc'))->render()
@@ -119,18 +109,41 @@ class BonController extends Controller
                 'users.name',
                 'projects.idOpti'
             ]);
-        $acc = DB::table('acc_access')
-            ->leftJoin('users', function (JoinClause $join) {
-                $join->on('users.jabatan_id', '=', 'acc_access.jabatanAcc')
-                    ->on('users.departement_id', '=', 'acc_access.departId');
+        $subquery = DB::table('accs AS a')
+            ->join('users AS u', 'a.users_id', '=', 'u.id')
+            ->join('jabatans AS j', 'j.id', '=', 'u.jabatan_id')
+            ->join('departements AS d', 'd.id', '=', 'u.departement_id')
+            ->where('a.bons_id', '=', $id)
+            ->select(
+                'a.users_id',
+                'u.jabatan_id',
+                'u.name AS uname',
+                'j.name AS jname',
+                'd.name AS dname',
+                'a.bons_id',
+                'a.status as status',
+                'a.keteranganTolak as keteranganTolak'
+            );
+
+        $acc = DB::table('acc_access AS acc')
+            ->join('jabatans AS jab', 'jab.id', '=', 'acc.jabatanAcc')
+            ->join('departements AS dep', 'acc.departId', '=', 'dep.id')
+            ->leftJoinSub($subquery, 'sq1', function ($join) {
+                $join->on('sq1.jabatan_id', '=', 'acc.jabatanAcc');
             })
-            ->leftJoin('accs', 'accs.users_id', '=', 'users.id')
-            ->leftJoin('jabatans', 'acc_access.jabatanAcc', '=', 'jabatans.id')
-            ->leftJoin('departements', 'acc_access.departId', '=', 'departements.id')
-            ->where('acc_access.departId', '=', Auth::user()->departement_id)
-            ->where('acc_access.jabatanPengaju', '=', Auth::user()->jabatan_id)
-            ->where('acc_access.status', '=', 'enable')
-            ->get(['users.name as uname', 'jabatans.name as jname', 'departements.name as dname', 'accs.status as astatus', 'accs.keteranganTolak as aketeranganTolak']);
+            ->where('acc.departId', '=', Auth::user()->departement_id)
+            ->where('acc.jabatanPengaju', '=', Auth::user()->jabatan_id)
+            ->where('acc.status', 'enable')
+            ->select(
+                'sq1.bons_id AS sq_bons_id',
+                'sq1.uname AS uname',
+                'jab.name AS jname',
+                'dep.name AS dname',
+                'sq1.status AS astatus',
+                'sq1.keteranganTolak AS aketeranganTolak'
+            )
+            ->get();
+
         return response()->json(array(
             'status' => 'oke',
             'msg' => view('detail', compact('detail', 'acc'))->render()
@@ -314,5 +327,54 @@ class BonController extends Controller
             }
         }
         return response()->json(["data" => $bonsFMAccArray]);
+    }
+    public function loadKasir()
+    {
+        // 3=Manager, 8=Finance
+        $data = DB::table("accs AS a")
+            ->join("users AS u", "u.id", "=", "a.users_id")
+            ->join("jabatans AS j", "j.id", "=", "u.jabatan_id")
+            ->join("departements AS d", "d.id", "=", "u.departement_id")
+            ->join("bons AS b", "b.id", "a.bons_id")
+            ->joinSub(function ($q) {
+                $q->select('users.id', 'users.name as uname', 'departements.name as dname')
+                    ->from("users")
+                    ->join('departements', 'users.departement_id', '=', 'departements.id');
+            }, "aju", function ($join) {
+                $join->on("aju.id", "=", "b.users_id");
+            })
+            ->where([["u.jabatan_id", 3], ["u.departement_id", 8], ["a.status", "Terima"]])
+            ->get(['aju.uname', 'aju.dname', 'b.tglPengajuan', 'b.total', 'u.name as ACC', 'b.id']);
+        return response()->json($data);
+    }
+    public function getDetailKasir(Request $request)
+    {
+        $id = $request->get('id');
+        $detail = DB::table('detailbons')
+            ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->join('departements', 'users.departement_id', '=', 'departements.id')
+            ->where('detailbons.bons_id', '=', $id)
+            ->get([
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
+                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name',
+                'projects.idOpti'
+            ]);
+        $acc = Acc::join("users AS u", "u.id", "accs.users_id")
+            ->join("jabatans AS j", "j.id", "u.jabatan_id")
+            ->join("departements AS d", "d.id", "u.departement_id")
+            ->where("bons_id", $id)
+            ->get(['u.name as uname', 'j.name as jname', 'd.name as dname', 'accs.status as astatus', 'accs.keteranganTolak as aketeranganTolak']);
+        return response()->json(array(
+            'status' => 'oke',
+            'msg' => view('detail', compact('detail', 'acc'))->render()
+        ));
+    }
+
+    public function test4()
+    {
+        dd(User::with("department")->where("id", 1)->get());
     }
 }

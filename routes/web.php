@@ -32,10 +32,17 @@ Route::middleware("auth")->group(function () {
     Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
     Route::get('/HistoryAcc', [BonController::class, 'HistoryAcc'])->name('bon.HistoryAcc');
 
+    // Kasir
+    Route::get("/kasirIndex", [BonController::class, "loadKasir"])->name("kasirIndex");
+    Route::get('/accKasir/{id}', [BonController::class, 'accKasir'])->name('accKasir');
+    Route::post('/decKasir/{id}', [BonController::class, 'decKasir'])->name('decKasir');
+    Route::post("/kasir/acc/detail", [BonController::class, 'getDetailKasir'])->name("detailKasir");
+
     // Setting Controller
     Route::get("/hierarchy", [SettingController::class, "index"])->name('setting.index');
     Route::get('/loadHierarchyJabatan', [SettingController::class, "loadJabatan"])->name('setting.loadJabatan');
     Route::post('/populateTable', [SettingController::class, 'populateTable'])->name("setting.populateTable");
     ROUTE::post("/changeCheck", [SettingController::class, 'checked'])->name("setting.checked");
 });
-Route::get("/test", [BonController::class, "fmAcc"]);
+// Route::get("/test", [BonController::class, "fmAcc"]);
+// Route::get("/test", [BonController::class, "test4"]);

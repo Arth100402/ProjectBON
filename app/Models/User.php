@@ -15,7 +15,11 @@ class User extends Authenticatable
 
     function department()
     {
-        return $this->belongsTo(Department::class, "departement_id", "id");
+        return $this->belongsTo(Departemen::class, "departement_id", "id");
+    }
+    function jabatan()
+    {
+        return $this->belongsTo(Jabatan::class, "jabatan_id", "id");
     }
 
     function bon()

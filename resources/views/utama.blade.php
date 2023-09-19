@@ -92,7 +92,9 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
                         data-close-others="true">
                         <img alt="" src="{{ asset('assets/img/avatar3_small.jpg') }}" />
-                        <span class="username username-hide-on-mobile">{{ Auth::user()->name }} </span>
+                        <span
+                            class="username username-hide-on-mobile">{{ Auth::user()->name }}-{{ Auth::user()->jabatan->name }}-{{ Auth::user()->department->name }}
+                        </span>
                         <i class="fa fa-angle-down"></i>
                     </a>
                     <ul class="dropdown-menu">
@@ -150,23 +152,25 @@
                             <span class="selected"></span>
                         </a>
                     </li>
-                    <li id="setting">
-                        <a href="/">
-                            <i class="fa fa-gear"></i>
-                            <span class="title">Setting</span>
-                            <span class="selected"></span>
-                        </a>
-                        <ul class="sub-menu">
-                            <li id="hierarchy">
-                                <a href="/hierarchy">
-                                    <i class="fa fa-sitemap"></i>
-                                    Configure Hierarchy
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    {{-- GM  Keatas & super admin --}}
+                    @if (Auth::user()->jabatan_id > 4 && Auth::user()->jabatan_id <= 7)
+                        <li id="setting">
+                            <a href="/">
+                                <i class="fa fa-gear"></i>
+                                <span class="title">Setting</span>
+                                <span class="selected"></span>
+                            </a>
+                            <ul class="sub-menu">
+                                <li id="hierarchy">
+                                    <a href="/hierarchy">
+                                        <i class="fa fa-sitemap"></i>
+                                        Configure Hierarchy
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
                 </ul>
-
                 <!-- END SIDEBAR MENU -->
             </div>
         </div>
