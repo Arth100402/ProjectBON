@@ -26,58 +26,80 @@
     @if (session('status'))
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
-    <div class="topdiv">
-        <a href="{{ route('create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
-    </div>
-    <h3>Pengajuan saya: </h3>
-    <div class="table-responsive" style="overflow: scroll">
-        <table id="myTableSelf" class="table table-striped table-bordered" style="table-layout: fixed">
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Departemen</th>
-                    <th>Tanggal Pengajuan</th>
-                    <th>Total Biaya Perjalanan</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-        </table>
-    </div>
-    <div>
-        <h3>Terima Tolak Pengajuan</h3>
-    </div>
-    <div class="table-responsive" style="overflow: scroll">
-        <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Departemen</th>
-                    <th>Tanggal Pengajuan</th>
-                    <th>Total Biaya Perjalanan</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-        </table>
-    </div>
-    <div>
-        <h3>Riwayat Penerimaan dan Penolakan Saya</h3>
-    </div>
-    <div class="table-responsive" style="overflow: scroll">
-        <table id="myTableAccDec" class="table table-striped table-bordered" style="table-layout: fixed">
-            <thead>
-                <tr>
-                    <th>Tanggal Pengajuan</th>
-                    <th>Nama Pengaju</th>
-                    <th>Nominal Yang Diajukan</th>
-                    <th>Status</th>
-                    <th>Keterangan</th>
-                    <th>Diterima/Ditolak Pada</th>
-                </tr>
-            </thead>
-        </table>
-    </div>
+    @if (Auth::user()->jabatan_id == 8)
+        <h3>Verifikasi Pencairan Bon: </h3>
+        <div class="table-responsive" style="overflow: scroll">
+            <table id="myTableCair" class="table table-striped table-bordered" style="table-layout: fixed">
+                <thead>
+                    <tr>
+                        <th>Nama Pengaju</th>
+                        <th>Departemen</th>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Total Biaya Perjalanan</th>
+                        <th>Nama Finance Manager</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    @else
+        <div class="topdiv">
+            <a href="{{ route('create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
+        </div>
+        <h3>Pengajuan saya: </h3>
+        <div class="table-responsive" style="overflow: scroll">
+            <table id="myTableSelf" class="table table-striped table-bordered" style="table-layout: fixed">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Departemen</th>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Total Biaya Perjalanan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        @if (Auth::user()->jabatan_id != 1)
+            <div>
+                <h3>Terima Tolak Pengajuan</h3>
+            </div>
+            <div class="table-responsive" style="overflow: scroll">
+                <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Departemen</th>
+                            <th>Tanggal Pengajuan</th>
+                            <th>Total Biaya Perjalanan</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div>
+                <h3>Riwayat Penerimaan dan Penolakan Saya</h3>
+            </div>
+            <div class="table-responsive" style="overflow: scroll">
+                <table id="myTableAccDec" class="table table-striped table-bordered" style="table-layout: fixed">
+                    <thead>
+                        <tr>
+                            <th>Tanggal Pengajuan</th>
+                            <th>Nama Pengaju</th>
+                            <th>Nominal Yang Diajukan</th>
+                            <th>Status</th>
+                            <th>Keterangan</th>
+                            <th>Diterima/Ditolak Pada</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        @endif
+    @endif
+    {{-- Modals --}}
     <div class="modal fade" id="modalEditA" tabindex="-1" role="basic" aria-hidden="true">
         <div class="modal-dialog modal-wide">
             <div class="modal-content">
@@ -113,43 +135,15 @@
             </div>
         </div>
     </div>
+
+    {{-- End Modals --}}
 @endsection
+
 @section('javascript')
     <script>
-        function getDetail(id) {
-            $.ajax({
-                type: 'POST',
-                url: "{{ route('bon.getDetail') }}",
-                data: {
-                    '_token': '<?php echo csrf_token(); ?>',
-                    'id': id
-                },
-                success: function(data) {
-                    $('#modalContentA').html(data.msg);
-                },
-                error: function(err) {
-                    console.log(err);
-                }
-            });
-        }
-
-        function getDetailSelf(id) {
-            $.ajax({
-                type: "POST",
-                url: "{{ route('bon.getDetailSelf') }}",
-                data: {
-                    '_token': '<?php echo csrf_token(); ?>',
-                    'id': id
-                },
-                success: function(data) {
-                    $('#modalContentB').html(data.msg);
-                },
-                error: function(error) {
-                    console.log(error);
-                }
-            });
-        }
         $(document).ready(function() {
+            const jabatanID = {!! Auth::user()->jabatan_id !!}
+
             $.fn.dataTable.ext.type.order['status-order-pre'] = function(d) {
                 switch (d) {
                     case 'Menunggu':
@@ -163,6 +157,7 @@
                 }
             };
 
+            // Tables
             var table = $('#myTable').DataTable({
                 info: false,
                 paging: false,
@@ -242,22 +237,7 @@
                     }
                 ]
             });
-            $.ajax({
-                type: "GET",
-                dataType: "json",
-                async: false,
-                url: "{{ route('bon.jsonShowIndexAdmin') }}",
-                success: function(data) {
-                    table.clear().draw()
-                    table.rows.add(data["data"]).draw()
-                },
-                error: function(error) {
-                    console.log("Error: ");
-                    console.log(error);
-                }
-            });
-
-            var table = $('#myTableSelf').DataTable({
+            var tableSelf = $('#myTableSelf').DataTable({
                 info: false,
                 paging: false,
                 scrollCollapse: true,
@@ -333,20 +313,6 @@
                         width: "5%"
                     }
                 ]
-            });
-            $.ajax({
-                type: "GET",
-                dataType: "json",
-                async: false,
-                url: "{{ route('bon.jsonShowIndexSelf') }}",
-                success: function(data) {
-                    table.clear().draw()
-                    table.rows.add(data["data"]).draw()
-                },
-                error: function(error) {
-                    console.log("Error: ");
-                    console.log(error);
-                }
             });
             var table3 = $('#myTableAccDec').DataTable({
                 info: false,
@@ -428,6 +394,39 @@
                     },
                 ]
             });
+            // End Table
+
+            // Ajaxs
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                async: false,
+                url: "{{ route('bon.jsonShowIndexAdmin') }}",
+                success: function(data) {
+                    table.clear().draw()
+                    table.rows.add(data["data"]).draw()
+                },
+                error: function(error) {
+                    console.log("Error: ");
+                    console.log(error);
+                }
+            });
+
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                async: false,
+                url: "{{ route('bon.jsonShowIndexSelf') }}",
+                success: function(data) {
+                    tableSelf.clear().draw()
+                    tableSelf.rows.add(data["data"]).draw()
+                },
+                error: function(error) {
+                    console.log("Error: ");
+                    console.log(error);
+                }
+            });
+
             $.ajax({
                 type: "GET",
                 dataType: "json",
@@ -442,10 +441,139 @@
                     console.log(error);
                 }
             });
+            // End Ajax
+
+            if (jabatanID == 8) {
+                var tableCair = $("#myTableCair").DataTable({
+                    info: false,
+                    paging: false,
+                    scrollCollapse: true,
+                    scrollY: '445px',
+                    columns: [{
+                            data: "uname",
+                            width: "10%"
+                        }, {
+                            data: "dname",
+                            width: "10%"
+                        }, {
+                            data: "tglPengajuan",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    var date = new Date(data);
+                                    var options = {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    };
+                                    return date.toLocaleDateString('id-ID', options);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+
+                        },
+                        {
+                            data: "total",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    return new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR'
+                                    }).format(data);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: "ACC",
+                            width: "10%"
+                        },
+                        {
+                            data: null,
+                            render: (data, type, row, meta) => {
+                                return `
+                            <a class="btn btn-info" href="#modalEditB" data-toggle="modal" onclick="getDetailKasir(${data.id})">
+                                <i class="fa fa-info-circle"></i>
+                                </a>
+                                <br>
+                                <a class="btn btn-success" href="/accKasir/${data.id}"><i class="fa fa-check-circle"></i></a><br>
+                                `
+                            },
+                            width: "5%"
+                        }
+                    ]
+                })
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('kasirIndex') }}",
+                    success: function(response) {
+                        tableCair.clear().draw()
+                        tableCair.rows.add(response).draw()
+                    }
+                });
+            }
         });
+
+        // Functions
+        const tolakKasir = (id) => {
+            $("#kirimTolak").attr("action", "/decKasir/" + id);
+        }
+        const getDetailKasir = (id) => {
+            $.ajax({
+                type: "POST",
+                url: "{{ route('detailKasir') }}",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    "id": id
+                },
+                success: function(response) {
+                    $('#modalContentB').html(response.msg);
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
 
         function tolak(id) {
             $("#kirimTolak").attr("action", "/decBon/" + id);
         }
+
+        function getDetail(id) {
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('bon.getDetail') }}",
+                data: {
+                    '_token': '<?php echo csrf_token(); ?>',
+                    'id': id
+                },
+                success: function(data) {
+                    $('#modalContentA').html(data.msg);
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function getDetailSelf(id) {
+            $.ajax({
+                type: "POST",
+                url: "{{ route('bon.getDetailSelf') }}",
+                data: {
+                    '_token': '<?php echo csrf_token(); ?>',
+                    'id': id
+                },
+                success: function(data) {
+                    $('#modalContentB').html(data.msg);
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+        // End function
     </script>
 @endsection

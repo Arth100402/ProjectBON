@@ -27,7 +27,7 @@
                         <td>{{ $d->name }}</td>
                         <td>{{ $d->noPaket }}</td>
                         <td>{{ $d->agenda }}</td>
-                        <td>{{ sprintf('Rp %s', number_format($d->penggunaan, 0, ',', '.')) }}</td>
+                        <td>{{ $d->penggunaan }}</td>
                         <td>{{ sprintf('Rp %s', number_format($d->biaya, 0, ',', '.')) }}</td>
                     </tr>
                 @endforeach
@@ -35,38 +35,39 @@
         </table>
     </div>
 
-    <div class="panel card-background-color">
-        <div class="panel-heading">
-            <h3>Status Acc</h3>
-        </div>
-        <div class="panel-body">
-            <table id="statusAcc" class="table table-bordered" style="background-color: white">
-                <thead>
-                    <tr>
-                        <th>Penyetuju</th>
-                        <th>Jabatan</th>
-                        <th>Departement</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($acc as $a)
+    @if ($acc != null)
+        <div class="panel card-background-color">
+            <div class="panel-heading">
+                <h3>Status Acc</h3>
+            </div>
+            <div class="panel-body">
+                <table id="statusAcc" class="table table-bordered" style="background-color: white">
+                    <thead>
                         <tr>
-                            <td>{{ $a->uname }}</td>
-                            <td>{{ $a->jname }}</td>
-                            <td>{{ $a->dname }}</td>
-                            @if ($a->astatus == "Tolak")
-                            <td>{{ $a->astatus }}, Karena {{ $a->aketeranganTolak }}</td>
-                            @else
-                            <td>{{ $a->astatus }}</td>
-                            @endif
+                            <th>Penyetuju</th>
+                            <th>Jabatan</th>
+                            <th>Departement</th>
+                            <th>Status</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach ($acc as $a)
+                            <tr>
+                                <td>{{ $a->uname }}</td>
+                                <td>{{ $a->jname }}</td>
+                                <td>{{ $a->dname }}</td>
+                                @if ($a->astatus == 'Tolak')
+                                    <td>{{ $a->astatus }}, Karena {{ $a->aketeranganTolak }}</td>
+                                @else
+                                    <td>{{ $a->astatus }}</td>
+                                @endif
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-
+    @endif
     <div class="setAlign">
         <button type="button" class="btn btn-danger" id="btnClose" data-dismiss="modal">Tutup</button>
     </div>
