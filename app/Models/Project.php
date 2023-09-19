@@ -21,4 +21,19 @@ class Project extends Model
     {
         return $this->hasMany(Bon::class, "projects_id", "id");
     }
+
+    function reimburse()
+    {
+        return $this->hasMany(Reimburse::class, "projects_id", "id");
+    }
+
+    function detaillaporan()
+    {
+        return $this->hasMany(DetailLaporan::class, "projects_id", "id");
+    }
+
+    function detailreimburse()
+    {
+        return $this->hasMany(DetailReimburse::class, "projects_id", "id");
+    }
 }

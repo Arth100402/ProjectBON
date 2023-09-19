@@ -33,6 +33,33 @@ class User extends Authenticatable
         return $this->hasMany(Acc::class, "users_id", "id");
     }
 
+    function acclaporan()
+    {
+        return $this->hasMany(AccLaporan::class, "users_id", "id");
+    }
+
+    function accreimburse()
+    {
+        return $this->hasMany(AccReimburse::class, "users_id", "id");
+    }
+
+    function laporan()
+    {
+        return $this->hasMany(Laporan::class, "users_id", "id");
+    }
+
+    function detaillaporan()
+    {
+        return $this->hasMany(DetailLaporan::class, "users_id", "id");
+    }
+
+    function detailreimburse()
+    {
+        return $this->hasMany(DetailReimburse::class, "users_id", "id");
+    }
+
+
+
     /**
      * The attributes that are mass assignable.
      *

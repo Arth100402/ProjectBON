@@ -23,4 +23,9 @@ class Bon extends Model
     {
         return $this->hasMany(DetailBon::class, "bons_id", "id");
     }
+
+    function detaillaporan()
+    {
+        return $this->hasMany(DetailLaporan::class, "bons_id", "id");
+    }
 }
