@@ -70,10 +70,10 @@
         <!-- BEGIN TOP NAVIGATION BAR -->
         <div class="header-inner">
             <!-- BEGIN LOGO -->
-            <div class="page-logo">
-                <a href="/">
-                    <img src="{{ asset('assets/img/logPOG.jpg') }}" style="height:25px;width:auto; border-radius:2px;"
-                        alt="logo" />
+            <div class="page-logo" style="display: grid;place-items:start;align-items:center">
+                <a href="/" style="display: flex; align-content:center;height:30px;width:30px;">
+                    <img src="{{ asset('assets/img/logPOG.jpg') }}"
+                        style="height:30px;width:auto; border-radius:2px;margin:0px" alt="logo" />
                 </a>
             </div>
             <!-- END LOGO -->
