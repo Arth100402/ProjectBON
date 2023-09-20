@@ -182,6 +182,7 @@
                             <thead>
                                 <tr>
                                     <th>Nama</th>
+                                    <th>Jabatan</th>
                                     <th>Departemen</th>
                                     <th>Tanggal Pengajuan</th>
                                     <th>Total Biaya Perjalanan</th>
