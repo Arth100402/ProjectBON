@@ -364,7 +364,14 @@ class BonController extends Controller
                 $join->on("aju.id", "=", "b.users_id");
             })
             ->where([["u.jabatan_id", 3], ["u.departement_id", 8], ["a.status", "Terima"]])
-            ->get(['aju.uname', 'aju.dname', 'b.tglPengajuan', 'b.total', 'u.name as ACC', 'b.id']);
+            ->whereNotIn('a.bons_id', function ($subquery) {
+                $subquery->select('bons_id')
+                    ->from('accs')
+                    ->join('users', 'users.id', '=', 'accs.users_id')
+                    ->join('jabatans', 'jabatans.id', '=', 'users.jabatan_id')
+                    ->where('users.jabatan_id', '=', Auth::user()->jabatan_id);
+            })
+            ->get(['aju.uname', 'aju.dname', 'b.tglPengajuan', 'b.total', 'u.name as ACC', 'b.status', 'b.id']);
         return response()->json($data);
     }
     public function getDetailKasir(Request $request)
@@ -391,6 +398,21 @@ class BonController extends Controller
             'status' => 'oke',
             'msg' => view('detail', compact('detail', 'acc'))->render()
         ));
+    }
+
+    public function accKasir($id)
+    {
+        $data = new Acc();
+        $data->bons_id = $id;
+        $data->users_id = Auth::user()->id;
+        $data->status = 'Terima';
+        $data->save();
+
+        $bon = Bon::find($id);
+        $bon->status = "Terima";
+        $bon->save();
+
+        return redirect()->route('index')->with('status', 'Bon telah di terima');
     }
 
     public function test4()

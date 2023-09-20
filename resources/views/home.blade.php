@@ -1,7 +1,7 @@
 @extends('utama')
 
 @section('title')
-    Pengajuan Bon Sementara
+    Bon Sementara
 @endsection
 
 @section('isi')
@@ -26,23 +26,63 @@
     @if (session('status'))
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
+    {{-- Kasir --}}
     @if (Auth::user()->jabatan_id == 8)
-        <h3>Verifikasi Pencairan Bon: </h3>
-        <div class="table-responsive" style="overflow: scroll">
-            <table id="myTableCair" class="table table-striped table-bordered" style="table-layout: fixed">
-                <thead>
-                    <tr>
-                        <th>Nama Pengaju</th>
-                        <th>Departemen</th>
-                        <th>Tanggal Pengajuan</th>
-                        <th>Total Biaya Perjalanan</th>
-                        <th>Nama Finance Manager</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-            </table>
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-reorder"></i>Verifikasi Pencairan Bon
+                </div>
+                <div class="tools">
+                    <a href="javascript:;" class="collapse"></a>
+                </div>
+            </div>
+            <div class="portlet-body" style="display: block">
+                <div class="table-responsive" style="overflow: scroll">
+                    <table id="myTableCair" class="table table-striped table-bordered" style="table-layout: fixed">
+                        <thead>
+                            <tr>
+                                <th>Nama Pengaju</th>
+                                <th>Departemen</th>
+                                <th>Tanggal Pengajuan</th>
+                                <th>Total Biaya Perjalanan</th>
+                                <th>Nama Finance Manager</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
         </div>
-    @elseif (Auth::user()->jabatan_id = 3 && (Auth::user()->departement_id = 8))
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-reorder"></i>Riwayat Penerimaan dan Penolakan Saya
+                </div>
+                <div class="tools">
+                    <a href="javascript:;" class="collapse"></a>
+                </div>
+            </div>
+            <div class="portlet-body" style="display: block">
+                <div class="table-responsive" style="overflow: scroll">
+                    <table id="myTableAccDec" class="table table-striped table-bordered" style="table-layout: fixed">
+                        <thead>
+                            <tr>
+                                <th>Tanggal Pengajuan</th>
+                                <th>Nama Pengaju</th>
+                                <th>Nominal Yang Diajukan</th>
+                                <th>Status</th>
+                                <th>Keterangan</th>
+                                <th>Diterima/Ditolak Pada</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {{-- FM --}}
+    @elseif (Auth::user()->jabatan_id == 3 && Auth::user()->departement_id == 8)
         <div class="topdiv">
             <a href="{{ route('create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
         </div>
@@ -98,57 +138,86 @@
     @else
         <div class="topdiv">
             <a href="{{ route('create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
-        </div>
-        <h3>Pengajuan saya: </h3>
-        <div class="table-responsive" style="overflow: scroll">
-            <table id="myTableSelf" class="table table-striped table-bordered" style="table-layout: fixed">
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>Departemen</th>
-                        <th>Tanggal Pengajuan</th>
-                        <th>Total Biaya Perjalanan</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-            </table>
+        </div><br>
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-reorder"></i>Pengajuan saya
+                </div>
+                <div class="tools">
+                    <a href="javascript:;" class="collapse"></a>
+                </div>
+            </div>
+            <div class="portlet-body" style="display: block">
+                <div class="table-responsive" style="overflow: scroll">
+                    <table id="myTableSelf" class="table table-striped table-bordered" style="table-layout: fixed">
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Departemen</th>
+                                <th>Tanggal Pengajuan</th>
+                                <th>Total Biaya Perjalanan</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
         </div>
 
         @if (Auth::user()->jabatan_id != 1)
-            <div>
-                <h3>Terima Tolak Pengajuan</h3>
+            <div class="portlet">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-reorder"></i>Terima Tolak Pengajuan
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse"></a>
+                    </div>
+                </div>
+                <div class="portlet-body" style="display: block">
+                    <div class="table-responsive" style="overflow: scroll">
+                        <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Departemen</th>
+                                    <th>Tanggal Pengajuan</th>
+                                    <th>Total Biaya Perjalanan</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="table-responsive" style="overflow: scroll">
-                <table id="myTable" class="table table-striped table-bordered" style="table-layout: fixed">
-                    <thead>
-                        <tr>
-                            <th>Nama</th>
-                            <th>Departemen</th>
-                            <th>Tanggal Pengajuan</th>
-                            <th>Total Biaya Perjalanan</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-            <div>
-                <h3>Riwayat Penerimaan dan Penolakan Saya</h3>
-            </div>
-            <div class="table-responsive" style="overflow: scroll">
-                <table id="myTableAccDec" class="table table-striped table-bordered" style="table-layout: fixed">
-                    <thead>
-                        <tr>
-                            <th>Tanggal Pengajuan</th>
-                            <th>Nama Pengaju</th>
-                            <th>Nominal Yang Diajukan</th>
-                            <th>Status</th>
-                            <th>Keterangan</th>
-                            <th>Diterima/Ditolak Pada</th>
-                        </tr>
-                    </thead>
-                </table>
+            <div class="portlet">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-reorder"></i>Riwayat Penerimaan dan Penolakan Saya
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse"></a>
+                    </div>
+                </div>
+                <div class="portlet-body" style="display: block">
+                    <div class="table-responsive" style="overflow: scroll">
+                        <table id="myTableAccDec" class="table table-striped table-bordered" style="table-layout: fixed">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal Pengajuan</th>
+                                    <th>Nama Pengaju</th>
+                                    <th>Nominal Yang Diajukan</th>
+                                    <th>Status</th>
+                                    <th>Keterangan</th>
+                                    <th>Diterima/Ditolak Pada</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
             </div>
         @endif
     @endif
@@ -630,6 +699,11 @@
                         {
                             data: "ACC",
                             width: "10%"
+                        },
+                        {
+                            data: "status",
+                            defaultContent: "Menunggu",
+                            width: "5%"
                         },
                         {
                             data: null,

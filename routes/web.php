@@ -38,7 +38,6 @@ Route::middleware("auth")->group(function () {
     // Kasir
     Route::get("/kasirIndex", [BonController::class, "loadKasir"])->name("kasirIndex");
     Route::get('/accKasir/{id}', [BonController::class, 'accKasir'])->name('accKasir');
-    Route::post('/decKasir/{id}', [BonController::class, 'decKasir'])->name('decKasir');
     Route::post("/kasir/acc/detail", [BonController::class, 'getDetailKasir'])->name("detailKasir");
 
     // Setting Controller

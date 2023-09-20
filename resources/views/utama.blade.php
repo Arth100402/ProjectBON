@@ -36,7 +36,7 @@
     <link href="{{ asset('assets/css/style-responsive.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/plugins.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/pages/tasks.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/themes/default.css') }}" rel="stylesheet" type="text/css" id="style_color" />
+    <link href="{{ asset('assets/css/themes/red.css') }}" rel="stylesheet" type="text/css" id="style_color" />
     <link href="{{ asset('assets/css/custom.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('css/jquery.dataTables.css') }}" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap-switch.min.css') }}" />
@@ -245,7 +245,7 @@
                 </div>
                 <!-- END BEGIN STYLE CUSTOMIZER -->
                 <!-- BEGIN PAGE HEADER-->
-                <h3 class="page-title">
+                <h3 class="page-title all-content">
                     @yield('title')
                 </h3>
                 <br>
