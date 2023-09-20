@@ -32,6 +32,9 @@ Route::middleware("auth")->group(function () {
     Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
     Route::get('/HistoryAcc', [BonController::class, 'HistoryAcc'])->name('bon.HistoryAcc');
 
+    // FM
+    Route::get("/fmindex", [BonController::class, "fmIndex"])->name("fmindex");
+
     // Kasir
     Route::get("/kasirIndex", [BonController::class, "loadKasir"])->name("kasirIndex");
     Route::get('/accKasir/{id}', [BonController::class, 'accKasir'])->name('accKasir');
@@ -44,5 +47,5 @@ Route::middleware("auth")->group(function () {
     Route::post('/populateTable', [SettingController::class, 'populateTable'])->name("setting.populateTable");
     ROUTE::post("/changeCheck", [SettingController::class, 'checked'])->name("setting.checked");
 });
-// Route::get("/test", [BonController::class, "fmAcc"]);
+// Route::get("/test", [BonController::class, "fmIndex"]);
 // Route::get("/test", [BonController::class, "test4"]);

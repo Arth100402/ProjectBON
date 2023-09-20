@@ -296,18 +296,36 @@ class BonController extends Controller
         $bon->save();
         return redirect()->route('index')->with('status', 'Bon telah di tolak');
     }
-    public function fmAcc()
+    public function fmIndex()
     {
+        // $dataBons = DB::table('bons')
+        //     ->join('users', 'users.id', '=', 'bons.users_id')
+        //     ->join ('departements', 'departements.id', '=', 'users.departement_id')
+        //     ->join('accs', 'accs.bons_id', '=', 'bons.id')
+        //     ->join('users as uacc','uacc.id','=','accs.users_id')
+        //     ->get(['bons.id', 'bons.users_id as idAju', 'users.name as pengaju', 'users.jabatan_id', 'users.departement_id','departements.name as dname', 'bons.tglPengajuan', 'bons.total']);
         $bonsFMAccArray = [];
 
-        $dataBons = DB::table('bons')
-            ->join('users', 'users.id', '=', 'bons.users_id')
-            ->get(['bons.id as bid', 'bons.users_id as idAju', 'users.name as pengaju', 'users.jabatan_id', 'users.departement_id', 'bons.tglPengajuan', 'bons.total']);
+        $dataBons = DB::table('bons as b')
+            ->join('users as u', 'u.id', '=', 'b.users_id')
+            ->join('departements as d', 'u.departement_id', '=', 'd.id')
+            ->join('accs as a', 'a.bons_id', '=', 'b.id')
+            ->whereNotIn('b.id', function ($query) {
+                $query->select('a.bons_id')
+                    ->from('accs as a')
+                    ->join('bons as b', 'a.bons_id', '=', 'b.id')
+                    ->join('users as u', 'u.id', '=', 'a.users_id')
+                    ->where('u.jabatan_id', 3)
+                    ->where('u.departement_id', 8);
+            })
+            ->select('b.id', 'u.name as pengaju', 'd.name as dname', 'b.tglPengajuan', 'b.total', 'u.jabatan_id', 'u.departement_id')
+            ->distinct()
+            ->get();
         for ($i = 0; $i < count($dataBons); $i++) {
             $dataAcc = DB::table('accs as a')
                 ->join('users as uacc', 'uacc.id', '=', 'a.users_id')
                 ->where('a.status', 'Terima')
-                ->where('a.bons_id', $dataBons[$i]->bid)
+                ->where('a.bons_id', $dataBons[$i]->id)
                 ->count();
 
             $dataAccess = DB::table('acc_access as aa')
@@ -318,14 +336,16 @@ class BonController extends Controller
             $comparison_result = $dataAcc === $dataAccess ? 'true' : 'false';
             if ($dataAcc > 0 && $dataAccess > 0 && $comparison_result === 'true') {
                 $bonsAdd = [
-                    'bid' => $dataBons[$i]->bid,
+                    'id' => $dataBons[$i]->id,
                     'pengaju' => $dataBons[$i]->pengaju,
+                    'department' => $dataBons[$i]->dname,
                     'tglPengajuan' => $dataBons[$i]->tglPengajuan,
                     'total' => $dataBons[$i]->total
                 ];
                 array_push($bonsFMAccArray, $bonsAdd);
             }
         }
+        // $data = json_encode($bonsFMAccArray);
         return response()->json(["data" => $bonsFMAccArray]);
     }
     public function loadKasir()
