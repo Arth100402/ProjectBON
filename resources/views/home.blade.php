@@ -303,8 +303,11 @@
                     },
                 ],
                 columns: [{
-                        data: "name"
+                        data: "uname"
 
+                    },
+                    {
+                        data: "jname"
                     },
                     {
                         data: "dname",
