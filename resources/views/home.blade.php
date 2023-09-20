@@ -42,6 +42,59 @@
                 </thead>
             </table>
         </div>
+    @elseif (Auth::user()->jabatan_id = 3 && (Auth::user()->departement_id = 8))
+        <div class="topdiv">
+            <a href="{{ route('create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
+        </div>
+        <h3>Pengajuan saya: </h3>
+        <div class="table-responsive" style="overflow: scroll">
+            <table id="myTableSelf" class="table table-striped table-bordered" style="table-layout: fixed">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Departemen</th>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Total Biaya Perjalanan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div>
+            <h3>Terima Tolak Pengajuan</h3>
+        </div>
+        <div class="table-responsive" style="overflow: scroll">
+            <table id="myTablefm" class="table table-striped table-bordered" style="table-layout: fixed">
+                <thead>
+                    <tr>
+                        <th>Bons ID</th>
+                        <th>Nama Pengaju</th>
+                        <th>Departemen</th>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Total Biaya Diajukan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div>
+            <h3>Riwayat Penerimaan dan Penolakan Saya</h3>
+        </div>
+        <div class="table-responsive" style="overflow: scroll">
+            <table id="myTableAccDec" class="table table-striped table-bordered" style="table-layout: fixed">
+                <thead>
+                    <tr>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Nama Pengaju</th>
+                        <th>Nominal Yang Diajukan</th>
+                        <th>Status</th>
+                        <th>Keterangan</th>
+                        <th>Diterima/Ditolak Pada</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
     @else
         <div class="topdiv">
             <a href="{{ route('create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
@@ -398,6 +451,80 @@
                     },
                 ]
             });
+            var tablefm = $('#myTablefm').DataTable({
+                info: false,
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '445px',
+                order: [
+                    [5, 'asc']
+                ],
+                columnDefs: [{
+                        searchable: true,
+                        targets: [0, 1, 2, 3, 4, 5]
+                    },
+                    {
+                        className: "wrap",
+                        targets: [0, 1, 2, 3, 4, 5]
+                    },
+                ],
+                columns: [{
+                        data: "id",
+                        width: "10%"
+                    },
+                    {
+                        data: "pengaju",
+                        width: "10%"
+                    },
+                    {
+                        data: "department",
+                        width: "10%"
+                    },
+                    {
+                        data: "tglPengajuan",
+                        render: function(data, type, row) {
+                            if (data !== null) {
+                                var date = new Date(data);
+                                var options = {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                };
+                                return date.toLocaleDateString('id-ID', options);
+                            } else {
+                                return "Data tidak tersedia";
+                            }
+                        }
+
+                    },
+                    {
+                        data: "total",
+                        render: function(data, type, row) {
+                            if (data !== null) {
+                                return new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR'
+                                }).format(data);
+                            } else {
+                                return "Data tidak tersedia";
+                            }
+                        }
+                    },
+                    {
+                        data: null,
+                        render: (data, type, row, meta) => {
+                            return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
+                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
+                                <br>
+                                <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
+                                <br>
+                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
+                        },
+                        width: "5%"
+                    }
+                ]
+            });
             // End Table
 
             // Ajaxs
@@ -439,6 +566,20 @@
                 success: function(data) {
                     table3.clear().draw()
                     table3.rows.add(data["data"]).draw()
+                },
+                error: function(error) {
+                    console.log("Error: ");
+                    console.log(error);
+                }
+            });
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                async: false,
+                url: "{{ route('fmindex') }}",
+                success: function(data) {
+                    tablefm.clear().draw()
+                    tablefm.rows.add(data["data"]).draw()
                 },
                 error: function(error) {
                     console.log("Error: ");
