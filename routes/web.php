@@ -44,4 +44,4 @@ Route::middleware("auth")->group(function () {
     Route::post('/populateTable', [SettingController::class, 'populateTable'])->name("setting.populateTable");
     ROUTE::post("/changeCheck", [SettingController::class, 'checked'])->name("setting.checked");
 });
-Route::get("/test", [BonController::class, "test4"]);
+Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);

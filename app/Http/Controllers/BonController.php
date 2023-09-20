@@ -25,33 +25,67 @@ class BonController extends Controller
 
     public function jsonShowIndexAdmin()
     {
-        $data = DB::table('bons AS b')
+        $departementID = Auth::user()->departement_id;
+
+        $query = DB::table('bons AS b')
+            ->select(
+                DB::raw('(SELECT jabatans.name FROM jabatans INNER JOIN users ON users.jabatan_id = jabatans.id WHERE users.id = u.id) AS jname'),
+                'u.name AS uname',
+                'd.name AS dname',
+                'b.tglPengajuan',
+                'b.total',
+                'b.status',
+                'b.id'
+            )
             ->leftJoin('accs AS a', 'b.id', '=', 'a.bons_id')
             ->leftJoin('users AS u', 'u.id', '=', 'b.users_id')
-            ->leftJoin('departements AS d', 'd.id', '=', 'u.departement_id')
-            ->where(function ($query) {
-                $query->whereNotIn('b.id', function ($query) {
-                    $query->select('bons_id')->from('accs');
+            ->leftJoin('departements as d', 'd.id', '=', 'u.departement_id')
+            ->where(function ($query) use ($departementID) {
+                $query->whereNotIn('b.id', function ($subquery) {
+                    $subquery->select('bons_id')->from('accs');
                 })
-                    ->whereIn('b.users_id', function ($query) {
-                        $query->select('id')->from('users')->where('jabatan_id', (Auth::user()->jabatan_id - 1))->where('departement_id', (Auth::user()->departement_id));
+                    ->whereIn('b.users_id', function ($subquery) use ($departementID) {
+                        $subquery->select('id')
+                            ->from('users')
+                            ->where('users.jabatan_id', Auth::user()->jabatan_id - 1)
+                            ->where('users.departement_id', $departementID);
+                    })
+                    ->whereIn('b.users_id', function ($subquery) use ($departementID) {
+                        $subquery->select('users.id')
+                            ->from('users')
+                            ->join('acc_access', 'acc_access.departId', '=', 'users.departement_id')
+                            ->where('acc_access.departId', $departementID)
+                            ->where('acc_access.jabatanAcc', Auth::user()->jabatan_id)
+                            ->whereColumn('acc_access.jabatanPengaju', 'u.jabatan_id')
+                            ->where('acc_access.status', 'enable');
                     });
             })
-            ->orWhere(function ($query) {
+            ->orWhere(function ($query) use ($departementID) {
                 $query->where('a.status', 'Terima')
-                    ->whereIn('a.users_id', function ($query) {
-                        $query->select('id')->from('users')->where('jabatan_id', (Auth::user()->jabatan_id - 1))->where('departement_id', (Auth::user()->departement_id));
+                    ->whereIn('a.users_id', function ($subquery) use ($departementID) {
+                        $subquery->select('id')
+                            ->from('users')
+                            ->where('users.jabatan_id', Auth::user()->jabatan_id - 1)
+                            ->where('users.departement_id', $departementID);
                     })
-                    ->whereNotIn('b.id', function ($query) {
-                        $query->select('ac.bons_id')
+                    ->whereNotIn('b.id', function ($subquery) {
+                        $subquery->select('ac.bons_id')
                             ->from('accs AS ac')
                             ->join('users AS us', 'ac.users_id', '=', 'us.id')
-                            ->where('us.jabatan_id', (Auth::user()->jabatan_id));
+                            ->where('us.jabatan_id', Auth::user()->jabatan_id);
+                    })
+                    ->whereIn('b.users_id', function ($subquery) use ($departementID) {
+                        $subquery->select('users.id')
+                            ->from('users')
+                            ->join('acc_access', 'acc_access.departId', '=', 'users.departement_id')
+                            ->where('acc_access.departId', $departementID)
+                            ->where('acc_access.jabatanAcc', Auth::user()->jabatan_id)
+                            ->whereColumn('acc_access.jabatanPengaju', 'u.jabatan_id')
+                            ->where('acc_access.status', 'enable');
                     });
-            })->get([
-                'b.id', 'b.tglPengajuan', 'b.users_id', 'b.total', 'b.status',
-                'u.name as name', 'd.name as dname'
-            ]);
+            })
+            ->get();
+        $data = $query;
 
         return response()->json([
             'data' => $data
