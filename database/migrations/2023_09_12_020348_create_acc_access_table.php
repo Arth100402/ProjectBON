@@ -22,6 +22,7 @@ class CreateAccAccessTable extends Migration
             $table->unsignedBigInteger('idAcc');
             $table->foreign('idAcc')->references('id')->on('users')->onDelete('cascade');
             $table->integer('threshold');
+            $table->integer('level');
             $table->enum("status", ["enable", "disable"]);
             $table->timestamps();
         });
