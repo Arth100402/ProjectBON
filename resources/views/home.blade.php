@@ -354,9 +354,7 @@
                         render: (data, type, row, meta) => {
                             return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
-                                <br>
                                 <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
-                                <br>
                                 <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
                         },
                         width: "5%"
@@ -433,8 +431,7 @@
                         render: (data, type, row, meta) => {
                             return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
                                 <i class="fa fa-info-circle"></i>
-                                </a>
-                                <br>`;
+                                </a>`;
                         },
                         width: "5%"
                     }
@@ -585,9 +582,7 @@
                         render: (data, type, row, meta) => {
                             return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
-                                <br>
                                 <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
-                                <br>
                                 <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
                         },
                         width: "5%"
@@ -712,13 +707,10 @@
                         {
                             data: null,
                             render: (data, type, row, meta) => {
-                                return `
-                            <a class="btn btn-info" href="#modalEditB" data-toggle="modal" onclick="getDetailKasir(${data.id})">
+                                return `<a class="btn btn-info" href="#modalEditB" data-toggle="modal" onclick="getDetailKasir(${data.id})">
                                 <i class="fa fa-info-circle"></i>
                                 </a>
-                                <br>
-                                <a class="btn btn-success" href="/accKasir/${data.id}"><i class="fa fa-check-circle"></i></a><br>
-                                `
+                                <a class="btn btn-success" href="/accKasir/${data.id}"><i class="fa fa-check-circle"></i></a>`
                             },
                             width: "5%"
                         }

@@ -67,7 +67,9 @@
     </div>
     <div class="form-group">
         <label for="sales">Pilih Sales: </label>
-        <select class="form-control" name="sales" id="select-sales" required></select>
+        <select class="form-control" name="sales" id="select-sales" disabled>
+            <option value="{{ Auth::user()->id }}">{{ Auth::user()->name }}</option>
+        </select>
         @error('sales')
             <span class="text-danger">{{ $message }}</span>
         @enderror
@@ -112,7 +114,7 @@
     </div>
     <br>
     <button id="addDetail" class="btn btn-info btn-block">Tambahkan</button><br>
-    <form method="POST" action="{{ route('store') }}">
+    <form method="POST" action="{{ route('store') }}" enctype="multipart/form-data">
         @csrf
         <div class="table-responsive" style="overflow: scroll">
             <table id="myTable" class="table table-striped table-bordered">
@@ -142,6 +144,11 @@
             @error('debit')
                 <span class="text-danger">{{ $message }}</span>
             @enderror
+        </div>
+
+        <div class="form-group">
+            <label for="sadaw">Surat (Jika Ada):</label>
+            <input type="file" name="filenames[]" id="files" class="form-control" multiple>
         </div>
 
         <button type="submit" class="btn btn-success" id="submit" disabled>Ajukan</button>
@@ -181,27 +188,6 @@
             initDTP("#tglMulai", today)
             initDTP("#tglAkhir", today)
 
-            $("#select-sales").select2({
-                placeholder: 'Pilih Sales',
-                debug: true,
-                ajax: {
-                    url: '{{ route('loadSales') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    processResults: function(data) {
-
-                        return {
-                            results: $.map(data.data, function(item) {
-                                return {
-                                    text: item.name,
-                                    id: item.id
-                                }
-                            })
-                        };
-                    },
-                    cache: true
-                }
-            });
             $("#select-ppc").select2({
                 placeholder: 'Pilih PPC',
                 ajax: {
