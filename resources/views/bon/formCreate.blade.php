@@ -76,7 +76,7 @@
     </div>
     <div class="form-group">
         <label for="ppc">Pilih PPC: </label>
-        <select class="form-control" name="ppc" id="select-ppc" required></select>
+        <select class="form-control" name="ppc" id="select-ppc"></select>
         @error('ppc')
             <span class="text-danger">{{ $message }}</span>
         @enderror
@@ -84,7 +84,7 @@
     <div class="form-group">
         <label for="asalKota">No Paket/SO/SQ:</label><br>
         <input type="text" name="nopaket" id="nopaket" class="form-control" placeholder="Masukkan No Paket"
-            required></select>
+            disabled></select>
         @error('nopaket')
             <span class="text-danger">{{ $message }}</span>
         @enderror
@@ -139,7 +139,7 @@
 
         <div class="form-group">
             <label for="saldo">Total Biaya Perjalanan: </label>
-            <input type="number" value="0" name="biayaPerjalanan" class="form-control" id="biayaPerjalanan"
+            <input type="number" min="0" value="0" name="biayaPerjalanan" class="form-control" id="biayaPerjalanan"
                 readonly>
             @error('debit')
                 <span class="text-danger">{{ $message }}</span>
@@ -189,7 +189,8 @@
             initDTP("#tglAkhir", today)
 
             $("#select-ppc").select2({
-                placeholder: 'Pilih PPC',
+                placeholder: 'Tidak ada ID Opti',
+                allowClear: true,
                 ajax: {
                     url: '{{ route('loadPPC') }}',
                     dataType: 'json',
@@ -199,14 +200,20 @@
                             results: $.map(data.data, function(item) {
                                 return {
                                     text: item.namaOpti,
-                                    id: item.id
+                                    id: item.id,
+                                    noPaket: item.noPaket
                                 }
                             })
                         };
                     },
                     cache: true
                 }
-            })
+            }).on("change", function(e) {
+                var selectedData = $(this).select2('data');
+                $('#nopaket').val(selectedData[0].noPaket);
+            }).on('select2:unselect', function(e) {
+                $('#nopaket').val('');
+            });
 
             $("#addDetail").on("click", function(e) {
                 // Validation
@@ -220,7 +227,7 @@
                     alert("Terdapat bagian yang belum terisi!")
                     return
                 }
-                // Add to Table 
+                // Add to Table
                 $("#submit").attr("disabled", false);
                 var rows = `
                     <tr>

@@ -203,8 +203,7 @@ class BonController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'filenames' => 'required',
-            'filenames.*' => 'required|mimes:doc,pdf,docx,xlx,csv|max:2048',
+            'filenames.*' => 'mimes:doc,pdf,docx,xlx,csv|max:2048',
         ]);
 
         $filenames = null;
@@ -235,7 +234,7 @@ class BonController extends Controller
                 "asalKota" => $request->get("asalKota")[$key],
                 "tujuan" => $request->get("tujuan")[$key],
                 "users_id" => $request->get("select-sales")[$key],
-                "projects_id" => $value,
+                "projects_id" => ($value === 'null') ? null : $value,
                 "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : "tesst",
                 "agenda" => $request->get("agenda")[$key],
                 "penggunaan" => $request->get("keterangan")[$key],
@@ -292,7 +291,7 @@ class BonController extends Controller
 
     public function  loadPPC(Request $request)
     {
-        $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti"]);
+        $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti", "noPaket"]);
         return response()->json(["data" => $data]);
     }
 
