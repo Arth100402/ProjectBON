@@ -42,11 +42,11 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-md-3">Jabatans: </label>
+                <label class="control-label col-md-3">Karyawan: </label>
                 <div class="col-md-4">
-                    <select class="form-control input-xlarge" id="select-jabatan" disabled></select>
+                    <select class="form-control input-xlarge" id="select-karyawan" disabled></select>
                     <span class="help-block">
-                        Pilih Jabatan! </span>
+                        Pilih Karyawan! </span>
                 </div>
             </div>
             <div class="form-group">
@@ -54,8 +54,8 @@
                 <div class="col-md-4"></div>
             </div>
             <div class="form-group">
-                <div class="col-md-4">
-                    <table id="myTable" class="table table-striped table-bordered"></table>
+                <div class="col-md-12">
+                    <table id="myTable" class="table table-bordered table-striped table-condensed flip-content"></table>
                 </div>
             </div>
         </div>
@@ -67,54 +67,70 @@
         $(document).ready(function() {
             // Event Listener
             $("#select-department").on("change", function() {
-                $("#select-jabatan").attr("disabled", false);
-                $("#select-jabatan").empty()
+                $("#select-karyawan").attr("disabled", false);
+                $("#select-karyawan").empty()
                 $("#myTable").html("");
             });
-
-            $("#select-jabatan").on("change", function() {
-                const table = $("#myTable");
-                const jabatanID = $(this).val();
-                let header = `<thead><tr>`
-                let body = `<tbody><tr>`
+            $("#myTable").on("change", ".threshold-input", function() {
+                const thres = $(this).val();
+                const idAcc = $(this).siblings("div").find(".select-acc");
+                const level = parseInt($(idAcc).attr("id").split('-')[1])
+                const karyawanID = $("#select-karyawan").val();
+                const departID = $("#select-department").val();
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('setting.populateTable') }}",
+                    url: "{{ route('setting.thr') }}",
                     data: {
                         "_token": "{{ csrf_token() }}",
-                        "idDepart": $("#select-department").val(),
-                        "idJabatan": jabatanID
+                        "idAcc": idAcc.val(),
+                        "thres": thres,
+                        "level": level,
+                        "idPart": departID,
+                        "idKar": karyawanID
                     },
                     success: function(response) {
-                        const jabatans = response.jabatans
-                        const status = response.status
-
-                        parent:
-                            for (const iterator of jabatans) {
-                                if (iterator.id <= jabatanID) continue;
-                                header +=
-                                    `
-                            <th>${iterator.name}</th>
-                            `
-                                for (const row of status) {
-                                    if (row.jabatanAcc == iterator.id && row.status ==
-                                        "enable") {
-                                        body += `
-                                        <td><input id="switch-${iterator.id}" type="checkbox" class="make-switch" checked data-on-color="primary" data-off-color="info" data-value="${jabatanID}-${iterator.id}"></td>    
-                                    `
-                                        temp = true
-                                        continue parent;
-                                    }
-                                }
-                                body += `
-                                <td><input id="switch-${iterator.id}" type="checkbox" class="make-switch" data-on-color="primary" data-off-color="info" data-value="${jabatanID}-${iterator.id}"></td>    
-                            `
-                            }
-                        header += `</tr></thead>`
-                        body += `</tr></tbody>`
-                        table.html(header + body);
-                        $(".make-switch").bootstrapSwitch();
-                        reDisable()
+                        console.log(response);
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            });
+            $("#myTable").on("change", ".select-acc", function() {
+                const idAcc = $(this).val();
+                const thres = $(this).parent().siblings(".threshold-input");
+                const level = parseInt($(this).attr("id").split('-')[1])
+                const karyawanID = $("#select-karyawan").val();
+                const departID = $("#select-department").val();
+                const st = ($(this).is(":has(option:selected[value!=''])") ? "true" : "false")
+                const ch = $(this);
+                thres.attr("disabled", idAcc ? false : true)
+                if (!idAcc) thres.val("0")
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('setting.changeAcc') }}",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "idAcc": idAcc,
+                        "thres": thres.val(),
+                        "level": level,
+                        "idPart": departID,
+                        "idKar": karyawanID
+                    },
+                    success: function(response) {
+                        reDisable();
+                        const id = $(ch).attr("id").split('-')
+                        if (st == "true" && !$("#level-" + (parseInt(id[1]) + 1)).is(
+                                ":has(option:selected)")) {
+                            $("#level-" + (parseInt(id[1]) + 1)).attr("disabled",
+                                false);
+                        }
+                        if (st == "false" && $("#level-" + (parseInt(id[1]) - 1)).attr(
+                                "disabled")) {
+                            console.log($("#level-" + (parseInt(id[1]) - 1)));
+                            $("#level-" + (parseInt(id[1]) - 1)).attr("disabled",
+                                false);
+                        }
                     },
                     error: function(err) {
                         console.log(err);
@@ -122,47 +138,86 @@
                 });
             });
 
-            $("#myTable").on("switchChange.bootstrapSwitch", ".make-switch", function(e) {
-                const ch = $(this);
-                const d = $("#select-department").val()
-                const [aj, ac] = $(this).attr("data-value").split("-")
-                const st = ($(this).is(":checked") ? "true" : "false")
+            $("#select-karyawan").on("change", function() {
+                const table = $("#myTable");
+                const karyawanID = $(this).val();
+                const departID = $("#select-department").val();
+                let header = `<thead><tr>`
+                let body = `<tbody><tr>`
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('setting.checked') }}",
+                    url: "{{ route('setting.populateTable') }}",
                     data: {
                         "_token": "{{ csrf_token() }}",
-                        "depart": d,
-                        "aju": aj,
-                        "acc": ac,
-                        "stat": st
+                        "idKar": karyawanID,
+                        "idPart": departID
                     },
                     success: function(response) {
-                        reDisable();
-                        const id = $(ch).attr("id").split('-')
-                        if (st == "true" && !$("#switch-" + (parseInt(id[1]) + 1)).is(
-                                ":checked")) {
-                            $("#switch-" + (parseInt(id[1]) + 1)).bootstrapSwitch("disabled",
-                                false);
+                        const status = response.status
+                        for (let level = 1; level <= 5; level++) {
+                            header +=
+                                `<th scope="col">Level ${level}</th>`
+                            body += `
+                                    <td>
+                                        <div>
+                                        <select class="form-control select-acc" id="level-${level}" style="100%">
+                                            ${status[level-1]?`<option value="${status[level-1].idAcc}" selected="selected">${status[level-1].name}</option>`:``}
+                                        </select></div>
+                                        <label>Threshold: </label>
+                                        <input type="number" class="form-control threshold-input" min="0" step="any" value="${status[level-1] ? status[level-1].threshold:0}" ${!status[level-1]?"disabled":""}>
+                                    </td>`
                         }
-                        if (st == "false" && $("#switch-" + (parseInt(id[1]) - 1)).attr(
-                                "disabled")) {
-                            console.log($("#switch-" + (parseInt(id[1]) - 1)));
-                            $("#switch-" + (parseInt(id[1]) - 1)).bootstrapSwitch("disabled",
-                                false);
-                        }
+                        header += `</tr></thead>`
+                        body += `</tr></tbody>`
+                        table.html(header + body);
+                        reDisable()
+                        $('.select-acc').select2({
+                            placeholder: '-- Pilih Atasan  --',
+                            allowClear: true,
+                            width: "element",
+                            cache: true,
+                            ajax: {
+                                url: '{{ route('setting.loadKaryawan') }}',
+                                dataType: 'json',
+                                delay: 250,
+                                data: function(q) {
+                                    return {
+                                        q: q.term,
+                                        idDepart: $("#select-department").val()
+                                    }
+                                },
+                                processResults: function(data) {
+                                    return {
+                                        results: $.map(data, function(item) {
+                                            return {
+                                                text: item.name,
+                                                id: item.id
+                                            }
+                                        })
+                                    };
+                                },
+                            }
+                        });
+                    },
+                    error: function(err) {
+                        console.log(err);
                     }
                 });
-
             });
 
             // Initialize
-            $('#select-jabatan').select2({
-                placeholder: '-- Pilih Jabatan  --',
+            $('#select-karyawan').select2({
+                placeholder: '-- Pilih Karyawan  --',
                 ajax: {
-                    url: '{{ route('setting.loadJabatan') }}',
+                    url: '{{ route('setting.loadKaryawan') }}',
                     dataType: 'json',
                     delay: 250,
+                    data: function(q) {
+                        return {
+                            q: q.term,
+                            idDepart: $("#select-department").val()
+                        }
+                    },
                     processResults: function(data) {
                         return {
                             results: $.map(data, function(item) {
@@ -178,13 +233,15 @@
             });
             $("#setting").addClass("active");
             $("#hierarchy").addClass("active");
-
             const reDisable = () => {
-                for (const el of $(".make-switch:not(:checked)").slice(1)) {
-                    $(el).bootstrapSwitch("disabled", true);
+                for (const el of $(".select-acc:not(:has(option:selected[value!='']))").slice(1)) {
+                    $(el).attr("disabled", true);
                 }
-                for (const el of $(".make-switch:checked").slice(0, $(".make-switch:checked").length - 1)) {
-                    $(el).bootstrapSwitch("disabled", true);
+                for (const el of $(".select-acc:has(option:selected)").slice(0, $(
+                            ".select-acc:has(option:selected)")
+                        .length -
+                        1)) {
+                    $(el).attr("disabled", true);
                 }
             }
         });

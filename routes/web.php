@@ -42,10 +42,12 @@ Route::middleware("auth")->group(function () {
 
     // Setting Controller
     Route::get("/hierarchy", [SettingController::class, "index"])->name('setting.index');
-    Route::get('/loadHierarchyJabatan', [SettingController::class, "loadJabatan"])->name('setting.loadJabatan');
+    Route::get('/loadHierarchyKaryawan', [SettingController::class, "loadKaryawan"])->name('setting.loadKaryawan');
     Route::post('/populateTable', [SettingController::class, 'populateTable'])->name("setting.populateTable");
     ROUTE::post("/changeCheck", [SettingController::class, 'checked'])->name("setting.checked");
+    ROUTE::post("/changeAcc", [SettingController::class, 'updateAcc'])->name("setting.changeAcc");
+    ROUTE::post("/upadteThres", [SettingController::class, 'updateThr'])->name("setting.thr");
 });
-Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
+Route::get("/test", [SettingController::class, "test"]);
 // Route::get("/test", [BonController::class, "fmIndex"]);
 // Route::get("/test", [BonController::class, "test4"]);
