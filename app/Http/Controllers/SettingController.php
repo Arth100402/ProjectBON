@@ -77,11 +77,5 @@ class SettingController extends Controller
 
     public function test()
     {
-        $access = DB::table('acc_access AS aa')
-            ->join("users AS u", "u.id", "aa.idAcc")
-            ->where([["idPengaju", 4], ["departId", 4]])
-            ->orderBy("level")
-            ->get(["aa.idAcc", "aa.threshold", "u.name"]);
-        dd($access);
     }
 }
