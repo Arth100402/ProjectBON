@@ -202,12 +202,29 @@ class BonController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'filenames.*' => 'mimes:doc,pdf,docx,xlx,csv|max:2048',
+        ]);
+
+        $filenames = null;
+        $filenamed = "";
+        if ($request->hasFile('filenames')) {
+            foreach ($request->file('filenames') as $key => $file) {
+                $fileExt = $file->getClientOriginalExtension();
+                $date = now()->format('YmdHis');
+                $temp = $date . "surat" . $key . "." . $fileExt;
+                $file->storeAs('files', $temp, 'public');
+                $filenamed .= $temp . ",";
+            }
+            $filenames = rtrim($filenamed, ",");
+        }
         $user = User::find(Auth::user()->id);
         $bon = DB::table('bons')->insertGetId([
             "tglPengajuan" => now(),
             "users_id" => $user->id,
             "total" => $request->get("biayaPerjalanan"),
-            "status" => null
+            "status" => null,
+            "file" => $filenames
         ]);
         foreach ($request->get("select-ppc") as $key => $value) {
             DB::table('detailbons')->insert([
@@ -217,7 +234,7 @@ class BonController extends Controller
                 "asalKota" => $request->get("asalKota")[$key],
                 "tujuan" => $request->get("tujuan")[$key],
                 "users_id" => $request->get("select-sales")[$key],
-                "projects_id" => $value,
+                "projects_id" => ($value === 'null') ? null : $value,
                 "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : "tesst",
                 "agenda" => $request->get("agenda")[$key],
                 "penggunaan" => $request->get("keterangan")[$key],
@@ -272,18 +289,9 @@ class BonController extends Controller
         //
     }
 
-    public function loadSales(Request $request)
-    {
-        $data = User::join("departements AS d", "d.id", "users.departement_id")
-            ->where("d.id", "5")
-            ->where("users.name", "LIKE", "%$request->q%")
-            ->get(["users.name", "users.id"]);
-        return response()->json(["data" => $data]);
-    }
-
     public function  loadPPC(Request $request)
     {
-        $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti"]);
+        $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti", "noPaket"]);
         return response()->json(["data" => $data]);
     }
 

@@ -21,7 +21,7 @@ class CreateDetailbonsTable extends Migration
             $table->date("tglAkhir");
             $table->string("asalKota");
             $table->string("tujuan");
-            $table->unsignedBigInteger('projects_id');
+            $table->unsignedBigInteger('projects_id')->nullable();
             $table->foreign('projects_id')->references('id')->on('projects')->onDelete('cascade');
             $table->unsignedBigInteger('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
