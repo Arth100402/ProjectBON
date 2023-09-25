@@ -44,6 +44,7 @@ class CreateProjectsTable extends Migration
             $table->bigInteger('profitSingle')->nullable();
             $table->integer('statusRegisterPortal')->nullable();
             $table->date('deadline');
+            $table->string('noPaket');
             $table->timestamps();
             $table->softDeletes();
         });

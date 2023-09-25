@@ -45,7 +45,8 @@ class ProjectSeeder extends Seeder
                     "profitDouble" => rand(1, 50) * 100000,
                     "profitSingle" => rand(1, 50) * 100000,
                     "statusRegisterPortal" => 1,
-                    "deadline" => date('Y-m-d', strtotime('+5 days'))
+                    "deadline" => date('Y-m-d', strtotime('+5 days')),
+                    "noPaket" => "1604-".($i)."SBY"
                 ]
             ]);
         }
