@@ -20,9 +20,9 @@ class UserSeeder extends Seeder
                 "name" => "Super POG",
                 "email" => "super@gmail.com",
                 "password" => Hash::make("super"),
-                "jabatan_id" => 4,
+                "jabatan_id" => 7,
                 "username" => "super",
-                "departement_id" => 4
+                "departement_id" => 1
             ]
         ]);
         DB::table('users')->insert([

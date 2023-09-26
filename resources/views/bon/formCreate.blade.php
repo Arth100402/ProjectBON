@@ -139,8 +139,8 @@
 
         <div class="form-group">
             <label for="saldo">Total Biaya Perjalanan: </label>
-            <input type="number" min="0" value="0" name="biayaPerjalanan" class="form-control" id="biayaPerjalanan"
-                readonly>
+            <input type="number" min="0" value="0" name="biayaPerjalanan" class="form-control"
+                id="biayaPerjalanan" readonly>
             @error('debit')
                 <span class="text-danger">{{ $message }}</span>
             @enderror
@@ -149,6 +149,7 @@
         <div class="form-group">
             <label for="sadaw">Surat (Jika Ada):</label>
             <input type="file" name="filenames[]" id="files" class="form-control" multiple>
+            <small>Types: .doc, .docx, .pdf, .xlx, .csv</small>
         </div>
 
         <button type="submit" class="btn btn-success" id="submit" disabled>Ajukan</button>
