@@ -249,12 +249,11 @@ class BonController extends Controller
                 ["idPengaju", Auth::user()->id]
             ])->get();
         for ($i = 0; $i < count($datas); $i++) {
-            DB::table("accs")
-                ->insert([
-                    "bons_id" => $bon,
-                    "users_id" => $datas[$i]->idAcc,
-                    "status" => "Diproses",
-                ]);
+            $newBon = new Acc;
+            $newBon->bons_id = $bon;
+            $newBon->users_id = $datas[$i]->idAcc;
+            $newBon->status = "Diproses";
+            $newBon->save();
             if ($request->get("biayaPerjalanan") < $datas[$i]->threshold) break;
         }
         return redirect(route('index'));
