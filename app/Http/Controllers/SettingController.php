@@ -27,6 +27,25 @@ class SettingController extends Controller
             ->get();
         return response()->json($data);
     }
+    public function loadAcc(Request $request)
+    {
+        $data = User::where([
+            ["users.name", "LIKE", "%$request->q%"],
+            ["users.jabatan_id", "!=", 7],
+            ["users.jabatan_id", "!=", 8],
+            ["users.departement_id", $request->get("idDepart")]
+        ])
+            ->whereNotIn("id", function ($query) use ($request) {
+                $query->select("idAcc")
+                    ->from("acc_access")
+                    ->where([
+                        ["departId", $request->get("idDepart")],
+                        ["idPengaju", $request->get("idKar")]
+                    ]);
+            })
+            ->get();
+        return response()->json($data);
+    }
     public function populateTable(Request $request)
     {
         $access = DB::table('acc_access AS aa')
@@ -77,5 +96,21 @@ class SettingController extends Controller
 
     public function test()
     {
+        $data = User::where([
+            ["users.name", "LIKE", "%%"],
+            ["users.jabatan_id", "!=", 7],
+            ["users.jabatan_id", "!=", 8],
+            ["users.departement_id", 4]
+        ])
+            ->whereNotIn("id", function ($query) {
+                $query->select("idAcc")
+                    ->from("acc_access")
+                    ->where([
+                        ["departId", 4],
+                        ["idPengaju", 4]
+                    ]);
+            })
+            ->get();
+        dd($data);
     }
 }

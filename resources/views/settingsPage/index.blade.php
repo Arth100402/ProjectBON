@@ -177,13 +177,14 @@
                             width: "element",
                             cache: true,
                             ajax: {
-                                url: '{{ route('setting.loadKaryawan') }}',
+                                url: '{{ route('setting.loadAcc') }}',
                                 dataType: 'json',
                                 delay: 250,
                                 data: function(q) {
                                     return {
                                         q: q.term,
-                                        idDepart: $("#select-department").val()
+                                        idDepart: $("#select-department").val(),
+                                        idKar: $("#select-karyawan").val()
                                     }
                                 },
                                 processResults: function(data) {
