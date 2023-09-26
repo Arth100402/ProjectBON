@@ -71,6 +71,26 @@ class BonController extends Controller
                 'users.name',
                 'departements.name as dname'
             ]);
+        $acc = DB::table('accs')
+            ->join('bons', 'bons.id', '=', 'accs.bons_id')
+            ->join('users as acc', 'acc.id', '=', 'accs.users_id')
+            ->join('users as aju', 'aju.id', '=', 'bons.users_id')
+            ->where('bons.users_id', '=', Auth::user()->id)
+            ->select('accs.bons_id', 'acc.name as acc_name', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
+            ->get();
+        $x = [];
+        foreach ($acc as $item) {
+            if ($item->status != 'Diproses') {
+                array_push($x, $item->bons_id);
+            }
+        }
+        foreach ($data as $item) {
+            $item->editable = true;
+            if (in_array($item->id, $x)) {
+                $item->editable = false;
+            }
+        }
+        // dd($data);
         return response()->json([
             'data' => $data
         ]);
@@ -133,6 +153,7 @@ class BonController extends Controller
             ->join('users as acc', 'acc.id', '=', 'accs.users_id')
             ->join('users as aju', 'aju.id', '=', 'bons.users_id')
             ->where('bons.users_id', '=', Auth::user()->id)
+            ->where('bons.id', '=', $id)
             ->select('acc.name as acc_name', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
             ->get();
         $pdf = null;
@@ -235,7 +256,7 @@ class BonController extends Controller
      */
     public function edit($id)
     {
-        //
+        return view('bon.edit');
     }
 
     /**
