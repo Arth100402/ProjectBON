@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
+use function Ramsey\Uuid\v1;
+
 class BonController extends Controller
 {
     /**
@@ -199,6 +201,19 @@ class BonController extends Controller
                 "penggunaan" => $request->get("keterangan")[$key],
                 "biaya" => $request->get("biaya")[$key],
             ]);
+        }
+        $datas = DB::table("acc_access")
+            ->where([
+                ["departId", Auth::user()->departement_id],
+                ["idPengaju", Auth::user()->id]
+            ])->get();
+        for ($i = 0; $i < count($datas); $i++) {
+            $newBon = new Acc;
+            $newBon->bons_id = $bon;
+            $newBon->users_id = $datas[$i]->idAcc;
+            $newBon->status = "Diproses";
+            $newBon->save();
+            if ($request->get("biayaPerjalanan") < $datas[$i]->threshold) break;
         }
         return redirect(route('index'));
     }
@@ -418,6 +433,19 @@ class BonController extends Controller
 
     public function test4()
     {
-        dd(User::with("department")->where("id", 1)->get());
+        // $filtered = [];
+        // $thres = 5001;
+        // $datas = DB::table("acc_access")
+        //     ->where([
+        //         ["departId", 4], 
+        //         ["idPengaju", 4]
+        //     ])->get();
+        // for ($i = 0; $i < count($datas); $i++) {
+        //     DB::table("accs")
+        //         ->insert([
+        //             "bons_id"
+        //         ]);
+        //     if ($thres < $datas[$i]->threshold) break;
+        // }
     }
 }
