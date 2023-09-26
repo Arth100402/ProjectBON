@@ -160,26 +160,13 @@ class BonController extends Controller
                 'a.status as status',
                 'a.keteranganTolak as keteranganTolak'
             );
-
-        $acc = DB::table('acc_access AS acc')
-            ->join('jabatans AS jab', 'jab.id', '=', 'acc.jabatanAcc')
-            ->join('departements AS dep', 'acc.departId', '=', 'dep.id')
-            ->leftJoinSub($subquery, 'sq1', function ($join) {
-                $join->on('sq1.jabatan_id', '=', 'acc.jabatanAcc');
-            })
-            ->where('acc.departId', '=', Auth::user()->departement_id)
-            ->where('acc.jabatanPengaju', '=', Auth::user()->jabatan_id)
-            ->where('acc.status', 'enable')
-            ->select(
-                'sq1.bons_id AS sq_bons_id',
-                'sq1.uname AS uname',
-                'jab.name AS jname',
-                'dep.name AS dname',
-                'sq1.status AS astatus',
-                'sq1.keteranganTolak AS aketeranganTolak'
-            )
+            $acc = DB::table('accs')
+            ->join('bons','bons.id','=','accs.bons_id')
+            ->join('users as acc','acc.id','=','accs.users_id')
+            ->join('users as aju','aju.id','=','bons.users_id')
+            ->where('bons.users_id','=',Auth::user()->id)
+            ->select('acc.name as acc_name','accs.status','accs.keteranganTolak','accs.updated_at')
             ->get();
-
         return response()->json(array(
             'status' => 'oke',
             'msg' => view('detail', compact('detail', 'acc'))->render()
@@ -479,7 +466,7 @@ class BonController extends Controller
         // $thres = 5001;
         // $datas = DB::table("acc_access")
         //     ->where([
-        //         ["departId", 4], 
+        //         ["departId", 4],
         //         ["idPengaju", 4]
         //     ])->get();
         // for ($i = 0; $i < count($datas); $i++) {

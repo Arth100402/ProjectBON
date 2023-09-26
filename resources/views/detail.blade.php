@@ -45,21 +45,18 @@
                     <thead>
                         <tr>
                             <th>Penyetuju</th>
-                            <th>Jabatan</th>
-                            <th>Departement</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($acc as $a)
                             <tr>
-                                <td>{{ $a->uname }}</td>
-                                <td>{{ $a->jname }}</td>
-                                <td>{{ $a->dname }}</td>
-                                @if ($a->astatus == 'Tolak')
-                                    <td>{{ $a->astatus }}, Karena {{ $a->aketeranganTolak }}</td>
+                                <td>{{ $a->acc_name }}</td>
+                                @if ($a->status == 'Tolak')
+                                    <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
+
                                 @else
-                                    <td>{{ $a->astatus }}</td>
+                                    <td>{{ $a->status }}</td>
                                 @endif
                             </tr>
                         @endforeach
