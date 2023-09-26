@@ -419,9 +419,14 @@
                     {
                         data: null,
                         render: (data, type, row, meta) => {
-                            return `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
+                            let result = `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
                                 <i class="fa fa-info-circle"></i>
-                                </a>`;
+                                </a>`
+                            if (type === 'display' && data.editable==true) {
+                                result +=
+                                    `<a class="btn btn-success" href="edit/${data.id}"><i class="fa fa-check-circle"></i></a>`;
+                            }
+                            return result;
                         },
                         width: "5%"
                     }
