@@ -54,7 +54,6 @@
                                 <td>{{ $a->acc_name }}</td>
                                 @if ($a->status == 'Tolak')
                                     <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
-
                                 @else
                                     <td>{{ $a->status }}</td>
                                 @endif
@@ -64,6 +63,9 @@
                 </table>
             </div>
         </div>
+    @endif
+    @if ($pdf != null)
+        <embed src="{{ asset('files/' . $pdf['filename']) }}" type="application/pdf" width="100%" height="600px" />
     @endif
     <div class="setAlign">
         <button type="button" class="btn btn-danger" id="btnClose" data-dismiss="modal">Tutup</button>

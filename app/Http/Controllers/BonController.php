@@ -6,6 +6,7 @@ use App\Models\Acc;
 use App\Models\Bon;
 use App\Models\Project;
 use App\Models\User;
+use Barryvdh\DomPDF\PDF;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,20 +28,28 @@ class BonController extends Controller
 
     public function jsonShowIndexAdmin()
     {
-        $query = DB::table('bons AS b')
-            ->select('b.id', 'u.name', 'b.tglPengajuan', 'b.total', 'b.status')
-            ->join('users AS u', 'b.users_id', '=', 'u.id')
-            ->join('accs AS a', 'b.id', '=', 'a.bons_id')
-            ->where('a.users_id', 6)
-            ->where('a.status', 'Diproses')
-            ->whereExists(function ($query) {
-                $query->select('a1.id')
-                    ->from('accs AS a1')
-                    ->where('a1.level', function ($query) {
-                        $query->select('a2.level')
-                            ->from('accs AS a2')
-                            ->whereColumn('a2.level', DB::raw('a.level - 1'))
-                            ->where('a2.status', 'Terima');
+
+        $query = DB::table('bons')
+            ->select('bons.id', 'users.name', 'bons.tglPengajuan', 'bons.total', 'a.status')
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->join('accs as a', 'bons.id', '=', 'a.bons_id')
+            ->where(function ($query) {
+                $query->where('a.users_id', Auth::user()->id)
+                    ->where('a.status', 'Diproses')
+                    ->whereExists(function ($query) {
+                        $query->select('id')
+                            ->from('accs as a1')
+                            ->whereColumn('a1.level', DB::raw('a.level - 1'))
+                            ->where('a1.status', 'Terima');
+                    });
+            })
+            ->orWhere(function ($query) {
+                $query->where('a.users_id', Auth::user()->id)
+                    ->where('a.status', 'Diproses')
+                    ->whereExists(function ($query) {
+                        $query->select('id')
+                            ->from('accs as a1')
+                            ->where('a1.level', 1);
                     });
             });
 
@@ -82,9 +91,11 @@ class BonController extends Controller
                 'projects.idOpti'
             ]);
         $acc = null;
+        $file = Bon::find($id);
+        $pdf = ['filename' => $file->file];
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc'))->render()
+            'msg' => view('detail', compact('detail', 'acc','pdf'))->render()
         ));
     }
     public function getDetailSelf(Request $request)
@@ -124,9 +135,10 @@ class BonController extends Controller
             ->where('bons.users_id', '=', Auth::user()->id)
             ->select('acc.name as acc_name', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
             ->get();
+        $pdf = null;
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc'))->render()
+            'msg' => view('detail', compact('detail', 'acc','pdf'))->render()
         ));
     }
 
@@ -149,8 +161,7 @@ class BonController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'filenames' => 'required',
-            'filenames.*' => 'required|mimes:pdf|max:10240',
+            'filenames.*' => 'mimes:pdf|max:10240',
         ]);
 
         $filenames = null;
@@ -198,6 +209,7 @@ class BonController extends Controller
             $newBon->bons_id = $bon;
             $newBon->users_id = $datas[$i]->idAcc;
             $newBon->status = "Diproses";
+            $newBon->level=$datas[$i]->level;
             $newBon->save();
             if ($request->get("biayaPerjalanan") < $datas[$i]->threshold) break;
         }
@@ -420,19 +432,6 @@ class BonController extends Controller
 
     public function test4()
     {
-        // $filtered = [];
-        // $thres = 5001;
-        // $datas = DB::table("acc_access")
-        //     ->where([
-        //         ["departId", 4],
-        //         ["idPengaju", 4]
-        //     ])->get();
-        // for ($i = 0; $i < count($datas); $i++) {
-        //     DB::table("accs")
-        //         ->insert([
-        //             "bons_id"
-        //         ]);
-        //     if ($thres < $datas[$i]->threshold) break;
-        // }
+        
     }
 }

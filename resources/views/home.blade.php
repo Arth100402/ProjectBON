@@ -184,7 +184,6 @@
                                     <th>Nama</th>
                                     <th>Tanggal Pengajuan</th>
                                     <th>Total Biaya Perjalanan</th>
-                                    <th>Status</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -285,7 +284,6 @@
                 scrollCollapse: true,
                 scrollY: '445px',
                 order: [
-                    [4, 'asc'],
                     [1, 'desc']
                 ],
                 columnDefs: [{
@@ -295,11 +293,7 @@
                     {
                         className: "wrap",
                         targets: [0, 1, 2]
-                    },
-                    {
-                        type: 'status-order',
-                        targets: 4
-                    },
+                    }
                 ],
                 columns: [{
                         data: "name"
@@ -333,11 +327,6 @@
                                 return "Data tidak tersedia";
                             }
                         }
-                    },
-                    {
-                        data: "status",
-                        defaultContent: '<p>Menunggu</p>',
-                        width: "5%"
                     },
                     {
                         data: null,
