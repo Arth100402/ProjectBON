@@ -3,6 +3,7 @@
 use App\Http\Controllers\BonController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SettingController;
+use App\Models\Bon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\TextUI\XmlConfiguration\Group;
@@ -48,6 +49,6 @@ Route::middleware("auth")->group(function () {
     ROUTE::post("/changeAcc", [SettingController::class, 'updateAcc'])->name("setting.changeAcc");
     ROUTE::post("/upadteThres", [SettingController::class, 'updateThr'])->name("setting.thr");
 });
-Route::get("/test", [BonController::class, "test4"]);
+Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
 // Route::get("/test", [BonController::class, "fmIndex"]);
 // Route::get("/test", [BonController::class, "test4"]);
