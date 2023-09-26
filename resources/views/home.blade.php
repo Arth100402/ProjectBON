@@ -182,8 +182,6 @@
                             <thead>
                                 <tr>
                                     <th>Nama</th>
-                                    <th>Jabatan</th>
-                                    <th>Departemen</th>
                                     <th>Tanggal Pengajuan</th>
                                     <th>Total Biaya Perjalanan</th>
                                     <th>Status</th>
@@ -292,11 +290,11 @@
                 ],
                 columnDefs: [{
                         searchable: true,
-                        targets: [0, 1, 2, 3, 4]
+                        targets: [0, 1, 2]
                     },
                     {
                         className: "wrap",
-                        targets: [0, 1, 2, 3, 4]
+                        targets: [0, 1, 2]
                     },
                     {
                         type: 'status-order',
@@ -304,15 +302,7 @@
                     },
                 ],
                 columns: [{
-                        data: "uname"
-
-                    },
-                    {
-                        data: "jname"
-                    },
-                    {
-                        data: "dname",
-                        width: "10%"
+                        data: "name"
                     },
                     {
                         data: "tglPengajuan",

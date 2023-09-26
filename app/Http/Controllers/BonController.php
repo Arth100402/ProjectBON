@@ -25,67 +25,25 @@ class BonController extends Controller
 
     public function jsonShowIndexAdmin()
     {
-        $departementID = Auth::user()->departement_id;
-
         $query = DB::table('bons AS b')
-            ->select(
-                DB::raw('(SELECT jabatans.name FROM jabatans INNER JOIN users ON users.jabatan_id = jabatans.id WHERE users.id = u.id) AS jname'),
-                'u.name AS uname',
-                'd.name AS dname',
-                'b.tglPengajuan',
-                'b.total',
-                'b.status',
-                'b.id'
-            )
-            ->leftJoin('accs AS a', 'b.id', '=', 'a.bons_id')
-            ->leftJoin('users AS u', 'u.id', '=', 'b.users_id')
-            ->leftJoin('departements as d', 'd.id', '=', 'u.departement_id')
-            ->where(function ($query) use ($departementID) {
-                $query->whereNotIn('b.id', function ($subquery) {
-                    $subquery->select('bons_id')->from('accs');
-                })
-                    ->whereIn('b.users_id', function ($subquery) use ($departementID) {
-                        $subquery->select('id')
-                            ->from('users')
-                            ->where('users.jabatan_id', Auth::user()->jabatan_id - 1)
-                            ->where('users.departement_id', $departementID);
-                    })
-                    ->whereIn('b.users_id', function ($subquery) use ($departementID) {
-                        $subquery->select('users.id')
-                            ->from('users')
-                            ->join('acc_access', 'acc_access.departId', '=', 'users.departement_id')
-                            ->where('acc_access.departId', $departementID)
-                            ->where('acc_access.jabatanAcc', Auth::user()->jabatan_id)
-                            ->whereColumn('acc_access.jabatanPengaju', 'u.jabatan_id')
-                            ->where('acc_access.status', 'enable');
+            ->select('u.name', 'b.tglPengajuan', 'b.total', 'b.status')
+            ->join('users AS u', 'b.users_id', '=', 'u.id')
+            ->join('accs AS a', 'b.id', '=', 'a.bons_id')
+            ->where('a.users_id', 6)
+            ->where('a.status', 'Diproses')
+            ->whereExists(function ($query) {
+                $query->select('a1.id')
+                    ->from('accs AS a1')
+                    ->where('a1.level', function ($query) {
+                        $query->select('a2.level')
+                            ->from('accs AS a2')
+                            ->whereColumn('a2.level', DB::raw('a.level - 1'))
+                            ->where('a2.status', 'Terima');
                     });
-            })
-            ->orWhere(function ($query) use ($departementID) {
-                $query->where('a.status', 'Terima')
-                    ->whereIn('a.users_id', function ($subquery) use ($departementID) {
-                        $subquery->select('id')
-                            ->from('users')
-                            ->where('users.jabatan_id', Auth::user()->jabatan_id - 1)
-                            ->where('users.departement_id', $departementID);
-                    })
-                    ->whereNotIn('b.id', function ($subquery) {
-                        $subquery->select('ac.bons_id')
-                            ->from('accs AS ac')
-                            ->join('users AS us', 'ac.users_id', '=', 'us.id')
-                            ->where('us.jabatan_id', Auth::user()->jabatan_id);
-                    })
-                    ->whereIn('b.users_id', function ($subquery) use ($departementID) {
-                        $subquery->select('users.id')
-                            ->from('users')
-                            ->join('acc_access', 'acc_access.departId', '=', 'users.departement_id')
-                            ->where('acc_access.departId', $departementID)
-                            ->where('acc_access.jabatanAcc', Auth::user()->jabatan_id)
-                            ->whereColumn('acc_access.jabatanPengaju', 'u.jabatan_id')
-                            ->where('acc_access.status', 'enable');
-                    });
-            })
-            ->get();
-        $data = $query;
+            });
+
+        $results = $query->get();
+        $data = $results;
 
         return response()->json([
             'data' => $data
@@ -203,7 +161,8 @@ class BonController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'filenames.*' => 'mimes:doc,pdf,docx,xlx,csv|max:2048',
+            'filenames' => 'required',
+            'filenames.*' => 'required|mimes:pdf|max:10240',
         ]);
 
         $filenames = null;
