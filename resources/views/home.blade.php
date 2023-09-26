@@ -347,7 +347,7 @@
                                 <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
                                 <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
                         },
-                        width: "5%"
+                        width: "15%"
                     }
                 ]
             });

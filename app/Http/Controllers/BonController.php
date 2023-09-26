@@ -28,7 +28,7 @@ class BonController extends Controller
     public function jsonShowIndexAdmin()
     {
         $query = DB::table('bons AS b')
-            ->select('u.name', 'b.tglPengajuan', 'b.total', 'b.status')
+            ->select('b.id', 'u.name', 'b.tglPengajuan', 'b.total', 'b.status')
             ->join('users AS u', 'b.users_id', '=', 'u.id')
             ->join('accs AS a', 'b.id', '=', 'a.bons_id')
             ->where('a.users_id', 6)
@@ -74,12 +74,11 @@ class BonController extends Controller
             ->join('users', 'bons.users_id', '=', 'users.id')
             ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
-            ->where('detailbons.bons_id', $id)
+            ->where('detailbons.bons_id', '=', $id)
             ->get([
                 'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
-                'departements.name as dname',
                 'projects.idOpti'
             ]);
         $acc = null;
@@ -118,12 +117,12 @@ class BonController extends Controller
                 'a.status as status',
                 'a.keteranganTolak as keteranganTolak'
             );
-            $acc = DB::table('accs')
-            ->join('bons','bons.id','=','accs.bons_id')
-            ->join('users as acc','acc.id','=','accs.users_id')
-            ->join('users as aju','aju.id','=','bons.users_id')
-            ->where('bons.users_id','=',Auth::user()->id)
-            ->select('acc.name as acc_name','accs.status','accs.keteranganTolak','accs.updated_at')
+        $acc = DB::table('accs')
+            ->join('bons', 'bons.id', '=', 'accs.bons_id')
+            ->join('users as acc', 'acc.id', '=', 'accs.users_id')
+            ->join('users as aju', 'aju.id', '=', 'bons.users_id')
+            ->where('bons.users_id', '=', Auth::user()->id)
+            ->select('acc.name as acc_name', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
             ->get();
         return response()->json(array(
             'status' => 'oke',
@@ -268,9 +267,9 @@ class BonController extends Controller
 
     public function accBon($id)
     {
-        $data = new Acc();
-        $data->bons_id = $id;
-        $data->users_id = Auth::user()->id;
+        $data = Acc::where('bons_id', $id)
+            ->where('users_id', Auth::user()->id)
+            ->first();
         $data->status = 'Terima';
         $data->save();
         return redirect()->route('index')->with('status', 'Bon telah di terima');
@@ -281,16 +280,17 @@ class BonController extends Controller
             ->join('bons', 'accs.bons_id', '=', 'bons.id')
             ->join('users', 'users.id', '=', 'bons.users_id')
             ->where('accs.users_id', '=', Auth::user()->id)
+            ->where('accs.status', '!=', 'Diproses')
             ->get(['bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.created_at']);
         return response()->json(["data" => $data]);
     }
 
     public function decBon(Request $request, $id)
     {
-        $data = new Acc();
+        $data = Acc::where('bons_id', $id)
+            ->where('users_id', Auth::user()->id)
+            ->first();
         $confirmationInput = $request->get('tolak');
-        $data->bons_id = $id;
-        $data->users_id = Auth::user()->id;
         $data->status = 'Tolak';
         $data->keteranganTolak = $confirmationInput;
         $data->save();
