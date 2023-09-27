@@ -28,7 +28,6 @@ class BonController extends Controller
 
     public function jsonShowIndexAdmin()
     {
-
         $query = DB::table('bons')
             ->select('bons.id', 'users.name', 'bons.tglPengajuan', 'bons.total', 'a.status')
             ->join('users', 'bons.users_id', '=', 'users.id')
@@ -115,7 +114,7 @@ class BonController extends Controller
         $pdf = ['filename' => $file->file];
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc','pdf'))->render()
+            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
         ));
     }
     public function getDetailSelf(Request $request)
@@ -159,7 +158,7 @@ class BonController extends Controller
         $pdf = null;
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc','pdf'))->render()
+            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
         ));
     }
 
@@ -230,7 +229,7 @@ class BonController extends Controller
             $newBon->bons_id = $bon;
             $newBon->users_id = $datas[$i]->idAcc;
             $newBon->status = "Diproses";
-            $newBon->level=$datas[$i]->level;
+            $newBon->level = $datas[$i]->level;
             $newBon->save();
             if ($request->get("biayaPerjalanan") < $datas[$i]->threshold) break;
         }
@@ -429,10 +428,11 @@ class BonController extends Controller
             ->join("jabatans AS j", "j.id", "u.jabatan_id")
             ->join("departements AS d", "d.id", "u.departement_id")
             ->where("bons_id", $id)
-            ->get(['u.name as uname', 'j.name as jname', 'd.name as dname', 'accs.status as astatus', 'accs.keteranganTolak as aketeranganTolak']);
+            ->get(['u.name as acc_name', 'accs.status as status', 'accs.keteranganTolak as keteranganTolak']);
+        $pdf = null;
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc'))->render()
+            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
         ));
     }
 
@@ -442,6 +442,7 @@ class BonController extends Controller
         $data->bons_id = $id;
         $data->users_id = Auth::user()->id;
         $data->status = 'Terima';
+        $data->level = 7;
         $data->save();
 
         $bon = Bon::find($id);
@@ -453,6 +454,5 @@ class BonController extends Controller
 
     public function test4()
     {
-        
     }
 }
