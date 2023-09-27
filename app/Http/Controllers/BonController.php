@@ -158,6 +158,29 @@ class BonController extends Controller
         ));
     }
 
+    public function getDetailHistory(Request $request)
+    {
+        $id = $request->get('id');
+        $detail = DB::table('detailbons')
+            ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->join('departements', 'users.departement_id', '=', 'departements.id')
+            ->where('detailbons.bons_id', '=', $id)
+            ->get([
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
+                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name',
+                'projects.idOpti'
+            ]);
+        $acc = null;
+        $pdf = null;
+        return response()->json(array(
+            'status' => 'oke',
+            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
+        ));
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -332,7 +355,7 @@ class BonController extends Controller
             ->join('users', 'users.id', '=', 'bons.users_id')
             ->where('accs.users_id', '=', Auth::user()->id)
             ->where('accs.status', '!=', 'Diproses')
-            ->get(['bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.created_at']);
+            ->get(['bons.id','bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at']);
         return response()->json(["data" => $data]);
     }
 
@@ -350,57 +373,58 @@ class BonController extends Controller
         $bon->save();
         return redirect()->route('index')->with('status', 'Bon telah di tolak');
     }
+    public function FmAccBon($id)
+    {
+        $data = new Acc;
+        $data->bons_id = $id;
+        $data->users_id = Auth::user()->id;
+        $data->status = 'Terima';
+        $data->level = 6;
+        $data->save();
+        return redirect()->route('index')->with('status', 'Bon telah di terima');
+    }
+    public function FmDecBon(Request $request, $id)
+    {
+        $data = new Acc;
+        $data->bons_id = $id;
+        $data->users_id = Auth::user()->id;
+        $confirmationInput = $request->get('tolak');
+        $data->status = 'Tolak';
+        $data->keteranganTolak = $confirmationInput;
+        $data->level = 6;
+        $data->save();
+        $bon = Bon::find($id);
+        $bon->status = "Tolak";
+        $bon->save();
+        return redirect()->route('index')->with('status', 'Bon telah di tolak');
+    }
     public function fmIndex()
     {
-        // $dataBons = DB::table('bons')
-        //     ->join('users', 'users.id', '=', 'bons.users_id')
-        //     ->join ('departements', 'departements.id', '=', 'users.departement_id')
-        //     ->join('accs', 'accs.bons_id', '=', 'bons.id')
-        //     ->join('users as uacc','uacc.id','=','accs.users_id')
-        //     ->get(['bons.id', 'bons.users_id as idAju', 'users.name as pengaju', 'users.jabatan_id', 'users.departement_id','departements.name as dname', 'bons.tglPengajuan', 'bons.total']);
-        $bonsFMAccArray = [];
-
-        $dataBons = DB::table('bons as b')
-            ->join('users as u', 'u.id', '=', 'b.users_id')
-            ->join('departements as d', 'u.departement_id', '=', 'd.id')
-            ->join('accs as a', 'a.bons_id', '=', 'b.id')
-            ->whereNotIn('b.id', function ($query) {
-                $query->select('a.bons_id')
-                    ->from('accs as a')
-                    ->join('bons as b', 'a.bons_id', '=', 'b.id')
-                    ->join('users as u', 'u.id', '=', 'a.users_id')
-                    ->where('u.jabatan_id', 3)
-                    ->where('u.departement_id', 8);
-            })
-            ->select('b.id', 'u.name as pengaju', 'd.name as dname', 'b.tglPengajuan', 'b.total', 'u.jabatan_id', 'u.departement_id')
-            ->distinct()
+        $acc = DB::table('accs')
+            ->join('bons', 'bons.id', '=', 'accs.bons_id')
+            ->join('users as acc', 'acc.id', '=', 'accs.users_id')
+            ->join('users as aju', 'aju.id', '=', 'bons.users_id')
+            ->select('accs.bons_id', 'accs.status', 'acc.departement_id as dname','acc.jabatan_id as jabatan')
             ->get();
-        for ($i = 0; $i < count($dataBons); $i++) {
-            $dataAcc = DB::table('accs as a')
-                ->join('users as uacc', 'uacc.id', '=', 'a.users_id')
-                ->where('a.status', 'Terima')
-                ->where('a.bons_id', $dataBons[$i]->id)
-                ->count();
-
-            $dataAccess = DB::table('acc_access as aa')
-                ->where('aa.departId', $dataBons[$i]->departement_id)
-                ->where('aa.status', 'enable')
-                ->where('aa.jabatanPengaju', $dataBons[$i]->jabatan_id)
-                ->count();
-            $comparison_result = $dataAcc === $dataAccess ? 'true' : 'false';
-            if ($dataAcc > 0 && $dataAccess > 0 && $comparison_result === 'true') {
-                $bonsAdd = [
-                    'id' => $dataBons[$i]->id,
-                    'pengaju' => $dataBons[$i]->pengaju,
-                    'department' => $dataBons[$i]->dname,
-                    'tglPengajuan' => $dataBons[$i]->tglPengajuan,
-                    'total' => $dataBons[$i]->total
-                ];
-                array_push($bonsFMAccArray, $bonsAdd);
+        $x = [];
+        foreach ($acc as $item) {
+            if ($item->status != 'Terima' || $item->jabatan == 3 && $item->dname == 8) {
+                array_push($x, $item->bons_id);
             }
         }
-        // $data = json_encode($bonsFMAccArray);
-        return response()->json(["data" => $bonsFMAccArray]);
+        $data = DB::table('bons')
+        ->join('users', 'bons.users_id', '=', 'users.id')
+        ->join('departements', 'users.departement_id', '=', 'departements.id')
+        ->join('accs', 'bons.id', '=', 'accs.bons_id')
+        ->whereNotIn( 'bons.id', $x)->distinct()
+        ->get([
+            'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total',
+            'users.name as pengaju',
+            'departements.name as dname'
+        ]);
+        return response()->json([
+            'data' => $data
+        ]);
     }
     public function loadKasir()
     {

@@ -108,7 +108,6 @@
             <table id="myTablefm" class="table table-striped table-bordered" style="table-layout: fixed">
                 <thead>
                     <tr>
-                        <th>Bons ID</th>
                         <th>Nama Pengaju</th>
                         <th>Departemen</th>
                         <th>Tanggal Pengajuan</th>
@@ -211,6 +210,7 @@
                                     <th>Status</th>
                                     <th>Keterangan</th>
                                     <th>Diterima/Ditolak Pada</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                         </table>
@@ -251,6 +251,15 @@
                         </div>
                         <button type="submit" class="btn btn-success">Submit</button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalEditD" tabindex="-1" role="basic" aria-hidden="true">
+        <div class="modal-dialog modal-wide">
+            <div class="modal-content">
+                <div class="modal-body" id="modalContentD">
+                    <!--loading animated gif can put here-->
                 </div>
             </div>
         </div>
@@ -482,7 +491,7 @@
                         defaultContent: '<p>-</p>',
                     },
                     {
-                        data: "created_at",
+                        data: "updated_at",
                         render: function(data, type, row) {
                             if (data !== null) {
                                 var date = new Date(data);
@@ -499,6 +508,16 @@
                         }
 
                     },
+                    {
+                        data: null,
+                        render: (data, type, row, meta) => {
+                            let result = `<a class="btn btn-success" href="#modalEditD" data-toggle="modal" onclick="getDetailHistory(${data.id})">
+                                <i class="fa fa-info-circle"></i>
+                                </a>`
+                            return result;
+                        },
+                        width: "5%"
+                    }
                 ]
             });
             var tablefm = $('#myTablefm').DataTable({
@@ -507,27 +526,23 @@
                 scrollCollapse: true,
                 scrollY: '445px',
                 order: [
-                    [5, 'asc']
+                    [2, 'asc']
                 ],
                 columnDefs: [{
                         searchable: true,
-                        targets: [0, 1, 2, 3, 4, 5]
+                        targets: [0, 1, 2, 3, 4]
                     },
                     {
                         className: "wrap",
-                        targets: [0, 1, 2, 3, 4, 5]
+                        targets: [0, 1, 2, 3, 4]
                     },
                 ],
                 columns: [{
-                        data: "id",
-                        width: "10%"
-                    },
-                    {
                         data: "pengaju",
                         width: "10%"
                     },
                     {
-                        data: "department",
+                        data: "dname",
                         width: "10%"
                     },
                     {
@@ -566,10 +581,15 @@
                         render: (data, type, row, meta) => {
                             return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
-                                <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
-                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
+                                <form method="POST" action="/FmAccBon/${data.id}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fa fa-check-circle"></i>
+                                    </button>
+                                </form>
+                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolakFM(${data.id})"><i class="fa fa-times"></i></a>`;
                         },
-                        width: "5%"
+                        width: "15%"
                     }
                 ]
             });
@@ -715,6 +735,10 @@
         const tolakKasir = (id) => {
             $("#kirimTolak").attr("action", "/decKasir/" + id);
         }
+        const tolakFM = (id) => {
+            $("#kirimTolak").attr("action", "/FmDecBon/" + id);
+        }
+
         const getDetailKasir = (id) => {
             $.ajax({
                 type: "POST",
@@ -766,6 +790,23 @@
                 },
                 error: function(error) {
                     console.log(error);
+                }
+            });
+        }
+
+        function getDetailHistory(id) {
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('bon.getDetailHistory') }}",
+                data: {
+                    '_token': '<?php echo csrf_token(); ?>',
+                    'id': id
+                },
+                success: function(data) {
+                    $('#modalContentD').html(data.msg);
+                },
+                error: function(err) {
+                    console.log(err);
                 }
             });
         }

@@ -28,6 +28,7 @@ Route::middleware("auth")->group(function () {
     Route::post('/getDetail', [BonController::class, 'getDetail'])->name('bon.getDetail');
     Route::get('/jsonShowIndexAdmin', [BonController::class, 'jsonShowIndexAdmin'])->name('bon.jsonShowIndexAdmin');
     Route::post('/getDetailSelf', [BonController::class, 'getDetailSelf'])->name('bon.getDetailSelf');
+    Route::post('/getDetailHistory', [BonController::class, 'getDetailHistory'])->name('bon.getDetailHistory');
     Route::get('/jsonShowIndexSelf', [BonController::class, 'jsonShowIndexSelf'])->name('bon.jsonShowIndexSelf');
     Route::get('/accBont/{id}', [BonController::class, 'accBon'])->name('bon.accBon');
     Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
@@ -35,6 +36,8 @@ Route::middleware("auth")->group(function () {
 
     // FM
     Route::get("/fmindex", [BonController::class, "fmIndex"])->name("fmindex");
+    Route::post('/FmAccBon/{id}', [BonController::class, 'FmAccBon'])->name('FmAccBon');
+    Route::post('/FmDecBon/{id}', [BonController::class, 'FmDecBon'])->name('FmDecBon');
 
     // Kasir
     Route::get("/kasirIndex", [BonController::class, "loadKasir"])->name("kasirIndex");
@@ -52,4 +55,4 @@ Route::middleware("auth")->group(function () {
 });
 // Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
 // Route::get("/test", [BonController::class, "jsonShowIndexSelf"]);
-Route::get("/test", [BonController::class, "test4"]);
+// Route::get("/test", [BonController::class, "fmIndex"]);
