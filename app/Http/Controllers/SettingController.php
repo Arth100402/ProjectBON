@@ -96,21 +96,21 @@ class SettingController extends Controller
 
     public function test()
     {
-        $data = User::where([
-            ["users.name", "LIKE", "%%"],
-            ["users.jabatan_id", "!=", 7],
-            ["users.jabatan_id", "!=", 8],
-            ["users.departement_id", 4]
-        ])
-            ->whereNotIn("id", function ($query) {
-                $query->select("idAcc")
-                    ->from("acc_access")
-                    ->where([
-                        ["departId", 4],
-                        ["idPengaju", 4]
-                    ]);
-            })
-            ->get();
-        dd($data);
+        // $data = User::where([
+        //     ["users.name", "LIKE", "%%"],
+        //     ["users.jabatan_id", "!=", 7],
+        //     ["users.jabatan_id", "!=", 8],
+        //     ["users.departement_id", 4]
+        // ])
+        //     ->whereNotIn("id", function ($query) {
+        //         $query->select("idAcc")
+        //             ->from("acc_access")
+        //             ->where([
+        //                 ["departId", 4],
+        //                 ["idPengaju", 4]
+        //             ]);
+        //     })
+        //     ->get();
+        // dd($data);
     }
 }

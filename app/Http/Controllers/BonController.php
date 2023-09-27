@@ -261,9 +261,9 @@ class BonController extends Controller
             ->get();
         if ($query->first()) {
             Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
-            return redirect()->route('index');
+            return redirect()->route('bon.index');
         } else {
-            return redirect()->route('index');
+            return redirect()->route('bon.index');
         }
     }
 
@@ -343,9 +343,9 @@ class BonController extends Controller
             ->get();
         if ($query->first()) {
             Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
-            return redirect()->route('index')->with('status', 'Bon telah di terima');
+            return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
         } else {
-            return redirect()->route('index')->with('status', 'Bon telah di terima');
+            return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
         }
     }
     public function HistoryAcc()
@@ -355,7 +355,7 @@ class BonController extends Controller
             ->join('users', 'users.id', '=', 'bons.users_id')
             ->where('accs.users_id', '=', Auth::user()->id)
             ->where('accs.status', '!=', 'Diproses')
-            ->get(['bons.id','bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at']);
+            ->get(['bons.id', 'bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at']);
         return response()->json(["data" => $data]);
     }
 
@@ -371,7 +371,7 @@ class BonController extends Controller
         $bon = Bon::find($id);
         $bon->status = "Tolak";
         $bon->save();
-        return redirect()->route('index')->with('status', 'Bon telah di tolak');
+        return redirect()->route('bon.index')->with('status', 'Bon telah di tolak');
     }
     public function FmAccBon($id)
     {
@@ -381,7 +381,7 @@ class BonController extends Controller
         $data->status = 'Terima';
         $data->level = 6;
         $data->save();
-        return redirect()->route('index')->with('status', 'Bon telah di terima');
+        return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
     }
     public function FmDecBon(Request $request, $id)
     {
@@ -396,7 +396,7 @@ class BonController extends Controller
         $bon = Bon::find($id);
         $bon->status = "Tolak";
         $bon->save();
-        return redirect()->route('index')->with('status', 'Bon telah di tolak');
+        return redirect()->route('bon.index')->with('status', 'Bon telah di tolak');
     }
     public function fmIndex()
     {
@@ -404,7 +404,7 @@ class BonController extends Controller
             ->join('bons', 'bons.id', '=', 'accs.bons_id')
             ->join('users as acc', 'acc.id', '=', 'accs.users_id')
             ->join('users as aju', 'aju.id', '=', 'bons.users_id')
-            ->select('accs.bons_id', 'accs.status', 'acc.departement_id as dname','acc.jabatan_id as jabatan')
+            ->select('accs.bons_id', 'accs.status', 'acc.departement_id as dname', 'acc.jabatan_id as jabatan')
             ->get();
         $x = [];
         foreach ($acc as $item) {
@@ -413,15 +413,15 @@ class BonController extends Controller
             }
         }
         $data = DB::table('bons')
-        ->join('users', 'bons.users_id', '=', 'users.id')
-        ->join('departements', 'users.departement_id', '=', 'departements.id')
-        ->join('accs', 'bons.id', '=', 'accs.bons_id')
-        ->whereNotIn( 'bons.id', $x)->distinct()
-        ->get([
-            'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total',
-            'users.name as pengaju',
-            'departements.name as dname'
-        ]);
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->join('departements', 'users.departement_id', '=', 'departements.id')
+            ->join('accs', 'bons.id', '=', 'accs.bons_id')
+            ->whereNotIn('bons.id', $x)->distinct()
+            ->get([
+                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total',
+                'users.name as pengaju',
+                'departements.name as dname'
+            ]);
         return response()->json([
             'data' => $data
         ]);
@@ -492,7 +492,7 @@ class BonController extends Controller
         $bon->status = "Terima";
         $bon->save();
 
-        return redirect()->route('index')->with('status', 'Bon telah di terima');
+        return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
     }
 
     public function test4()
