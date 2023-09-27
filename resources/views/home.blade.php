@@ -108,7 +108,6 @@
             <table id="myTablefm" class="table table-striped table-bordered" style="table-layout: fixed">
                 <thead>
                     <tr>
-                        <th>Bons ID</th>
                         <th>Nama Pengaju</th>
                         <th>Departemen</th>
                         <th>Tanggal Pengajuan</th>
@@ -411,7 +410,7 @@
                             let result = `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
                                 <i class="fa fa-info-circle"></i>
                                 </a>`
-                            if (type === 'display' && data.editable==true) {
+                            if (type === 'display' && data.editable == true) {
                                 result +=
                                     `<a class="btn btn-success" href="edit/${data.id}"><i class="fa fa-check-circle"></i></a>`;
                             }
@@ -507,27 +506,23 @@
                 scrollCollapse: true,
                 scrollY: '445px',
                 order: [
-                    [5, 'asc']
+                    [2, 'asc']
                 ],
                 columnDefs: [{
                         searchable: true,
-                        targets: [0, 1, 2, 3, 4, 5]
+                        targets: [0, 1, 2, 3, 4]
                     },
                     {
                         className: "wrap",
-                        targets: [0, 1, 2, 3, 4, 5]
+                        targets: [0, 1, 2, 3, 4]
                     },
                 ],
                 columns: [{
-                        data: "id",
-                        width: "10%"
-                    },
-                    {
                         data: "pengaju",
                         width: "10%"
                     },
                     {
-                        data: "department",
+                        data: "dname",
                         width: "10%"
                     },
                     {
@@ -566,10 +561,15 @@
                         render: (data, type, row, meta) => {
                             return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
-                                <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
-                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
+                                <form method="POST" action="/FmAccBon/${data.id}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fa fa-check-circle"></i>
+                                    </button>
+                                </form>
+                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolakFM(${data.id})"><i class="fa fa-times"></i></a>`;
                         },
-                        width: "5%"
+                        width: "15%"
                     }
                 ]
             });
@@ -715,6 +715,10 @@
         const tolakKasir = (id) => {
             $("#kirimTolak").attr("action", "/decKasir/" + id);
         }
+        const tolakFM = (id) => {
+            $("#kirimTolak").attr("action", "/FmDecBon/" + id);
+        }
+
         const getDetailKasir = (id) => {
             $.ajax({
                 type: "POST",
