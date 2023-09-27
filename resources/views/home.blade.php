@@ -58,7 +58,7 @@
         <div class="portlet">
             <div class="portlet-title">
                 <div class="caption">
-                    <i class="fa fa-reorder"></i>Riwayat Penerimaan dan Penolakan Saya
+                    <i class="fa fa-reorder"></i>Riwayat Penerimaan Pencairan
                 </div>
                 <div class="tools">
                     <a href="javascript:;" class="collapse"></a>
@@ -411,7 +411,7 @@
                             let result = `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
                                 <i class="fa fa-info-circle"></i>
                                 </a>`
-                            if (type === 'display' && data.editable==true) {
+                            if (type === 'display' && data.editable == true) {
                                 result +=
                                     `<a class="btn btn-success" href="edit/${data.id}"><i class="fa fa-check-circle"></i></a>`;
                             }

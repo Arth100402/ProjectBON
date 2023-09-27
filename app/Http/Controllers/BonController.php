@@ -446,10 +446,11 @@ class BonController extends Controller
             ->join("jabatans AS j", "j.id", "u.jabatan_id")
             ->join("departements AS d", "d.id", "u.departement_id")
             ->where("bons_id", $id)
-            ->get(['u.name as uname', 'j.name as jname', 'd.name as dname', 'accs.status as astatus', 'accs.keteranganTolak as aketeranganTolak']);
+            ->get(['u.name as acc_name', 'accs.status as status', 'accs.keteranganTolak as keteranganTolak']);
+        $pdf = null;
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc'))->render()
+            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
         ));
     }
 
@@ -459,6 +460,7 @@ class BonController extends Controller
         $data->bons_id = $id;
         $data->users_id = Auth::user()->id;
         $data->status = 'Terima';
+        $data->level = 7;
         $data->save();
 
         $bon = Bon::find($id);
