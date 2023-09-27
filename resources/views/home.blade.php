@@ -84,7 +84,7 @@
         {{-- FM --}}
     @elseif (Auth::user()->jabatan_id == 3 && Auth::user()->departement_id == 8)
         <div class="topdiv">
-            <a href="{{ route('create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
+            <a href="{{ route('bon.create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
         </div>
         <h3>Pengajuan saya: </h3>
         <div class="table-responsive" style="overflow: scroll">
@@ -136,7 +136,7 @@
         </div>
     @else
         <div class="topdiv">
-            <a href="{{ route('create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
+            <a href="{{ route('bon.create') }}" class="btn btn-success"><i class="fa fa-plus-square-o"></i></a>
         </div><br>
         <div class="portlet">
             <div class="portlet-title">
@@ -422,7 +422,7 @@
                                 </a>`
                             if (type === 'display' && data.editable == true) {
                                 result +=
-                                    `<a class="btn btn-success" href="edit/${data.id}"><i class="fa fa-check-circle"></i></a>`;
+                                    `<a class="btn btn-success" href="/bon/${data.id}/edit"><i class="fa fa-check-circle"></i></a>`;
                             }
                             return result;
                         },

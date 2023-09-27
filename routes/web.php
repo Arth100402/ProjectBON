@@ -22,7 +22,8 @@ use PHPUnit\TextUI\XmlConfiguration\Group;
 Auth::routes();
 Route::middleware("auth")->group(function () {
     // BON Controller
-    Route::resource('/', BonController::class);
+    Route::redirect('/', '/bon', 301);
+    Route::resource('/bon', BonController::class);
     Route::get("/loadppc", [BonController::class, "loadPPC"])->name("loadPPC");
     Route::get("/loadsales", [BonController::class, "loadSales"])->name("loadSales");
     Route::post('/getDetail', [BonController::class, 'getDetail'])->name('bon.getDetail');
