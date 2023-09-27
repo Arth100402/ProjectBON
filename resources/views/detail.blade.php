@@ -50,17 +50,65 @@
                     </thead>
                     <tbody>
                         @foreach ($acc as $a)
-                            <tr>
-                                <td>{{ $a->acc_name }}</td>
-                                @if ($a->status == 'Tolak')
-                                    <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
-                                @else
-                                    <td>{{ $a->status }}</td>
-                                @endif
-                            </tr>
+                            @if ($a->acc_jabatan != 8 && ($a->acc_jabatan != 3 && $a->acc_depart != 8))
+                                <tr>
+                                    <td>{{ $a->acc_name }}</td>
+                                    @if ($a->status == 'Tolak')
+                                        <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
+                                    @else
+                                        <td>{{ $a->status }}</td>
+                                    @endif
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
-                </table>
+                </table><br>
+                <h4>Finance Manager: </h4>
+                @foreach ($acc as $a)
+                    @if ($a->acc_jabatan == 3 && $a->acc_depart == 8)
+                        <table class="table table-bordered" style="background-color: white">
+                            <thead>
+                                <tr>
+                                    <th>Penyetuju</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ $a->acc_name }}</td>
+                                    @if ($a->status == 'Tolak')
+                                        <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
+                                    @else
+                                        <td>{{ $a->status }}</td>
+                                    @endif
+                                </tr>
+                            </tbody>
+                        </table>
+                    @endif
+                @endforeach
+                <h4>Kasir: </h4>
+                @foreach ($acc as $a)
+                    @if ($a->acc_jabatan == 8)
+                        <table class="table table-bordered" style="background-color: white">
+                            <thead>
+                                <tr>
+                                    <th>Penyetuju</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ $a->acc_name }}</td>
+                                    @if ($a->status == 'Tolak')
+                                        <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
+                                    @else
+                                        <td>{{ $a->status }}</td>
+                                    @endif
+                                </tr>
+                            </tbody>
+                        </table>
+                    @endif
+                @endforeach
             </div>
         </div>
     @endif

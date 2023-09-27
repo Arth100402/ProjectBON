@@ -148,7 +148,8 @@ class BonController extends Controller
             ->join('users as aju', 'aju.id', '=', 'bons.users_id')
             ->where('bons.users_id', '=', Auth::user()->id)
             ->where('bons.id', '=', $id)
-            ->select('acc.name as acc_name', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
+            ->orderBy("accs.level")
+            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
             ->get();
         $pdf = null;
         return response()->json(array(
