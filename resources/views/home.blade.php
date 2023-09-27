@@ -58,7 +58,7 @@
         <div class="portlet">
             <div class="portlet-title">
                 <div class="caption">
-                    <i class="fa fa-reorder"></i>Riwayat Penerimaan dan Penolakan Saya
+                    <i class="fa fa-reorder"></i>Riwayat Penerimaan Pencairan
                 </div>
                 <div class="tools">
                     <a href="javascript:;" class="collapse"></a>
@@ -210,6 +210,7 @@
                                     <th>Status</th>
                                     <th>Keterangan</th>
                                     <th>Diterima/Ditolak Pada</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                         </table>
@@ -250,6 +251,15 @@
                         </div>
                         <button type="submit" class="btn btn-success">Submit</button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalEditD" tabindex="-1" role="basic" aria-hidden="true">
+        <div class="modal-dialog modal-wide">
+            <div class="modal-content">
+                <div class="modal-body" id="modalContentD">
+                    <!--loading animated gif can put here-->
                 </div>
             </div>
         </div>
@@ -481,7 +491,7 @@
                         defaultContent: '<p>-</p>',
                     },
                     {
-                        data: "created_at",
+                        data: "updated_at",
                         render: function(data, type, row) {
                             if (data !== null) {
                                 var date = new Date(data);
@@ -498,6 +508,16 @@
                         }
 
                     },
+                    {
+                        data: null,
+                        render: (data, type, row, meta) => {
+                            let result = `<a class="btn btn-success" href="#modalEditD" data-toggle="modal" onclick="getDetailHistory(${data.id})">
+                                <i class="fa fa-info-circle"></i>
+                                </a>`
+                            return result;
+                        },
+                        width: "5%"
+                    }
                 ]
             });
             var tablefm = $('#myTablefm').DataTable({
@@ -770,6 +790,23 @@
                 },
                 error: function(error) {
                     console.log(error);
+                }
+            });
+        }
+
+        function getDetailHistory(id) {
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('bon.getDetailHistory') }}",
+                data: {
+                    '_token': '<?php echo csrf_token(); ?>',
+                    'id': id
+                },
+                success: function(data) {
+                    $('#modalContentD').html(data.msg);
+                },
+                error: function(err) {
+                    console.log(err);
                 }
             });
         }
