@@ -157,6 +157,29 @@ class BonController extends Controller
         ));
     }
 
+    public function getDetailHistory(Request $request)
+    {
+        $id = $request->get('id');
+        $detail = DB::table('detailbons')
+            ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->join('departements', 'users.departement_id', '=', 'departements.id')
+            ->where('detailbons.bons_id', '=', $id)
+            ->get([
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
+                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name',
+                'projects.idOpti'
+            ]);
+        $acc = null;
+        $pdf = null;
+        return response()->json(array(
+            'status' => 'oke',
+            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
+        ));
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -331,7 +354,7 @@ class BonController extends Controller
             ->join('users', 'users.id', '=', 'bons.users_id')
             ->where('accs.users_id', '=', Auth::user()->id)
             ->where('accs.status', '!=', 'Diproses')
-            ->get(['bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.created_at']);
+            ->get(['bons.id','bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at']);
         return response()->json(["data" => $data]);
     }
 
