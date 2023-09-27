@@ -23,7 +23,7 @@ class DetailBonSeeder extends Seeder
                     "asalKota" => "Surabaya",
                     "tujuan" => "Surabaya",
                     "users_id" => ($i),
-                    "projects_id" => ($i),
+                    "projects_id" => ($i+3),
                     "agenda" => "agenda".($i),
                     "biaya" => 1000000*$i
                 ]

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Email;
 use App\Models\Acc;
 use App\Models\Bon;
 use App\Models\Project;
@@ -11,6 +12,7 @@ use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 use function Ramsey\Uuid\v1;
 
@@ -29,32 +31,24 @@ class BonController extends Controller
     public function jsonShowIndexAdmin()
     {
 
-        $query = DB::table('bons')
-            ->select('bons.id', 'users.name', 'bons.tglPengajuan', 'bons.total', 'a.status')
-            ->join('users', 'bons.users_id', '=', 'users.id')
-            ->join('accs as a', 'bons.id', '=', 'a.bons_id')
+        $query = DB::table('bons AS b')
+            ->join('users as u', 'b.users_id', '=', 'u.id')
+            ->join('accs AS a', 'b.id', '=', 'a.bons_id')
+            ->select('a.id', 'b.id', 'u.name', 'b.tglPengajuan', 'b.total', 'a.status', 'a.level')
+            ->where('a.users_id', Auth::user()->id)
+            ->where('a.status', 'Diproses')
             ->where(function ($query) {
-                $query->where('a.users_id', Auth::user()->id)
-                    ->where('a.status', 'Diproses')
-                    ->whereExists(function ($query) {
-                        $query->select('id')
-                            ->from('accs as a1')
-                            ->whereColumn('a1.level', DB::raw('a.level - 1'))
-                            ->where('a1.status', 'Terima');
-                    });
+                $query->whereExists(function ($subquery) {
+                    $subquery->select('id')
+                        ->from('accs AS a1')
+                        ->whereColumn('a1.bons_id', 'a.bons_id')
+                        ->where('a1.level', DB::raw('a.level - 1'))
+                        ->where('a1.status', 'Terima');
+                })
+                    ->orWhere('a.level', 1);
             })
-            ->orWhere(function ($query) {
-                $query->where('a.users_id', Auth::user()->id)
-                    ->where('a.status', 'Diproses')
-                    ->whereExists(function ($query) {
-                        $query->select('id')
-                            ->from('accs as a1')
-                            ->where('a1.level', 1);
-                    });
-            });
-
-        $results = $query->get();
-        $data = $results;
+            ->get();
+        $data = $query;
 
         return response()->json([
             'data' => $data
@@ -115,7 +109,7 @@ class BonController extends Controller
         $pdf = ['filename' => $file->file];
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc','pdf'))->render()
+            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
         ));
     }
     public function getDetailSelf(Request $request)
@@ -159,7 +153,7 @@ class BonController extends Controller
         $pdf = null;
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc','pdf'))->render()
+            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
         ));
     }
 
@@ -230,11 +224,23 @@ class BonController extends Controller
             $newBon->bons_id = $bon;
             $newBon->users_id = $datas[$i]->idAcc;
             $newBon->status = "Diproses";
-            $newBon->level=$datas[$i]->level;
+            $newBon->level = $datas[$i]->level;
             $newBon->save();
             if ($request->get("biayaPerjalanan") < $datas[$i]->threshold) break;
         }
-        return redirect(route('index'));
+
+        $query = DB::table('accs as a')
+            ->join('users as u', 'a.users_id', '=', 'u.id')
+            ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
+            ->where('bons_id', $bon)
+            ->where('level', 1)
+            ->get();
+        if ($query->first()) {
+            Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
+            return redirect()->route('index');
+        } else {
+            return redirect()->route('index');
+        }
     }
 
     /**
@@ -305,7 +311,18 @@ class BonController extends Controller
             ->first();
         $data->status = 'Terima';
         $data->save();
-        return redirect()->route('index')->with('status', 'Bon telah di terima');
+        $query = DB::table('accs as a')
+            ->join('users as u', 'a.users_id', '=', 'u.id')
+            ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
+            ->where('bons_id', $id)
+            ->where('level', $data->level + 1)
+            ->get();
+        if ($query->first()) {
+            Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
+            return redirect()->route('index')->with('status', 'Bon telah di terima');
+        } else {
+            return redirect()->route('index')->with('status', 'Bon telah di terima');
+        }
     }
     public function HistoryAcc()
     {
@@ -453,6 +470,5 @@ class BonController extends Controller
 
     public function test4()
     {
-        
     }
 }

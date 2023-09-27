@@ -52,4 +52,4 @@ Route::middleware("auth")->group(function () {
 });
 // Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
 // Route::get("/test", [BonController::class, "jsonShowIndexSelf"]);
-// Route::get("/test", [BonController::class, "test4"]);
+Route::get("/test", [BonController::class, "test4"]);
