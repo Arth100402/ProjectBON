@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SettingController;
 use App\Models\Bon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\TextUI\XmlConfiguration\Group;
 
@@ -35,7 +36,7 @@ Route::middleware("auth")->group(function () {
     Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
     Route::post('/revBon/{id}', [BonController::class, 'revBon'])->name('bon.revBon');
     Route::get('/HistoryAcc', [BonController::class, 'HistoryAcc'])->name('bon.HistoryAcc');
-    // Route::get('/loadDetailBon/{id}', [BonController::class, 'loadDetailBon'])->name('bon.loadDetailBon');
+    Route::post('/loadDetailBon', [BonController::class, 'loadDetailBon'])->name('bon.loadDetailBon');
 
 
     // FM
@@ -59,4 +60,6 @@ Route::middleware("auth")->group(function () {
 });
 // Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
 // Route::get("/test", [BonController::class, "jsonShowIndexSelf"]);
-// Route::get("/test", [BonController::class, "fmIndex"]);
+Route::get("/test", function(){
+    return DB::table('detailbons')->where('bons_id',3)->delete();
+});
