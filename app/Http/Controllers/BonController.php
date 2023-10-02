@@ -410,7 +410,7 @@ class BonController extends Controller
         $data->keteranganRevisi = $confirmationInput;
         $data->save();
         $history = DB::table('revisionhistory')->insert(
-            ['history' => 'Revisi karena ' . $confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id]
+            ['history' => 'Revisi karena ' . $confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
         );
         return redirect()->route('bon.index')->with('status', 'Bon telah di kembalikan untuk direvisi');
     }

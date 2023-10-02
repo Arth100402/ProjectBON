@@ -151,7 +151,7 @@
                 height="600px" />
         </div>
     @endif
-    <div class="setAlign">
-        <button type="button" class="btn btn-danger" id="btnClose" data-dismiss="modal">Tutup</button>
-    </div>
+</div>
+<div class="setAlign">
+    <button type="button" class="btn btn-danger" id="btnClose" data-dismiss="modal">Tutup</button>
 </div>
