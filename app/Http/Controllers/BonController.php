@@ -75,7 +75,7 @@ class BonController extends Controller
             ->get();
         $x = [];
         foreach ($acc as $item) {
-            if ($item->status != 'Diproses') {
+            if ($item->status != 'Diproses' || $item->status != 'Revisi') {
                 array_push($x, $item->bons_id);
             }
         }
@@ -96,7 +96,7 @@ class BonController extends Controller
         $detail = DB::table('detailbons')
             ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
             ->join('users', 'bons.users_id', '=', 'users.id')
-            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->leftJoin('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', '=', $id)
             ->get([
@@ -123,7 +123,7 @@ class BonController extends Controller
         $detail = DB::table('detailbons')
             ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
             ->join('users', 'bons.users_id', '=', 'users.id')
-            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->leftJoin('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', '=', $id)
             ->get([
@@ -173,7 +173,7 @@ class BonController extends Controller
         $detail = DB::table('detailbons')
             ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
             ->join('users', 'bons.users_id', '=', 'users.id')
-            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->leftJoin('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', '=', $id)
             ->get([
@@ -244,7 +244,7 @@ class BonController extends Controller
                 "asalKota" => $request->get("asalKota")[$key],
                 "tujuan" => $request->get("tujuan")[$key],
                 "users_id" => $request->get("select-sales")[$key],
-                "projects_id" => ($request->get("select-ppc") === 'null') ? null : $request->get("select-ppc"),
+                "projects_id" => ($request->get("select-ppc")[$key] === 'null') ? null : $request->get("select-ppc")[$key],
                 "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : "tesst",
                 "agenda" => $request->get("agenda")[$key],
                 "penggunaan" => $request->get("keterangan")[$key],
