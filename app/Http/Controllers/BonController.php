@@ -74,9 +74,14 @@ class BonController extends Controller
             ->select('accs.bons_id', 'acc.name as acc_name', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
             ->get();
         $x = [];
+        $remove = [];
         foreach ($acc as $item) {
-            if ($item->status != 'Diproses' || $item->status != 'Revisi') {
+            if ($item->status != 'Diproses') {
                 array_push($x, $item->bons_id);
+            }
+            if($item->status == 'Revisi'){
+                array_push($remove, $item->bons_id);
+                $x=array_diff($x,$remove);
             }
         }
         foreach ($data as $item) {
@@ -85,7 +90,6 @@ class BonController extends Controller
                 $item->editable = false;
             }
         }
-        // dd($data);
         return response()->json([
             'data' => $data
         ]);
@@ -359,7 +363,6 @@ class BonController extends Controller
         //     ->join('users as u', 'a.users_id', '=', 'u.id')
         //     ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
         //     ->where('bons_id', $id)
-        //     ->where('level', 1)
         //     ->get();
 
         // if ($query->first()) {

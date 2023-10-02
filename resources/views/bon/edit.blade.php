@@ -17,19 +17,19 @@
         <label for="tglMulai">Mulai Tanggal:</label><br>
         <div class="input-group datepick">
             <input type="text" class="form-control dateTimePicker" name="tglMulai" id="tglMulai"
-                placeholder="Masukkan Tanggal Mulai" required readonly value="{{ $bon->tglPengajuan }}">
+                placeholder="Masukkan Tanggal Mulai" required readonly disabled value="{{ $bon->tglPengajuan }}">
             <div class="input-group-addon">
                 <span class="glyphicon glyphicon-calendar"></span>
             </div>
         </div>
-        <div class="btn-group" role="group" aria-label="...">
+        {{-- <div class="btn-group" role="group" aria-label="...">
             <button type="button" class="btn btn-default btn-info" onclick="appendDate('day','#tglMulai')">+1
                 Hari</button>
             <button type="button" class="btn btn-default btn-primary" onclick="appendDate('week','#tglMulai')">+1
                 Minggu</button>
             <button type="button" class="btn btn-default btn-info" onclick="appendDate('month','#tglMulai')">+1
                 Bulan</button>
-        </div>
+        </div> --}}
     </div>
     <div class="form-group required" style="min-width:25%; max-width:30%">
         <label for="tglAkhir">Akhir Tanggal:</label><br>
@@ -154,7 +154,7 @@
             <input type="file" name="filenames[]" id="files" class="form-control" multiple>
             <small>Types: .doc, .docx, .pdf, .xlx, .csv</small>
         </div>
-        <button type="submit" class="btn btn-primary">Ubah</button>
+        <button type="submit" disabled class="btn btn-primary">Ubah</button>
         <a class="btn btn-danger" href="/">Batal Ubah</a>
     </form>
 @endsection
