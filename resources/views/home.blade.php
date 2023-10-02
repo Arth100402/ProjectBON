@@ -449,7 +449,7 @@
                                 </a>`
                             if (type === 'display' && data.editable == true) {
                                 result +=
-                                    `<a class="btn btn-success" href="/bon/${data.id}/edit"><i class="fa fa-check-circle"></i></a>`;
+                                    `<a class="btn btn-success" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
                             }
                             return result;
                         },
@@ -634,6 +634,8 @@
                 async: false,
                 url: "{{ route('bon.jsonShowIndexAdmin') }}",
                 success: function(data) {
+                    console.log("TEST");
+                    console.log(data);
                     table.clear().draw()
                     table.rows.add(data["data"]).draw()
                 },

@@ -30,7 +30,6 @@ class BonController extends Controller
 
     public function jsonShowIndexAdmin()
     {
-
         $query = DB::table('bons AS b')
             ->join('users as u', 'b.users_id', '=', 'u.id')
             ->join('accs AS a', 'b.id', '=', 'a.bons_id')
@@ -104,12 +103,16 @@ class BonController extends Controller
                 'users.name',
                 'projects.idOpti'
             ]);
+        $revises = DB::table("revisionhistory")
+            ->join("users", "users.id", "revisionhistory.users_id")
+            ->where("revisionhistory.bons_id", $id)
+            ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
         $acc = null;
         $file = Bon::find($id);
         $pdf = ['filename' => $file->file];
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
+            'msg' => view('detail', compact('detail', 'acc', 'pdf', 'revises'))->render()
         ));
     }
     public function getDetailSelf(Request $request)
@@ -151,10 +154,14 @@ class BonController extends Controller
             ->orderBy("accs.level")
             ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
             ->get();
+        $revises = DB::table("revisionhistory")
+            ->join("users", "users.id", "revisionhistory.users_id")
+            ->where("revisionhistory.bons_id", $id)
+            ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
         $pdf = null;
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
+            'msg' => view('detail', compact('detail', 'acc', 'pdf', 'revises'))->render()
         ));
     }
 
@@ -173,11 +180,15 @@ class BonController extends Controller
                 'users.name',
                 'projects.idOpti'
             ]);
+        $revises = DB::table("revisionhistory")
+            ->join("users", "users.id", "revisionhistory.users_id")
+            ->where("revisionhistory.bons_id", $id)
+            ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
         $acc = null;
         $pdf = null;
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
+            'msg' => view('detail', compact('detail', 'acc', 'pdf', 'revises'))->render()
         ));
     }
 
@@ -292,7 +303,6 @@ class BonController extends Controller
             ->join('users', 'detailbons.users_id', '=', 'users.id')
             ->where('detailbons.bons_id', $id)
             ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
-        dd($bon, $data);
         return view('bon.edit', compact('bon', 'data'));
     }
 
@@ -399,8 +409,8 @@ class BonController extends Controller
         $data->status = 'Revisi';
         $data->keteranganRevisi = $confirmationInput;
         $data->save();
-        $history = DB::table('history_tabel')->insert(
-            ['history' => 'Revisi karena '.$confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id]
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Revisi karena ' . $confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id]
         );
         return redirect()->route('bon.index')->with('status', 'Bon telah di kembalikan untuk direvisi');
     }

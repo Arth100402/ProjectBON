@@ -1,38 +1,68 @@
 <div class="panel card-background-color">
-    <h3>Detail Bon</h3>
-    <div class="table-wrapper table-responsive" style="height:30vh; overflow-y:scroll">
-        <table id="detailTableAcc" class="table table-bordered" style="background-color: white">
-            <thead>
-                <tr>
-                    <th>Mulai Tanggal</th>
-                    <th>Akhir Tanggal</th>
-                    <th>Asal Kota</th>
-                    <th>Tujuan</th>
-                    <th>Project</th>
-                    <th>Pengaju</th>
-                    <th>No Paket</th>
-                    <th>Agenda</th>
-                    <th>Penggunaan</th>
-                    <th>Biaya</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($detail as $d)
+    <div class="panel-heading">
+        <h3>Detail Bon</h3>
+    </div>
+    <div class="panel-body">
+        <div class="table-wrapper table-responsive" style="height:30vh; overflow-y:scroll">
+            <table id="detailTableAcc" class="table table-bordered" style="background-color: white">
+                <thead>
                     <tr>
-                        <td>{{ $d->tglMulai }}</td>
-                        <td>{{ $d->tglAkhir }}</td>
-                        <td>{{ $d->asalKota }}</td>
-                        <td>{{ $d->tujuan }}</td>
-                        <td>{{ $d->idOpti }}</td>
-                        <td>{{ $d->name }}</td>
-                        <td>{{ $d->noPaket }}</td>
-                        <td>{{ $d->agenda }}</td>
-                        <td>{{ $d->penggunaan }}</td>
-                        <td>{{ sprintf('Rp %s', number_format($d->biaya, 0, ',', '.')) }}</td>
+                        <th>Mulai Tanggal</th>
+                        <th>Akhir Tanggal</th>
+                        <th>Asal Kota</th>
+                        <th>Tujuan</th>
+                        <th>Project</th>
+                        <th>Pengaju</th>
+                        <th>No Paket</th>
+                        <th>Agenda</th>
+                        <th>Penggunaan</th>
+                        <th>Biaya</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach ($detail as $d)
+                        <tr>
+                            <td>{{ $d->tglMulai }}</td>
+                            <td>{{ $d->tglAkhir }}</td>
+                            <td>{{ $d->asalKota }}</td>
+                            <td>{{ $d->tujuan }}</td>
+                            <td>{{ $d->idOpti }}</td>
+                            <td>{{ $d->name }}</td>
+                            <td>{{ $d->noPaket }}</td>
+                            <td>{{ $d->agenda }}</td>
+                            <td>{{ $d->penggunaan }}</td>
+                            <td>{{ sprintf('Rp %s', number_format($d->biaya, 0, ',', '.')) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel-heading">
+        <h3>Riwayat Revisi: </h3>
+    </div>
+    <div class="panel-body">
+        <div class="table-wrapper table-responsive" style="height:30vh; overflow-y:scroll">
+            <table id="detailTableAcc" class="table table-bordered" style="background-color: white">
+                <thead>
+                    <tr>
+                        <th>Atasan</th>
+                        <th>Komentar</th>
+                        <th>Tanggal Komentar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($revises as $d)
+                        <tr>
+                            <td>{{ $d->atasan }}</td>
+                            <td>{{ $d->history }}</td>
+                            <td>{{ $d->tglRevisi }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 
     @if ($acc != null)
@@ -113,7 +143,13 @@
         </div>
     @endif
     @if ($pdf != null)
-        <embed src="{{ asset('files/' . $pdf['filename']) }}" type="application/pdf" width="100%" height="600px" />
+        <div class="panel-heading">
+            <h3>Dokumen Pendukung:</h3>
+        </div>
+        <div class="panel-body">
+            <embed src="{{ asset('files/' . $pdf['filename']) }}" type="application/pdf" width="100%"
+                height="600px" />
+        </div>
     @endif
     <div class="setAlign">
         <button type="button" class="btn btn-danger" id="btnClose" data-dismiss="modal">Tutup</button>
