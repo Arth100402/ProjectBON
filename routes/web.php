@@ -34,6 +34,8 @@ Route::middleware("auth")->group(function () {
     Route::get('/accBont/{id}', [BonController::class, 'accBon'])->name('bon.accBon');
     Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
     Route::get('/HistoryAcc', [BonController::class, 'HistoryAcc'])->name('bon.HistoryAcc');
+    // Route::get('/loadDetailBon/{id}', [BonController::class, 'loadDetailBon'])->name('bon.loadDetailBon');
+
 
     // FM
     Route::get("/fmindex", [BonController::class, "fmIndex"])->name("fmindex");

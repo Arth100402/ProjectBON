@@ -264,6 +264,15 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="modalHistory" tabindex="-1" role="basic" aria-hidden="true">
+        <div class="modal-dialog modal-wide">
+            <div class="modal-content">
+                <div class="modal-body" id="modalContentHistory">
+                    <!--loading animated gif can put here-->
+                </div>
+            </div>
+        </div>
+    </div>
 
     {{-- End Modals --}}
 @endsection
@@ -619,6 +628,7 @@
                 success: function(data) {
                     tableSelf.clear().draw()
                     tableSelf.rows.add(data["data"]).draw()
+                    console.log(data);
                 },
                 error: function(error) {
                     console.log("Error: ");

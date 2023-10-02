@@ -286,7 +286,14 @@ class BonController extends Controller
      */
     public function edit($id)
     {
-        return view('bon.edit');
+        $bon = DB::table('bons')->where('id',$id)->get()[0];
+        $data = DB::table('detailbons')
+        ->join('projects','detailbons.projects_id','=','projects.id')
+        ->join('users','detailbons.users_id','=','users.id')
+        ->where('detailbons.bons_id',$id)
+        ->get(['detailbons.*','projects.namaOpti','projects.noPaket','users.name']);
+        dd($bon, $data);
+        return view('bon.edit',compact('bon','data'));
     }
 
     /**
@@ -310,6 +317,14 @@ class BonController extends Controller
     public function destroy($id)
     {
         //
+    }
+    public function loadDetailBon($id){
+        $data = DB::table('detailbons')
+        ->join('projecs','detailbons.projects_id','=','projects.id')
+        ->join('users','detailbons.users_id','=','users.id')
+        ->where('bons_id',$id)
+        ->get(['detailbons.*','projects.namaOpti','projects.noPaket','user.name']);
+        return response()->json($data);
     }
 
     public function  loadPPC(Request $request)
