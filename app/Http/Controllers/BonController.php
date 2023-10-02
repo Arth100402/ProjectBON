@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Email;
+use App\Mail\revMail;
 use App\Models\Acc;
 use App\Models\Bon;
+use App\Models\DetailBon;
 use App\Models\Project;
 use App\Models\User;
 use Barryvdh\DomPDF\PDF;
@@ -234,7 +236,7 @@ class BonController extends Controller
             "status" => null,
             "file" => $filenames
         ]);
-        foreach ($request->get("select-ppc") as $key => $value) {
+        foreach ($request->get("select-sales") as $key => $value) {
             DB::table('detailbons')->insert([
                 "bons_id" => $bon,
                 "tglMulai" => $this->convertDTPtoDatabaseDT($request->get("tglMulai")[$key]),
@@ -242,7 +244,7 @@ class BonController extends Controller
                 "asalKota" => $request->get("asalKota")[$key],
                 "tujuan" => $request->get("tujuan")[$key],
                 "users_id" => $request->get("select-sales")[$key],
-                "projects_id" => ($value === 'null') ? null : $value,
+                "projects_id" => ($request->get("select-ppc") === 'null') ? null : $request->get("select-ppc"),
                 "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : "tesst",
                 "agenda" => $request->get("agenda")[$key],
                 "penggunaan" => $request->get("keterangan")[$key],
@@ -297,13 +299,15 @@ class BonController extends Controller
      */
     public function edit($id)
     {
-        $bon = DB::table('bons')->where('id', $id)->get()[0];
+        $bon = DB::table('bons')
+        ->where('id',$id)->get()[0];
         $data = DB::table('detailbons')
-            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
-            ->join('users', 'detailbons.users_id', '=', 'users.id')
-            ->where('detailbons.bons_id', $id)
-            ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
-        return view('bon.edit', compact('bon', 'data'));
+        ->join('projects','detailbons.projects_id','=','projects.id')
+        ->join('users','detailbons.users_id','=','users.id')
+        ->where('detailbons.bons_id',$id)
+        ->get(['detailbons.*','projects.namaOpti','projects.noPaket','users.name']);
+        // dd($bon, $data);
+        return view('bon.edit',compact('bon','data'));
     }
 
     /**
@@ -313,9 +317,59 @@ class BonController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request,$id)
     {
-        //
+        $request->validate([
+            'filenames.*' => 'mimes:pdf|max:10240',
+        ]);
+
+        $filenames = null;
+        $filenamed = "";
+        if ($request->hasFile('filenames')) {
+            foreach ($request->file('filenames') as $key => $file) {
+                $fileExt = $file->getClientOriginalExtension();
+                $date = now()->format('YmdHis');
+                $temp = $date . "surat" . $key . "." . $fileExt;
+                $file->storeAs('files', $temp, 'public');
+                $filenamed .= $temp . ",";
+            }
+            $filenames = rtrim($filenamed, ",");
+        }
+        $bon = Bon::find($id);
+        $bon->total = $request->get("biayaPerjalanan");
+        $bon->save();
+        $aff = DB::table('detailbons')->where('bons_id',$id)->delete();
+            foreach ($request->get("select-sales") as $key => $value) {
+                $data = new DetailBon();
+                $data->bons_id = $id;
+                $data->tglMulai = $this->convertDTPtoDatabaseDT($request->get("tglMulai")[$key]);
+                $data->tglAkhir= $this->convertDTPtoDatabaseDT($request->get("tglAkhir")[$key]);
+                $data->asalKota = $request->get("asalKota")[$key];
+                $data->tujuan= $request->get("tujuan")[$key];
+                $data->users_id= $request->get("select-sales")[$key];
+                $data->projects_id = ($request->get("select-ppc")[$key] === 'null') ? null : $request->get("select-ppc")[$key];
+                $data->noPaket = ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : "tesst";
+                $data->agenda = $request->get("agenda")[$key];
+                $data->penggunaan = $request->get("keterangan")[$key];
+                $data->biaya = $request->get("biaya")[$key];
+                $data->save();
+            }
+
+
+        // $query = DB::table('accs as a')
+        //     ->join('users as u', 'a.users_id', '=', 'u.id')
+        //     ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
+        //     ->where('bons_id', $id)
+        //     ->where('level', 1)
+        //     ->get();
+
+        // if ($query->first()) {
+        //     Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
+        //     return redirect()->route('bon.index');
+        // } else {
+        //     return redirect()->route('bon.index');
+        // }
+        return redirect()->route('bon.index');
     }
 
     /**
@@ -328,13 +382,12 @@ class BonController extends Controller
     {
         //
     }
-    public function loadDetailBon($id)
-    {
+    public function loadDetailBon(Request $request){
         $data = DB::table('detailbons')
-            ->join('projecs', 'detailbons.projects_id', '=', 'projects.id')
-            ->join('users', 'detailbons.users_id', '=', 'users.id')
-            ->where('bons_id', $id)
-            ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'user.name']);
+        ->leftJoin('projects','detailbons.projects_id','=','projects.id')
+        ->join('users','detailbons.users_id','=','users.id')
+        ->where('detailbons.bons_id',$request->get('id'))
+        ->get(['detailbons.*','projects.namaOpti','projects.id AS pid','projects.noPaket','users.name']);
         return response()->json($data);
     }
 
@@ -351,7 +404,12 @@ class BonController extends Controller
 
     private function convertDTPtoDatabaseDT($date)
     {
-        return date("Y-m-d", strtotime(str_replace(" ", "", explode(",", $date)[1])));
+        $exp = explode(",", $date);
+        if(count($exp)>1){
+            return date("Y-m-d", strtotime(str_replace(" ", "", explode(",", $date)[1])));
+        }
+        return $date;
+
     }
 
     public function accBon($id)

@@ -17,7 +17,7 @@
         <label for="tglMulai">Mulai Tanggal:</label><br>
         <div class="input-group datepick">
             <input type="text" class="form-control dateTimePicker" name="tglMulai" id="tglMulai"
-                placeholder="Masukkan Tanggal Mulai" required readonly value="{{$bon->tglPengajuan}}">
+                placeholder="Masukkan Tanggal Mulai" required readonly value="{{ $bon->tglPengajuan }}">
             <div class="input-group-addon">
                 <span class="glyphicon glyphicon-calendar"></span>
             </div>
@@ -114,8 +114,9 @@
     </div>
     <br>
     <button id="addDetail" class="btn btn-info btn-block">Tambahkan</button><br>
-    <form method="POST" action="{{ route('bon.store') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('bon.update',$bon->id) }}" enctype="multipart/form-data">
         @csrf
+        @method("PUT")
         <div class="table-responsive" style="overflow: scroll">
             <table id="myTable" class="table table-striped table-bordered">
                 <thead>
@@ -132,25 +133,16 @@
                         <th>Biaya</th>
                         <th>Action</th>
                     </tr>
-                    @foreach ($data as $item)
-                    <td>{{$item->tglMulai}}</td>
-                    <td>{{$item->tglAkhir}}</td>
-                    <td>{{$item->asalKota}}</td>
-                    <td>{{$item->tujuan}}</td>
-                    <td>{{$item->name}}</td>
-                    <td>{{$item->namaOpti}}</td>
-                    <td>{{$item->noPaket}}</td>
-                    <td>{{$item->agenda}}</td>
-                    <td>{{$item->biaya}}</td>
-                    @endforeach
                 </thead>
-                <tbody id="table-container"></tbody>
+                <tbody id="table-container">
+
+                </tbody>
             </table>
         </div>
 
         <div class="form-group">
             <label for="saldo">Total Biaya Perjalanan: </label>
-            <input type="number" min="0" value="0" name="biayaPerjalanan" class="form-control"
+            <input type="number" min="0" value="{{$bon->total}}" name="biayaPerjalanan" class="form-control"
                 id="biayaPerjalanan" readonly>
             @error('debit')
                 <span class="text-danger">{{ $message }}</span>
@@ -262,6 +254,7 @@
                 const totalPengeluaran = $(this).parent().parent().find("#biaya").val()
                 $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) - parseInt(
                     totalPengeluaran));
+                console.log($(this).parent().parent().find("#biaya"));
                 $(this).parent().parent().remove()
                 if ($("#table-container tr").length < 1) {
                     $("#submit").attr("disabled", true);
@@ -283,99 +276,37 @@
                     } else return
                 }
             });
+            $.ajax({
+                type: "POST",
+                url: "{{ route('bon.loadDetailBon') }}",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    "id": {{ $bon->id }}
+                },
+                dataType: 'JSON',
+                success: function(data) {
+                    console.log("TEST");
+                    console.log(data);
+                    var tbody = $('#table-container'); // Get the tbody element
+                    tbody.empty(); // Clear the tbody
+
+                    $.each(data, function(i, item) {
+                        console.log(i, item);
+                        var row = '<tr><td>' + (item.tglMulai ? item.tglMulai : '')+`<input type="hidden" name="tglMulai[]" value="${item.tglMulai}">`+'</td>'+
+                            '<td>' + (item.tglAkhir ? item.tglAkhir : '') +`<input type="hidden" name="tglAkhir[]" value="${item.tglAkhir}">`+'</td>'+
+                            '<td>' + (item.asalKota ? item.asalKota : '') +`<input type="hidden" name="asalKota[]" value="${item.asalKota}">`+'</td>'+
+                            '<td>' + (item.tujuan ? item.tujuan : '')+`<input type="hidden" name="tujuan[]" value="${item.tujuan}">`+'</td>'+
+                            '<td>' + (item.name ? item.name : '') + `<input type="hidden" name="select-sales[]" value="{{Auth::user()->id}}">`+'</td>'+
+                            '<td>' + (item.namaOpti ? item.namaOpti : '')+ `<input type="hidden" name="select-ppc[]" value="${item.pid}">` + '</td>'+
+                            '<td>' + (item.noPaket ? item.noPaket : '')+`<input type="hidden" name="nopaket[]" value="${item.noPaket}">` + '</td>'+
+                            '<td>' + (item.agenda ? item.agenda : '') +`<input type="hidden" name="agenda[]" value="${item.agenda }">`+ '</td>'+
+                            '<td>' + (item.penggunaan ? item.penggunaan : '') +`<input type="hidden" name="keterangan[]" value="${item.penggunaan}">`+ '</td>'+
+                            '<td>' + (item.biaya ? item.biaya : '')+ `<input type="hidden" name="biaya[]" id="biaya" value="${item.biaya }">`+ '</td>'+
+                            '<td>' + `<a class="btn btn-danger btn-block" id="deleteRow"><i class="fa fa-trash-o"></i></a>` + '</td></tr>';
+                        tbody.append(row);
+                    });
+                }
+            });
         });
-        // var table = $('#myTable').DataTable({
-        //         info: false,
-        //         paging: false,
-        //         scrollCollapse: true,
-        //         scrollY: '445px',
-        //         order: [
-        //             [4, 'asc'],
-        //             [1, 'desc']
-        //         ],
-        //         columns: [{
-        //                 data: "tglMulai",
-        //                 render: function(data, type, row) {
-        //                     if (data !== null) {
-        //                         var date = new Date(data);
-        //                         var options = {
-        //                             weekday: 'long',
-        //                             year: 'numeric',
-        //                             month: 'long',
-        //                             day: 'numeric'
-        //                         };
-        //                         return date.toLocaleDateString('id-ID', options);
-        //                     } else {
-        //                         return "Data tidak tersedia";
-        //                     }
-        //                 }
-        //             },
-        //             {
-        //                 data: "tglAkhir",
-        //                 render: function(data, type, row) {
-        //                     if (data !== null) {
-        //                         var date = new Date(data);
-        //                         var options = {
-        //                             weekday: 'long',
-        //                             year: 'numeric',
-        //                             month: 'long',
-        //                             day: 'numeric'
-        //                         };
-        //                         return date.toLocaleDateString('id-ID', options);
-        //                     } else {
-        //                         return "Data tidak tersedia";
-        //                     }
-        //                 }
-        //             },
-        //             {
-        //                 data: "asalKota"
-        //             },
-        //             {
-        //                 data: "tujuan"
-        //             },
-        //             {
-        //                 data: "namaOpti"
-        //             },
-        //             {
-        //                 data: "name"
-        //             },
-        //             {
-        //                 data: "noPaket"
-        //             },
-        //             {
-        //                 data: "agenda"
-        //             },
-        //             {
-        //                 data: "penggunaan"
-        //             },
-        //             {
-        //                 data: "biaya",
-        //                 render: function(data, type, row) {
-        //                     if (data !== null) {
-        //                         return new Intl.NumberFormat('id-ID', {
-        //                             style: 'currency',
-        //                             currency: 'IDR'
-        //                         }).format(data);
-        //                     } else {
-        //                         return "Data tidak tersedia";
-        //                     }
-        //                 }
-        //             }
-        //         ]
-        //     });
-            // $.ajax({
-            //     type: "GET",
-            //     dataType: "json",
-            //     async: false,
-            //     url: `loadDetailBon/${bon->id}`,
-            //     success: function(data) {
-            //         table.clear().draw()
-            //         table.rows.add(data["data"]).draw()
-            //     },
-            //     error: function(error) {
-            //         console.log("Error: ");
-            //         console.log(error);
-            //     }
-            // });
     </script>
 @endsection
