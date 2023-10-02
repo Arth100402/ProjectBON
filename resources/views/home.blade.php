@@ -264,6 +264,23 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="modalEditE" tabindex="-1" role="basic" aria-hidden="true">
+        <div class="modal-dialog modal-wide">
+            <div class="modal-content">
+                <div class="modal-body" id="modalContentE">
+                    <form id="kirimRevisi" method="POST">
+                        @csrf
+                        <div class="form-group">
+                            <label for="nama">Alasan Revisi</label>
+                            <input type="text" class="form-control" name="revisi" id="revisi"
+                                placeholder="Masukkan Alasan Revisi">
+                        </div>
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="modalHistory" tabindex="-1" role="basic" aria-hidden="true">
         <div class="modal-dialog modal-wide">
             <div class="modal-content">
@@ -352,6 +369,7 @@
                             return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
                                 onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
                                 <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
+                                <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisi(${data.id})"><i class="fa fa-comment"></i></a>
                                 <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
                         },
                         width: "15%"
@@ -496,8 +514,13 @@
                         width: "5%"
                     },
                     {
-                        data: "keteranganTolak",
-                        defaultContent: '<p>-</p>',
+                        data: null,
+                        render: (data, type, row) => {
+                            if (data.keteranganRevisi){
+                                return data.keteranganRevisi
+                            }
+                            return data.keteranganTolak;
+                        }
                     },
                     {
                         data: "updated_at",
@@ -768,6 +791,10 @@
 
         function tolak(id) {
             $("#kirimTolak").attr("action", "/decBon/" + id);
+        }
+
+        function revisi(id) {
+            $("#kirimRevisi").attr("action", "/revBon/" + id);
         }
 
         function getDetail(id) {

@@ -286,14 +286,14 @@ class BonController extends Controller
      */
     public function edit($id)
     {
-        $bon = DB::table('bons')->where('id',$id)->get()[0];
+        $bon = DB::table('bons')->where('id', $id)->get()[0];
         $data = DB::table('detailbons')
-        ->join('projects','detailbons.projects_id','=','projects.id')
-        ->join('users','detailbons.users_id','=','users.id')
-        ->where('detailbons.bons_id',$id)
-        ->get(['detailbons.*','projects.namaOpti','projects.noPaket','users.name']);
+            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->join('users', 'detailbons.users_id', '=', 'users.id')
+            ->where('detailbons.bons_id', $id)
+            ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
         dd($bon, $data);
-        return view('bon.edit',compact('bon','data'));
+        return view('bon.edit', compact('bon', 'data'));
     }
 
     /**
@@ -318,12 +318,13 @@ class BonController extends Controller
     {
         //
     }
-    public function loadDetailBon($id){
+    public function loadDetailBon($id)
+    {
         $data = DB::table('detailbons')
-        ->join('projecs','detailbons.projects_id','=','projects.id')
-        ->join('users','detailbons.users_id','=','users.id')
-        ->where('bons_id',$id)
-        ->get(['detailbons.*','projects.namaOpti','projects.noPaket','user.name']);
+            ->join('projecs', 'detailbons.projects_id', '=', 'projects.id')
+            ->join('users', 'detailbons.users_id', '=', 'users.id')
+            ->where('bons_id', $id)
+            ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'user.name']);
         return response()->json($data);
     }
 
@@ -370,7 +371,7 @@ class BonController extends Controller
             ->join('users', 'users.id', '=', 'bons.users_id')
             ->where('accs.users_id', '=', Auth::user()->id)
             ->where('accs.status', '!=', 'Diproses')
-            ->get(['bons.id', 'bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at']);
+            ->get(['bons.id', 'bons.tglPengajuan', 'users.name', 'bons.total', 'accs.status', 'accs.keteranganTolak', 'accs.keteranganRevisi', 'accs.updated_at']);
         return response()->json(["data" => $data]);
     }
 
@@ -388,6 +389,22 @@ class BonController extends Controller
         $bon->save();
         return redirect()->route('bon.index')->with('status', 'Bon telah di tolak');
     }
+
+    public function revBon(Request $request, $id)
+    {
+        $data = Acc::where('bons_id', $id)
+            ->where('users_id', Auth::user()->id)
+            ->first();
+        $confirmationInput = $request->get('revisi');
+        $data->status = 'Revisi';
+        $data->keteranganRevisi = $confirmationInput;
+        $data->save();
+        $history = DB::table('history_tabel')->insert(
+            ['history' => 'Revisi karena '.$confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id]
+        );
+        return redirect()->route('bon.index')->with('status', 'Bon telah di kembalikan untuk direvisi');
+    }
+
     public function FmAccBon($id)
     {
         $data = new Acc;
