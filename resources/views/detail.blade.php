@@ -80,7 +80,7 @@
                     </thead>
                     <tbody>
                         @foreach ($acc as $a)
-                            @if ($a->acc_jabatan != 8 && ($a->acc_jabatan != 3 && $a->acc_depart != 8))
+                            @if ($a->acc_jabatan != 8 && !($a->acc_jabatan == 3 && $a->acc_depart == 8))
                                 <tr>
                                     <td>{{ $a->acc_name }}</td>
                                     @if ($a->status == 'Tolak')
