@@ -453,7 +453,7 @@
                             }
                             return result;
                         },
-                        width: "5%"
+                        width: "10%"
                     }
                 ]
             });

@@ -154,7 +154,7 @@
             <input type="file" name="filenames[]" id="files" class="form-control" multiple>
             <small>Types: .doc, .docx, .pdf, .xlx, .csv</small>
         </div>
-        <button type="submit" disabled class="btn btn-primary">Ubah</button>
+        <button type="submit" id="submit" disabled class="btn btn-primary">Ubah</button>
         <a class="btn btn-danger" href="/">Batal Ubah</a>
     </form>
 @endsection
@@ -258,6 +258,9 @@
                 $(this).parent().parent().remove()
                 if ($("#table-container tr").length < 1) {
                     $("#submit").attr("disabled", true);
+                }
+                else{
+                    $("#submit").attr("disabled", false);
                 }
             });
             $(".datepick").on("click", function() {

@@ -8,7 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class revMail extends Mailable
+class PengajuMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -40,7 +40,7 @@ class revMail extends Mailable
             ->join('users as u', 'db.users_id', '=', 'u.id')
             ->where('db.bons_id', $this->bons_id)
             ->get();
-        return $this->view('mail.revisi')
+        return $this->view('mail.pengaju')
                     ->with(['bons_id' => $this->bons_id,
                             'name' => $this->name,
                             'results' => $result])

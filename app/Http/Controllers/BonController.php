@@ -358,20 +358,20 @@ class BonController extends Controller
             $data->save();
         }
 
+        $query = DB::table('accs')
+            ->join('users', 'accs.users_id', '=', 'users.id')
+            ->select('accs.bons_id','users.email', 'accs.bons_id', 'users.name')
+            ->where('accs.bons_id', $id)
+            ->where('accs.status', 'Revisi')
+            ->get();
+        
 
-        // $query = DB::table('accs as a')
-        //     ->join('users as u', 'a.users_id', '=', 'u.id')
-        //     ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
-        //     ->where('bons_id', $id)
-        //     ->get();
-
-        // if ($query->first()) {
-        //     Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
-        //     return redirect()->route('bon.index');
-        // } else {
-        //     return redirect()->route('bon.index');
-        // }
-        return redirect()->route('bon.index');
+        if ($query->first()) {
+            Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
+            return redirect()->route('bon.index');
+        } else {
+            return redirect()->route('bon.index');
+        }
     }
 
     /**
@@ -472,6 +472,20 @@ class BonController extends Controller
         $history = DB::table('revisionhistory')->insert(
             ['history' => 'Revisi karena ' . $confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
         );
+
+        $query = DB::table('accs')
+            ->join('bons', 'accs.bons_id','=','bons.id')
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->select('accs.bons_id','users.email', 'accs.bons_id', 'users.name')
+            ->where('accs.bons_id', $id)
+            ->get();
+
+        if ($query->first()) {
+            Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
+            return redirect()->route('bon.index');
+        } else {
+            return redirect()->route('bon.index');
+        }
         return redirect()->route('bon.index')->with('status', 'Bon telah di kembalikan untuk direvisi');
     }
 

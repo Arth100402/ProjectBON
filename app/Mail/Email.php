@@ -36,7 +36,7 @@ class Email extends Mailable
     {
         $result = DB::table('detailbons as db')
             ->select('db.*', 'u.id', 'u.name', 'p.id', 'p.idOpti')
-            ->join('projects as p', 'db.projects_id', '=', 'p.id')
+            ->leftJoin('projects as p', 'db.projects_id', '=', 'p.id')
             ->join('users as u', 'db.users_id', '=', 'u.id')
             ->where('db.bons_id', $this->bons_id)
             ->get();
