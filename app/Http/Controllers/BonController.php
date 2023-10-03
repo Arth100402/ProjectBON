@@ -79,9 +79,9 @@ class BonController extends Controller
             if ($item->status != 'Diproses') {
                 array_push($x, $item->bons_id);
             }
-            if($item->status == 'Revisi'){
+            if ($item->status == 'Revisi') {
                 array_push($remove, $item->bons_id);
-                $x=array_diff($x,$remove);
+                $x = array_diff($x, $remove);
             }
         }
         foreach ($data as $item) {
@@ -276,10 +276,10 @@ class BonController extends Controller
             ->where('bons_id', $bon)
             ->where('level', 1)
             ->get();
-        // if ($query->first()) {
-        //     Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
-        //     return redirect()->route('bon.index');
-        // }
+        if ($query->first()) {
+            Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
+            return redirect()->route('bon.index');
+        }
         return redirect()->route('bon.index');
     }
 
@@ -358,13 +358,19 @@ class BonController extends Controller
             $data->save();
         }
 
+        $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->first();
+        $change->status = 'Diproses';
+
+
         $query = DB::table('accs')
             ->join('users', 'accs.users_id', '=', 'users.id')
-            ->select('accs.bons_id','users.email', 'accs.bons_id', 'users.name')
+            ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name')
             ->where('accs.bons_id', $id)
             ->where('accs.status', 'Revisi')
             ->get();
-        
+
+        $change->save();
+
 
         if ($query->first()) {
             Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
@@ -453,6 +459,7 @@ class BonController extends Controller
         $confirmationInput = $request->get('tolak');
         $data->status = 'Tolak';
         $data->keteranganTolak = $confirmationInput;
+        $data->keteranganRevisi = null;
         $data->save();
         $bon = Bon::find($id);
         $bon->status = "Tolak";
@@ -474,9 +481,9 @@ class BonController extends Controller
         );
 
         $query = DB::table('accs')
-            ->join('bons', 'accs.bons_id','=','bons.id')
+            ->join('bons', 'accs.bons_id', '=', 'bons.id')
             ->join('users', 'bons.users_id', '=', 'users.id')
-            ->select('accs.bons_id','users.email', 'accs.bons_id', 'users.name')
+            ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name')
             ->where('accs.bons_id', $id)
             ->get();
 
@@ -574,7 +581,7 @@ class BonController extends Controller
         $detail = DB::table('detailbons')
             ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
             ->join('users', 'bons.users_id', '=', 'users.id')
-            ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->leftJoin('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', '=', $id)
             ->get([
@@ -583,15 +590,22 @@ class BonController extends Controller
                 'users.name',
                 'projects.idOpti'
             ]);
-        $acc = Acc::join("users AS u", "u.id", "accs.users_id")
-            ->join("jabatans AS j", "j.id", "u.jabatan_id")
-            ->join("departements AS d", "d.id", "u.departement_id")
-            ->where("bons_id", $id)
-            ->get(['u.name as acc_name', 'accs.status as status', 'accs.keteranganTolak as keteranganTolak']);
+        $acc = DB::table('accs')
+            ->join('bons', 'bons.id', '=', 'accs.bons_id')
+            ->join('users as acc', 'acc.id', '=', 'accs.users_id')
+            ->join('users as aju', 'aju.id', '=', 'bons.users_id')
+            ->where('bons.id', '=', $id)
+            ->orderBy("accs.level")
+            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
+            ->get();
         $pdf = null;
+        $revises = DB::table("revisionhistory")
+            ->join("users", "users.id", "revisionhistory.users_id")
+            ->where("revisionhistory.bons_id", $id)
+            ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
         return response()->json(array(
             'status' => 'oke',
-            'msg' => view('detail', compact('detail', 'acc', 'pdf'))->render()
+            'msg' => view('detail', compact('detail', 'acc', 'pdf', 'revises'))->render()
         ));
     }
 

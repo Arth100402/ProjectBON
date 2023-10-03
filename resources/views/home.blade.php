@@ -10,6 +10,11 @@
             word-wrap: break-word !important;
         }
 
+        .flex {
+            display: flex;
+            width: 100%;
+        }
+
         .setAlign {
             text-align: right;
         }
@@ -75,6 +80,7 @@
                                 <th>Status</th>
                                 <th>Keterangan</th>
                                 <th>Diterima/Ditolak Pada</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                     </table>
@@ -130,6 +136,7 @@
                         <th>Status</th>
                         <th>Keterangan</th>
                         <th>Diterima/Ditolak Pada</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
             </table>
@@ -298,6 +305,7 @@
     <script>
         $(document).ready(function() {
             const jabatanID = {!! Auth::user()->jabatan_id !!}
+            const departID = {!! Auth::user()->departement_id !!}
 
             $.fn.dataTable.ext.type.order['status-order-pre'] = function(d) {
                 switch (d) {
@@ -311,386 +319,6 @@
                         return 4;
                 }
             };
-
-            // Tables
-            var table = $('#myTable').DataTable({
-                info: false,
-                paging: false,
-                scrollCollapse: true,
-                scrollY: '445px',
-                order: [
-                    [1, 'desc']
-                ],
-                columnDefs: [{
-                        searchable: true,
-                        targets: [0, 1, 2]
-                    },
-                    {
-                        className: "wrap",
-                        targets: [0, 1, 2]
-                    }
-                ],
-                columns: [{
-                        data: "name"
-                    },
-                    {
-                        data: "tglPengajuan",
-                        render: function(data, type, row) {
-                            if (data !== null) {
-                                var date = new Date(data);
-                                var options = {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                };
-                                return date.toLocaleDateString('id-ID', options);
-                            } else {
-                                return "Data tidak tersedia";
-                            }
-                        }
-                    },
-                    {
-                        data: "total",
-                        render: function(data, type, row) {
-                            if (data !== null) {
-                                return new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR'
-                                }).format(data);
-                            } else {
-                                return "Data tidak tersedia";
-                            }
-                        }
-                    },
-                    {
-                        data: null,
-                        render: (data, type, row, meta) => {
-                            return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
-                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
-                                <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
-                                <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisi(${data.id})"><i class="fa fa-comment"></i></a>
-                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
-                        },
-                        width: "15%"
-                    }
-                ]
-            });
-            var tableSelf = $('#myTableSelf').DataTable({
-                info: false,
-                paging: false,
-                scrollCollapse: true,
-                scrollY: '445px',
-                order: [
-                    [4, 'asc'],
-                    [1, 'desc']
-                ],
-                columnDefs: [{
-                        searchable: true,
-                        targets: [0, 1, 2, 3, 4]
-                    },
-                    {
-                        className: "wrap",
-                        targets: [0, 1, 2, 3, 4]
-                    },
-                    {
-                        type: 'status-order',
-                        targets: 4
-                    },
-                ],
-                columns: [{
-                        data: "name"
-
-                    },
-                    {
-                        data: "dname",
-                        width: "10%"
-                    },
-                    {
-                        data: "tglPengajuan",
-                        render: function(data, type, row) {
-                            if (data !== null) {
-                                var date = new Date(data);
-                                var options = {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                };
-                                return date.toLocaleDateString('id-ID', options);
-                            } else {
-                                return "Data tidak tersedia";
-                            }
-                        }
-                    },
-                    {
-                        data: "total",
-                        render: function(data, type, row) {
-                            if (data !== null) {
-                                return new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR'
-                                }).format(data);
-                            } else {
-                                return "Data tidak tersedia";
-                            }
-                        }
-                    },
-                    {
-                        data: "status",
-                        defaultContent: '<p>Menunggu</p>',
-                        width: "5%"
-                    },
-                    {
-                        data: null,
-                        render: (data, type, row, meta) => {
-                            let result = `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
-                                <i class="fa fa-info-circle"></i>
-                                </a>`
-                            if (type === 'display' && data.editable == true) {
-                                result +=
-                                    `<a class="btn btn-success" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
-                            }
-                            return result;
-                        },
-                        width: "10%"
-                    }
-                ]
-            });
-            var table3 = $('#myTableAccDec').DataTable({
-                info: false,
-                paging: false,
-                scrollCollapse: true,
-                scrollY: '445px',
-                order: [
-                    [5, 'asc']
-                ],
-                columnDefs: [{
-                        searchable: true,
-                        targets: [0, 1, 2, 3, 4, 5]
-                    },
-                    {
-                        className: "wrap",
-                        targets: [0, 1, 2, 3, 4, 5]
-                    },
-                ],
-                columns: [{
-                        data: "tglPengajuan",
-                        render: function(data, type, row) {
-                            if (data !== null) {
-                                var date = new Date(data);
-                                var options = {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                };
-                                return date.toLocaleDateString('id-ID', options);
-                            } else {
-                                return "Data tidak tersedia";
-                            }
-                        }
-
-                    },
-                    {
-                        data: "name",
-                        width: "10%"
-                    },
-                    {
-                        data: "total",
-                        render: function(data, type, row) {
-                            if (data !== null) {
-                                return new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR'
-                                }).format(data);
-                            } else {
-                                return "Data tidak tersedia";
-                            }
-                        }
-                    },
-                    {
-                        data: "status",
-                        width: "5%"
-                    },
-                    {
-                        data: null,
-                        render: (data, type, row) => {
-                            if (data.keteranganRevisi){
-                                return data.keteranganRevisi
-                            }
-                            return data.keteranganTolak;
-                        }
-                    },
-                    {
-                        data: "updated_at",
-                        render: function(data, type, row) {
-                            if (data !== null) {
-                                var date = new Date(data);
-                                var options = {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                };
-                                return date.toLocaleDateString('id-ID', options);
-                            } else {
-                                return "Data tidak tersedia";
-                            }
-                        }
-
-                    },
-                    {
-                        data: null,
-                        render: (data, type, row, meta) => {
-                            let result = `<a class="btn btn-success" href="#modalEditD" data-toggle="modal" onclick="getDetailHistory(${data.id})">
-                                <i class="fa fa-info-circle"></i>
-                                </a>`
-                            return result;
-                        },
-                        width: "5%"
-                    }
-                ]
-            });
-            var tablefm = $('#myTablefm').DataTable({
-                info: false,
-                paging: false,
-                scrollCollapse: true,
-                scrollY: '445px',
-                order: [
-                    [2, 'asc']
-                ],
-                columnDefs: [{
-                        searchable: true,
-                        targets: [0, 1, 2, 3, 4]
-                    },
-                    {
-                        className: "wrap",
-                        targets: [0, 1, 2, 3, 4]
-                    },
-                ],
-                columns: [{
-                        data: "pengaju",
-                        width: "10%"
-                    },
-                    {
-                        data: "dname",
-                        width: "10%"
-                    },
-                    {
-                        data: "tglPengajuan",
-                        render: function(data, type, row) {
-                            if (data !== null) {
-                                var date = new Date(data);
-                                var options = {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                };
-                                return date.toLocaleDateString('id-ID', options);
-                            } else {
-                                return "Data tidak tersedia";
-                            }
-                        }
-
-                    },
-                    {
-                        data: "total",
-                        render: function(data, type, row) {
-                            if (data !== null) {
-                                return new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR'
-                                }).format(data);
-                            } else {
-                                return "Data tidak tersedia";
-                            }
-                        }
-                    },
-                    {
-                        data: null,
-                        render: (data, type, row, meta) => {
-                            return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
-                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
-                                <form method="POST" action="/FmAccBon/${data.id}">
-                                    @csrf
-                                    <button type="submit" class="btn btn-success">
-                                        <i class="fa fa-check-circle"></i>
-                                    </button>
-                                </form>
-                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolakFM(${data.id})"><i class="fa fa-times"></i></a>`;
-                        },
-                        width: "15%"
-                    }
-                ]
-            });
-            // End Table
-
-            // Ajaxs
-            $.ajax({
-                type: "GET",
-                dataType: "json",
-                async: false,
-                url: "{{ route('bon.jsonShowIndexAdmin') }}",
-                success: function(data) {
-                    console.log("TEST");
-                    console.log(data);
-                    table.clear().draw()
-                    table.rows.add(data["data"]).draw()
-                },
-                error: function(error) {
-                    console.log("Error: ");
-                    console.log(error);
-                }
-            });
-
-            $.ajax({
-                type: "GET",
-                dataType: "json",
-                async: false,
-                url: "{{ route('bon.jsonShowIndexSelf') }}",
-                success: function(data) {
-                    tableSelf.clear().draw()
-                    tableSelf.rows.add(data["data"]).draw()
-                    console.log(data);
-                },
-                error: function(error) {
-                    console.log("Error: ");
-                    console.log(error);
-                }
-            });
-
-            $.ajax({
-                type: "GET",
-                dataType: "json",
-                async: false,
-                url: "{{ route('bon.HistoryAcc') }}",
-                success: function(data) {
-                    table3.clear().draw()
-                    table3.rows.add(data["data"]).draw()
-                },
-                error: function(error) {
-                    console.log("Error: ");
-                    console.log(error);
-                }
-            });
-            $.ajax({
-                type: "GET",
-                dataType: "json",
-                async: false,
-                url: "{{ route('fmindex') }}",
-                success: function(data) {
-                    tablefm.clear().draw()
-                    tablefm.rows.add(data["data"]).draw()
-                },
-                error: function(error) {
-                    console.log("Error: ");
-                    console.log(error);
-                }
-            });
-            // End Ajax
-
             if (jabatanID == 8) {
                 var tableCair = $("#myTableCair").DataTable({
                     info: false,
@@ -751,7 +379,7 @@
                                 </a>
                                 <a class="btn btn-success" href="/accKasir/${data.id}"><i class="fa fa-check-circle"></i></a>`
                             },
-                            width: "5%"
+                            width: "10%"
                         }
                     ]
                 })
@@ -763,7 +391,485 @@
                         tableCair.rows.add(response).draw()
                     }
                 });
+            } else if (jabatanID == 3 && departID == 8) {
+
+                var tablefm = $('#myTablefm').DataTable({
+                    info: false,
+                    paging: false,
+                    scrollCollapse: true,
+                    scrollY: '445px',
+                    order: [
+                        [2, 'asc']
+                    ],
+                    columnDefs: [{
+                            searchable: true,
+                            targets: [0, 1, 2, 3, 4]
+                        },
+                        {
+                            className: "wrap",
+                            targets: [0, 1, 2, 3, 4]
+                        },
+                    ],
+                    columns: [{
+                            data: "pengaju",
+                            width: "10%"
+                        },
+                        {
+                            data: "dname",
+                            width: "10%"
+                        },
+                        {
+                            data: "tglPengajuan",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    var date = new Date(data);
+                                    var options = {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    };
+                                    return date.toLocaleDateString('id-ID', options);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+
+                        },
+                        {
+                            data: "total",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    return new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR'
+                                    }).format(data);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: null,
+                            render: (data, type, row, meta) => {
+                                return `<div class="flex"><a class="btn btn-info" href="#modalEditA" data-toggle="modal"
+                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
+                                <form method="POST" action="/FmAccBon/${data.id}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fa fa-check-circle"></i>
+                                    </button>
+                                </form>
+                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolakFM(${data.id})"><i class="fa fa-times"></i></a></div>`;
+                            },
+                            width: "15%"
+                        }
+                    ]
+                });
+
+                var tableSelf = $('#myTableSelf').DataTable({
+                    info: false,
+                    paging: false,
+                    scrollCollapse: true,
+                    scrollY: '445px',
+                    order: [
+                        [4, 'asc'],
+                        [1, 'desc']
+                    ],
+                    columnDefs: [{
+                            searchable: true,
+                            targets: [0, 1, 2, 3, 4]
+                        },
+                        {
+                            className: "wrap",
+                            targets: [0, 1, 2, 3, 4]
+                        },
+                        {
+                            type: 'status-order',
+                            targets: 4
+                        },
+                    ],
+                    columns: [{
+                            data: "name"
+
+                        },
+                        {
+                            data: "dname",
+                            width: "10%"
+                        },
+                        {
+                            data: "tglPengajuan",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    var date = new Date(data);
+                                    var options = {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    };
+                                    return date.toLocaleDateString('id-ID', options);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: "total",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    return new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR'
+                                    }).format(data);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: "status",
+                            defaultContent: '<p>Menunggu</p>',
+                            width: "5%"
+                        },
+                        {
+                            data: null,
+                            render: (data, type, row, meta) => {
+                                let result = `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
+                                <i class="fa fa-info-circle"></i>
+                                </a>`
+                                if (type === 'display' && data.editable == true) {
+                                    result +=
+                                        `<a class="btn btn-success" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
+                                }
+                                return result;
+                            },
+                            width: "10%"
+                        }
+                    ]
+                });
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    url: "{{ route('fmindex') }}",
+                    success: function(data) {
+                        tablefm.clear().draw()
+                        tablefm.rows.add(data["data"]).draw()
+                    },
+                    error: function(error) {
+                        console.log("Error: ");
+                        console.log(error);
+                    }
+                });
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    url: "{{ route('bon.jsonShowIndexSelf') }}",
+                    success: function(data) {
+                        tableSelf.clear().draw()
+                        tableSelf.rows.add(data["data"]).draw()
+                        console.log(data);
+                    },
+                    error: function(error) {
+                        console.log("Error: ");
+                        console.log(error);
+                    }
+                });
+            } else {
+                // Tables
+                var table = $('#myTable').DataTable({
+                    info: false,
+                    paging: false,
+                    scrollCollapse: true,
+                    scrollY: '445px',
+                    order: [
+                        [1, 'desc']
+                    ],
+                    columnDefs: [{
+                            searchable: true,
+                            targets: [0, 1, 2]
+                        },
+                        {
+                            className: "wrap",
+                            targets: [0, 1, 2]
+                        }
+                    ],
+                    columns: [{
+                            data: "name"
+                        },
+                        {
+                            data: "tglPengajuan",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    var date = new Date(data);
+                                    var options = {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    };
+                                    return date.toLocaleDateString('id-ID', options);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: "total",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    return new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR'
+                                    }).format(data);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: null,
+                            render: (data, type, row, meta) => {
+                                return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
+                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
+                                <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
+                                <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisi(${data.id})"><i class="fa fa-comment"></i></a>
+                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
+                            },
+                            width: "15%"
+                        }
+                    ]
+                });
+                var tableSelf = $('#myTableSelf').DataTable({
+                    info: false,
+                    paging: false,
+                    scrollCollapse: true,
+                    scrollY: '445px',
+                    order: [
+                        [4, 'asc'],
+                        [1, 'desc']
+                    ],
+                    columnDefs: [{
+                            searchable: true,
+                            targets: [0, 1, 2, 3, 4]
+                        },
+                        {
+                            className: "wrap",
+                            targets: [0, 1, 2, 3, 4]
+                        },
+                        {
+                            type: 'status-order',
+                            targets: 4
+                        },
+                    ],
+                    columns: [{
+                            data: "name"
+
+                        },
+                        {
+                            data: "dname",
+                            width: "10%"
+                        },
+                        {
+                            data: "tglPengajuan",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    var date = new Date(data);
+                                    var options = {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    };
+                                    return date.toLocaleDateString('id-ID', options);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: "total",
+                            render: function(data, type, row) {
+                                if (data !== null) {
+                                    return new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR'
+                                    }).format(data);
+                                } else {
+                                    return "Data tidak tersedia";
+                                }
+                            }
+                        },
+                        {
+                            data: "status",
+                            defaultContent: '<p>Menunggu</p>',
+                            width: "5%"
+                        },
+                        {
+                            data: null,
+                            render: (data, type, row, meta) => {
+                                let result = `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
+                                <i class="fa fa-info-circle"></i>
+                                </a>`
+                                if (type === 'display' && data.editable == true) {
+                                    result +=
+                                        `<a class="btn btn-success" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
+                                }
+                                return result;
+                            },
+                            width: "10%"
+                        }
+                    ]
+                });
+
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    url: "{{ route('bon.jsonShowIndexSelf') }}",
+                    success: function(data) {
+                        tableSelf.clear().draw()
+                        tableSelf.rows.add(data["data"]).draw()
+                        console.log(data);
+                    },
+                    error: function(error) {
+                        console.log("Error: ");
+                        console.log(error);
+                    }
+                });
+
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    url: "{{ route('bon.jsonShowIndexAdmin') }}",
+                    success: function(data) {
+                        console.log("TEST");
+                        console.log(data);
+                        table.clear().draw()
+                        table.rows.add(data["data"]).draw()
+                    },
+                    error: function(error) {
+                        console.log("Error: ");
+                        console.log(error);
+                    }
+                });
+
             }
+
+
+            var table3 = $('#myTableAccDec').DataTable({
+                info: false,
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '445px',
+                order: [
+                    [5, 'asc']
+                ],
+                columnDefs: [{
+                        searchable: true,
+                        targets: [0, 1, 2, 3, 4, 5]
+                    },
+                    {
+                        className: "wrap",
+                        targets: [0, 1, 2, 3, 4, 5]
+                    },
+                ],
+                columns: [{
+                        data: "tglPengajuan",
+                        render: function(data, type, row) {
+                            if (data !== null) {
+                                var date = new Date(data);
+                                var options = {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                };
+                                return date.toLocaleDateString('id-ID', options);
+                            } else {
+                                return "Data tidak tersedia";
+                            }
+                        }
+
+                    },
+                    {
+                        data: "name",
+                        width: "10%"
+                    },
+                    {
+                        data: "total",
+                        render: function(data, type, row) {
+                            if (data !== null) {
+                                return new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR'
+                                }).format(data);
+                            } else {
+                                return "Data tidak tersedia";
+                            }
+                        }
+                    },
+                    {
+                        data: "status",
+                        width: "5%"
+                    },
+                    {
+                        data: null,
+                        render: (data, type, row) => {
+                            if (data.keteranganRevisi) {
+                                return data.keteranganRevisi
+                            }
+                            return data.keteranganTolak;
+                        }
+                    },
+                    {
+                        data: "updated_at",
+                        render: function(data, type, row) {
+                            if (data !== null) {
+                                var date = new Date(data);
+                                var options = {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                };
+                                return date.toLocaleDateString('id-ID', options);
+                            } else {
+                                return "Data tidak tersedia";
+                            }
+                        }
+
+                    },
+                    {
+                        data: null,
+                        render: (data, type, row, meta) => {
+                            let result = `<a class="btn btn-success" href="#modalEditD" data-toggle="modal" onclick="getDetailHistory(${data.id})">
+                                <i class="fa fa-info-circle"></i>
+                                </a>`
+                            return result;
+                        },
+                        width: "5%"
+                    }
+                ]
+            });
+
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                async: false,
+                url: "{{ route('bon.HistoryAcc') }}",
+                success: function(data) {
+                    table3.clear().draw()
+                    table3.rows.add(data["data"]).draw()
+                },
+                error: function(error) {
+                    console.log("Error: ");
+                    console.log(error);
+                }
+            });
         });
 
         // Functions
