@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 use function Ramsey\Uuid\v1;
 
@@ -225,10 +226,22 @@ class BonController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'filenames.*' => 'mimes:jpg,jpeg,png,pdf,docx|max:10240',
-        ]);
-
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'filenames.*' => 'mimes:jpg,jpeg,png,pdf|max:10240',
+                'biayaPerjalanan' => 'required|integer',
+            ],
+            [
+                'filenames.mimes' => 'Pastikan anda mengunggah file dengan format pdf',
+                'filenames.max' => 'Pastikan anda mengunggah file dengan ukuran maksimal 10MB',
+                'biayaPerjalanan.required' => 'Biaya perjalanan harus diisi',
+                'biayaPerjalanan.integer' => 'Biaya perjalanan harus berupa angka',
+            ]
+        );
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
         $filenames = null;
         $filenamed = "";
         if ($request->hasFile('filenames')) {
@@ -258,7 +271,7 @@ class BonController extends Controller
                 "tujuan" => $request->get("tujuan")[$key],
                 "users_id" => $request->get("select-sales")[$key],
                 "projects_id" => ($request->get("select-ppc")[$key] === 'null') ? null : $request->get("select-ppc")[$key],
-                "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : "tesst",
+                "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : null,
                 "agenda" => $request->get("agenda")[$key],
                 "penggunaan" => $request->get("keterangan")[$key],
                 "biaya" => $request->get("biaya")[$key],
@@ -332,9 +345,22 @@ class BonController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'filenames.*' => 'mimes:pdf|max:10240',
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'filenames.*' => 'mimes:pdf|max:10240',
+                'biayaPerjalanan' => 'required|integer',
+            ],
+            [
+                'filenames.mimes' => 'Pastikan anda mengunggah file dengan format pdf',
+                'filenames.max' => 'Pastikan anda mengunggah file dengan ukuran maksimal 10MB',
+                'biayaPerjalanan.required' => 'Biaya perjalanan harus diisi',
+                'biayaPerjalanan.integer' => 'Biaya perjalanan harus berupa angka',
+            ]
+        );
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
         $filenames = null;
         $filenamed = "";

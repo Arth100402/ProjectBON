@@ -152,15 +152,15 @@
         @php
             $unites = explode(',', $pdf['filename']);
             $extensions = [];
-            
+
             foreach ($unites as $unite) {
                 $parts = explode('.', $unite);
                 $extension = end($parts);
                 $extensions[] = $extension;
             }
-            
+
             foreach ($extensions as $key => $value) {
-                if ($value === 'jpg') {
+                if ($value === 'jpg' || $value === 'jpeg' || $value === 'png') {
                     echo "<div class='panel-body'>
                 <img src='" .
                         asset('files/' . $unites[$key]) .
@@ -171,7 +171,7 @@
                 <embed src='" .
                         asset('files/' . $unites[$key]) .
                         "' type='application/pdf' width='100%' height='600px' /> </div>";
-                } 
+                }
                 // elseif ($value === 'docx') {
                 //     $phpWord = IOFactory::load(public_path('files/' . $unites[$key]));
                 //     $htmlWriter = IOFactory::createWriter($phpWord, 'HTML');
