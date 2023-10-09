@@ -114,9 +114,9 @@
     </div>
     <br>
     <button id="addDetail" class="btn btn-info btn-block">Tambahkan</button><br>
-    <form method="POST" action="{{ route('bon.update',$bon->id) }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('bon.update', $bon->id) }}" enctype="multipart/form-data">
         @csrf
-        @method("PUT")
+        @method('PUT')
         <div class="table-responsive" style="overflow: scroll">
             <table id="myTable" class="table table-striped table-bordered">
                 <thead>
@@ -139,11 +139,12 @@
                 </tbody>
             </table>
         </div>
-
         <div class="form-group">
             <label for="saldo">Total Biaya Perjalanan: </label>
-            <input type="number" min="0" value="{{$bon->total}}" name="biayaPerjalanan" class="form-control"
-                id="biayaPerjalanan" readonly>
+            <input type="text" min="0" value="Rp 0" name="biayaPerjalananDisplay" class="form-control"
+                id="biayaPerjalananDisplay" readonly>
+            <input type="number" min="0" value="{{ $bon->total }}" name="biayaPerjalanan"
+                class="form-control" id="biayaPerjalanan" readonly style="display: none;">
             @error('debit')
                 <span class="text-danger">{{ $message }}</span>
             @enderror
@@ -187,6 +188,15 @@
             }).data("DateTimePicker").date(moment(date))
         }
         $(document).ready(function() {
+
+            let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
+            let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            });
+            $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
+
             var today = new Date();
             initDTP("#tglMulai", today)
             initDTP("#tglAkhir", today)
@@ -224,11 +234,59 @@
                 const tujuan = $("#tujuan").val();
                 const agenda = $("#agenda").val()
                 const keter = $("#keterangan").val()
-
-                if (!asal || !tujuan || !agenda || !keter || asal == '' || tujuan == '' || agenda == '' ||
-                    keter == '') {
-                    alert("Terdapat bagian yang belum terisi!")
-                    return
+                const regex = /^(?!.*\s\s)[a-zA-Z0-9\s\W]{3,}$/;
+                let biaya = parseInt($("#biaya").val());
+                let formatter = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                });
+                let formatted_biaya = formatter.format(biaya);
+                if (!regex.test(asal)) {
+                    alert("Pastikan asal kota tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#asalKota").after(
+                        '<span id="asalKotaError" style="color: red;">Pastikan asal kota tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#asalKota").focus();
+                    return;
+                } else if (!regex.test(tujuan)) {
+                    alert(
+                        "Pastikan kota tujuan tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#tujuan").after(
+                        '<span id="tujuanError" style="color: red;">Pastikan kota tujuan tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#tujuan").focus();
+                    return;
+                } else if (!regex.test(agenda)) {
+                    alert("Pastikan agenda tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#agenda").after(
+                        '<span id="agendaError" style="color: red;">Pastikan agenda kegiatan tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#agenda").focus();
+                    return;
+                } else if (!regex.test(keter)) {
+                    alert("Pastikan penggunaan tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#keterangan").after(
+                        '<span id="keteranganError" style="color: red;">Pastikan penggunaan tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#keterangan").focus();
+                    return;
                 }
                 // Add to Table
                 $("#submit").attr("disabled", false);
@@ -243,24 +301,38 @@
                         <td>${$("#nopaket").val()}<input type="hidden" name="nopaket[]" value="${$("#nopaket").val()}"></td>
                         <td>${agenda}<input type="hidden" name="agenda[]" value="${agenda}"></td>
                         <td>${keter}<input type="hidden" name="keterangan[]" value="${keter}"></td>
-                        <td>${$("#biaya").val()}<input type="hidden" name="biaya[]" id="biaya" value="${$("#biaya").val()}"></td>
+                        <td>${formatted_biaya}<input type="hidden" name="biaya[]" id="biaya" value="${$("#biaya").val()}"></td>
                         <td><a class="btn btn-danger btn-block" id="deleteRow"><i class="fa fa-trash-o"></i></a></td>
                     </tr>`
                 $("#table-container").append(rows);
                 $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) + parseInt($("#biaya")
                     .val()));
+                let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
+                let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                });
+                $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
+                $("#asalKotaError").remove();
+                $("#tujuanError").remove();
+                $("#agendaError").remove();
+                $("#keteranganError").remove();
             });
             $(document).on("click", "#deleteRow", function() {
                 const totalPengeluaran = $(this).parent().parent().find("#biaya").val()
                 $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) - parseInt(
                     totalPengeluaran));
-                console.log($(this).parent().parent().find("#biaya"));
+                let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
+                let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                });
+                $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
                 $(this).parent().parent().remove()
                 if ($("#table-container tr").length < 1) {
                     $("#submit").attr("disabled", true);
-                }
-                else{
-                    $("#submit").attr("disabled", false);
                 }
             });
             $(".datepick").on("click", function() {
@@ -295,17 +367,43 @@
 
                     $.each(data, function(i, item) {
                         console.log(i, item);
-                        var row = '<tr><td>' + (item.tglMulai ? item.tglMulai : '')+`<input type="hidden" name="tglMulai[]" value="${item.tglMulai}">`+'</td>'+
-                            '<td>' + (item.tglAkhir ? item.tglAkhir : '') +`<input type="hidden" name="tglAkhir[]" value="${item.tglAkhir}">`+'</td>'+
-                            '<td>' + (item.asalKota ? item.asalKota : '') +`<input type="hidden" name="asalKota[]" value="${item.asalKota}">`+'</td>'+
-                            '<td>' + (item.tujuan ? item.tujuan : '')+`<input type="hidden" name="tujuan[]" value="${item.tujuan}">`+'</td>'+
-                            '<td>' + (item.name ? item.name : '') + `<input type="hidden" name="select-sales[]" value="{{Auth::user()->id}}">`+'</td>'+
-                            '<td>' + (item.namaOpti ? item.namaOpti : '')+ `<input type="hidden" name="select-ppc[]" value="${item.pid}">` + '</td>'+
-                            '<td>' + (item.noPaket ? item.noPaket : '')+`<input type="hidden" name="nopaket[]" value="${item.noPaket}">` + '</td>'+
-                            '<td>' + (item.agenda ? item.agenda : '') +`<input type="hidden" name="agenda[]" value="${item.agenda }">`+ '</td>'+
-                            '<td>' + (item.penggunaan ? item.penggunaan : '') +`<input type="hidden" name="keterangan[]" value="${item.penggunaan}">`+ '</td>'+
-                            '<td>' + (item.biaya ? item.biaya : '')+ `<input type="hidden" name="biaya[]" id="biaya" value="${item.biaya }">`+ '</td>'+
-                            '<td>' + `<a class="btn btn-danger btn-block" id="deleteRow"><i class="fa fa-trash-o"></i></a>` + '</td></tr>';
+                        var row = '<tr><td>' + (item.tglMulai ? item.tglMulai : '') +
+                            `<input type="hidden" name="tglMulai[]" value="${item.tglMulai}">` +
+                            '</td>' +
+                            '<td>' + (item.tglAkhir ? item.tglAkhir : '') +
+                            `<input type="hidden" name="tglAkhir[]" value="${item.tglAkhir}">` +
+                            '</td>' +
+                            '<td>' + (item.asalKota ? item.asalKota : '') +
+                            `<input type="hidden" name="asalKota[]" value="${item.asalKota}">` +
+                            '</td>' +
+                            '<td>' + (item.tujuan ? item.tujuan : '') +
+                            `<input type="hidden" name="tujuan[]" value="${item.tujuan}">` +
+                            '</td>' +
+                            '<td>' + (item.name ? item.name : '') +
+                            `<input type="hidden" name="select-sales[]" value="{{ Auth::user()->id }}">` +
+                            '</td>' +
+                            '<td>' + (item.namaOpti ? item.namaOpti : '') +
+                            `<input type="hidden" name="select-ppc[]" value="${item.pid}">` +
+                            '</td>' +
+                            '<td>' + (item.noPaket ? item.noPaket : '') +
+                            `<input type="hidden" name="nopaket[]" value="${item.noPaket}">` +
+                            '</td>' +
+                            '<td>' + (item.agenda ? item.agenda : '') +
+                            `<input type="hidden" name="agenda[]" value="${item.agenda }">` +
+                            '</td>' +
+                            '<td>' + (item.penggunaan ? item.penggunaan : '') +
+                            `<input type="hidden" name="keterangan[]" value="${item.penggunaan}">` +
+                            '</td>' +
+                            '<td>' + (item.biaya ? item.biaya.toLocaleString('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0
+                            }) : '') +
+                            `<input type="hidden" name="biaya[]" id="biaya" value="${item.biaya ? item.biaya : ''}">` +
+                            '</td>' +
+                            '<td>' +
+                            `<a class="btn btn-danger btn-block" id="deleteRow"><i class="fa fa-trash-o"></i></a>` +
+                            '</td></tr>';
                         tbody.append(row);
                     });
                 }
