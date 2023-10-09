@@ -1,3 +1,4 @@
+{{-- require_once 'vendor/autoload.php'--}}
 <div class="panel card-background-color">
     <div class="panel-heading">
         <h3>Detail Bon</h3>
@@ -85,6 +86,8 @@
                                     <td>{{ $a->acc_name }}</td>
                                     @if ($a->status == 'Tolak')
                                         <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
+                                    @elseif ($a->status == 'Terima' && $a->keteranganAcc != null)
+                                        <td>{{ $a->status }} dan {{ $a->keteranganAcc }}</td>
                                     @else
                                         <td>{{ $a->status }}</td>
                                     @endif
@@ -144,12 +147,39 @@
     @endif
     @if ($pdf != null)
         <div class="panel-heading">
-            <h3>Dokumen Pendukung:</h3>
+            <h3>Dokumen Pendukung: </h3>
         </div>
-        <div class="panel-body">
-            <embed src="{{ asset('files/' . $pdf['filename']) }}" type="application/pdf" width="100%"
-                height="600px" />
-        </div>
+        @php
+            $unites = explode(',', $pdf['filename']);
+            $extensions = [];
+
+            foreach ($unites as $unite) {
+                $parts = explode('.', $unite);
+                $extension = end($parts);
+                $extensions[] = $extension;
+            }
+
+            foreach ($extensions as $key => $value) {
+                if ($value === 'jpg' || $value === 'jpeg' || $value === 'png') {
+                    echo "<div class='panel-body'>
+                <img src='" .
+                        asset('files/' . $unites[$key]) .
+                        "'>
+                </div>";
+                } elseif ($value === 'pdf') {
+                    echo "<div class='panel-body'>
+                <embed src='" .
+                        asset('files/' . $unites[$key]) .
+                        "' type='application/pdf' width='100%' height='600px' /> </div>";
+                }
+                // elseif ($value === 'docx') {
+                //     $phpWord = IOFactory::load(public_path('files/' . $unites[$key]));
+                //     $htmlWriter = IOFactory::createWriter($phpWord, 'HTML');
+                //     $html = $htmlWriter->generateHTMLall();
+                //     echo "<div class='panel-body'>" . $html . '</div>';
+                // }
+            }
+        @endphp
     @endif
 </div>
 <div class="setAlign">

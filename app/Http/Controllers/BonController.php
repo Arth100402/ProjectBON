@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 use function Ramsey\Uuid\v1;
 
@@ -35,7 +36,7 @@ class BonController extends Controller
         $query = DB::table('bons AS b')
             ->join('users as u', 'b.users_id', '=', 'u.id')
             ->join('accs AS a', 'b.id', '=', 'a.bons_id')
-            ->select('a.id', 'b.id', 'u.name', 'b.tglPengajuan', 'b.total', 'a.status', 'a.level')
+            ->select('a.id', 'b.id', 'u.name', 'b.tglPengajuan', 'b.total', 'a.status', 'a.level', 'a.threshold')
             ->where('a.users_id', Auth::user()->id)
             ->where('a.status', 'Diproses')
             ->where(function ($query) {
@@ -113,7 +114,14 @@ class BonController extends Controller
             ->join("users", "users.id", "revisionhistory.users_id")
             ->where("revisionhistory.bons_id", $id)
             ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
-        $acc = null;
+        $acc = DB::table('accs')
+            ->join('bons', 'bons.id', '=', 'accs.bons_id')
+            ->join('users as acc', 'acc.id', '=', 'accs.users_id')
+            ->join('users as aju', 'aju.id', '=', 'bons.users_id')
+            ->where('bons.id', '=', $id)
+            ->orderBy("accs.level")
+            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.keteranganAcc', 'accs.updated_at')
+            ->get();
         $file = Bon::find($id);
         $pdf = ['filename' => $file->file];
         return response()->json(array(
@@ -158,13 +166,14 @@ class BonController extends Controller
             ->where('bons.users_id', '=', Auth::user()->id)
             ->where('bons.id', '=', $id)
             ->orderBy("accs.level")
-            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
+            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.keteranganAcc', 'accs.updated_at')
             ->get();
         $revises = DB::table("revisionhistory")
             ->join("users", "users.id", "revisionhistory.users_id")
             ->where("revisionhistory.bons_id", $id)
             ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
-        $pdf = null;
+        $file = Bon::find($id);
+        $pdf = ['filename' => $file->file];
         return response()->json(array(
             'status' => 'oke',
             'msg' => view('detail', compact('detail', 'acc', 'pdf', 'revises'))->render()
@@ -191,7 +200,8 @@ class BonController extends Controller
             ->where("revisionhistory.bons_id", $id)
             ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
         $acc = null;
-        $pdf = null;
+        $file = Bon::find($id);
+        $pdf = ['filename' => $file->file];
         return response()->json(array(
             'status' => 'oke',
             'msg' => view('detail', compact('detail', 'acc', 'pdf', 'revises'))->render()
@@ -216,17 +226,29 @@ class BonController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'filenames.*' => 'mimes:pdf|max:10240',
-        ]);
-
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'filenames.*' => 'mimes:jpg,jpeg,png,pdf|max:10240',
+                'biayaPerjalanan' => 'required|integer',
+            ],
+            [
+                'filenames.mimes' => 'Pastikan anda mengunggah file dengan format pdf',
+                'filenames.max' => 'Pastikan anda mengunggah file dengan ukuran maksimal 10MB',
+                'biayaPerjalanan.required' => 'Biaya perjalanan harus diisi',
+                'biayaPerjalanan.integer' => 'Biaya perjalanan harus berupa angka',
+            ]
+        );
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
         $filenames = null;
         $filenamed = "";
         if ($request->hasFile('filenames')) {
             foreach ($request->file('filenames') as $key => $file) {
                 $fileExt = $file->getClientOriginalExtension();
                 $date = now()->format('YmdHis');
-                $temp = $date . "surat" . $key . "." . $fileExt;
+                $temp = $date . "surat" . $key . "." . $fileExt . " ";
                 $file->storeAs('files', $temp, 'public');
                 $filenamed .= $temp . ",";
             }
@@ -249,7 +271,7 @@ class BonController extends Controller
                 "tujuan" => $request->get("tujuan")[$key],
                 "users_id" => $request->get("select-sales")[$key],
                 "projects_id" => ($request->get("select-ppc")[$key] === 'null') ? null : $request->get("select-ppc")[$key],
-                "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : "tesst",
+                "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : null,
                 "agenda" => $request->get("agenda")[$key],
                 "penggunaan" => $request->get("keterangan")[$key],
                 "biaya" => $request->get("biaya")[$key],
@@ -266,6 +288,7 @@ class BonController extends Controller
             $newBon->users_id = $datas[$i]->idAcc;
             $newBon->status = "Diproses";
             $newBon->level = $datas[$i]->level;
+            $newBon->threshold = $datas[$i]->threshold;
             $newBon->save();
             if ($request->get("biayaPerjalanan") < $datas[$i]->threshold) break;
         }
@@ -321,9 +344,22 @@ class BonController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'filenames.*' => 'mimes:pdf|max:10240',
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'filenames.*' => 'mimes:pdf|max:10240',
+                'biayaPerjalanan' => 'required|integer',
+            ],
+            [
+                'filenames.mimes' => 'Pastikan anda mengunggah file dengan format pdf',
+                'filenames.max' => 'Pastikan anda mengunggah file dengan ukuran maksimal 10MB',
+                'biayaPerjalanan.required' => 'Biaya perjalanan harus diisi',
+                'biayaPerjalanan.integer' => 'Biaya perjalanan harus berupa angka',
+            ]
+        );
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
         $filenames = null;
         $filenamed = "";
@@ -454,6 +490,29 @@ class BonController extends Controller
             return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
         }
     }
+
+    public function accBontThres($id)
+    {
+        $data = Acc::where('bons_id', $id)
+            ->where('users_id', Auth::user()->id)
+            ->first();
+        $data->status = 'Terima';
+        $data->keteranganAcc = 'Menyetujui bon sementara diluar threshold';
+        $data->save();
+        $query = DB::table('accs as a')
+            ->join('users as u', 'a.users_id', '=', 'u.id')
+            ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
+            ->where('bons_id', $id)
+            ->where('level', $data->level + 1)
+            ->get();
+        if ($query->first()) {
+            Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
+            return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
+        } else {
+            return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
+        }
+    }
+
     public function HistoryAcc()
     {
         $data = DB::table('accs')
@@ -517,6 +576,7 @@ class BonController extends Controller
         $data->users_id = Auth::user()->id;
         $data->status = 'Terima';
         $data->level = 6;
+        $data->threshold = 0;
         $data->save();
         return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
     }
@@ -529,11 +589,25 @@ class BonController extends Controller
         $data->status = 'Tolak';
         $data->keteranganTolak = $confirmationInput;
         $data->level = 6;
+        $data->threshold = 0;
         $data->save();
         $bon = Bon::find($id);
         $bon->status = "Tolak";
         $bon->save();
         return redirect()->route('bon.index')->with('status', 'Bon telah di tolak');
+    }
+    public function FmRevBon(Request $request, $id)
+    {
+        $data = new Acc;
+        $data->bons_id = $id;
+        $data->users_id = Auth::user()->id;
+        $confirmationInput = $request->get('revisi');
+        $data->status = 'Revisi';
+        $data->keteranganRevisi = $confirmationInput;
+        $data->level = 6;
+        $data->threshold = 0;
+        $data->save();
+        return redirect()->route('bon.index')->with('status', 'Bon telah diajukan untuk revisi');
     }
     public function fmIndex()
     {
@@ -610,7 +684,7 @@ class BonController extends Controller
             ->join('users as aju', 'aju.id', '=', 'bons.users_id')
             ->where('bons.id', '=', $id)
             ->orderBy("accs.level")
-            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
+            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.keteranganAcc', 'accs.updated_at')
             ->get();
         $pdf = null;
         $revises = DB::table("revisionhistory")

@@ -460,6 +460,7 @@
                                         <i class="fa fa-check-circle"></i>
                                     </button>
                                 </form>
+                                <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisiFm(${data.id})"><i class="fa fa-comment"></i></a>
                                 <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolakFM(${data.id})"><i class="fa fa-times"></i></a></div>`;
                             },
                             width: "15%"
@@ -632,11 +633,20 @@
                         {
                             data: null,
                             render: (data, type, row, meta) => {
-                                return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
-                                onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
-                                <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
-                                <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisi(${data.id})"><i class="fa fa-comment"></i></a>
-                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
+                                if (data.threshold < data.total) {
+                                    return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
+                                    onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
+                                    <a class="btn btn-success" href="/accBontThres/${data.id}" onclick="return confirm('Total melebihi threshold, Apakah masih ingin menyetujui?')"><i class="fa fa-check-circle"></i></a>
+                                    <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisi(${data.id})"><i class="fa fa-comment"></i></a>
+                                    <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
+                                }
+                                else {
+                                    return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
+                                    onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
+                                    <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
+                                    <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisi(${data.id})"><i class="fa fa-comment"></i></a>
+                                    <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
+                                }
                             },
                             width: "15%"
                         }
@@ -903,6 +913,10 @@
 
         function revisi(id) {
             $("#kirimRevisi").attr("action", "/revBon/" + id);
+        }
+
+        function revisiFm(id) {
+            $("#kirimRevisi").attr("action", "/FmRevBon/" + id);
         }
 
         function getDetail(id) {

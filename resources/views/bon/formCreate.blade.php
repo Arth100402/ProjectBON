@@ -51,16 +51,18 @@
     </div>
     <div class="form-group">
         <label for="asalKota">Asal Kota:</label><br>
-        <input type="text" name="asalKota" id="asalKota" class="form-control" placeholder="Masukkan Asal Kota"
-            required></select>
+        <input type="text" name="asalKota" id="asalKota" class="form-control"
+            placeholder="Masukkan Asal Kota. Contoh : Jakarta" required>
+        </select>
         @error('asalKota')
             <span class="text-danger">{{ $message }}</span>
         @enderror
     </div>
     <div class="form-group">
         <label for="tujuan">Tujuan:</label><br>
-        <input type="text" name="tujuan" id="tujuan" class="form-control" placeholder="Masukkan Kota Tujuan"
-            required></select>
+        <input type="text" name="tujuan" id="tujuan" class="form-control"
+            placeholder="Masukkan Kota Tujuan. Contoh : Surabaya" required>
+        </select>
         @error('tujuan')
             <span class="text-danger">{{ $message }}</span>
         @enderror
@@ -91,7 +93,8 @@
     </div>
     <div class="form-group">
         <label for="agenda">Agenda: </label><br>
-        <textarea name="agenda" id="agenda" class="form-control" rows="10" placeholder="Masukkan Agenda Anda" required></textarea>
+        <textarea name="agenda" id="agenda" class="form-control" rows="10"
+            placeholder="Masukkan Agenda Anda. Contoh : Meeting dengan pelanggan terkait acara festival" required></textarea>
         @error('agenda')
             <span class="text-danger">{{ $message }}</span>
         @enderror
@@ -99,7 +102,7 @@
     <div class="form-group">
         <label for="keterangan">Penggunaan: </label><br>
         <input type="text" name="keterangan" id="keterangan" class="form-control"
-            placeholder="Masukkan Keterangan Kegiatan" required>
+            placeholder="Masukkan Keterangan Kegiatan. Contoh : Uang bensin" required>
         @error('keterangan')
             <span class="text-danger">{{ $message }}</span>
         @enderror
@@ -107,7 +110,7 @@
     <div class="form-group">
         <label for="biaya">Biaya: </label>
         <input type="number" min="0" step="1000" value="0" name="biaya" class="form-control"
-            id="biaya" placeholder="Masukkan Nominal Biaya">
+            id="biaya" placeholder="Masukkan Nominal Biaya. Contoh 500.000">
         @error('biaya')
             <span class="text-danger">{{ $message }}</span>
         @enderror
@@ -139,8 +142,10 @@
 
         <div class="form-group">
             <label for="saldo">Total Biaya Perjalanan: </label>
+            <input type="text" min="0" value="Rp 0" name="biayaPerjalananDisplay" class="form-control"
+                id="biayaPerjalananDisplay" readonly>
             <input type="number" min="0" value="0" name="biayaPerjalanan" class="form-control"
-                id="biayaPerjalanan" readonly>
+                id="biayaPerjalanan" readonly style="display: none;">
             @error('debit')
                 <span class="text-danger">{{ $message }}</span>
             @enderror
@@ -149,7 +154,8 @@
         <div class="form-group">
             <label for="sadaw">Surat (Jika Ada):</label>
             <input type="file" name="filenames[]" id="files" class="form-control" multiple>
-            <small>Types: .pdf</small>
+            <small>Types: .docx .jpg .jpeg .png .pdf</small>
+            <small>Max: 10mb</small>
         </div>
 
         <button type="submit" class="btn btn-success" id="submit" disabled>Ajukan</button>
@@ -222,11 +228,59 @@
                 const tujuan = $("#tujuan").val();
                 const agenda = $("#agenda").val()
                 const keter = $("#keterangan").val()
-
-                if (!asal || !tujuan || !agenda || !keter || asal == '' || tujuan == '' || agenda == '' ||
-                    keter == '') {
-                    alert("Terdapat bagian yang belum terisi!")
-                    return
+                const regex = /^(?!.*\s\s)[a-zA-Z0-9\s\W]{3,}$/;
+                let biaya = parseInt($("#biaya").val());
+                let formatter = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                });
+                let formatted_biaya = formatter.format(biaya);
+                if (!regex.test(asal)) {
+                    alert("Pastikan asal kota tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#asalKota").after(
+                        '<span id="asalKotaError" style="color: red;">Pastikan asal kota tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#asalKota").focus();
+                    return;
+                } else if (!regex.test(tujuan)) {
+                    alert(
+                        "Pastikan kota tujuan tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#tujuan").after(
+                        '<span id="tujuanError" style="color: red;">Pastikan kota tujuan tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#tujuan").focus();
+                    return;
+                } else if (!regex.test(agenda)) {
+                    alert("Pastikan agenda tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#agenda").after(
+                        '<span id="agendaError" style="color: red;">Pastikan agenda kegiatan tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#agenda").focus();
+                    return;
+                } else if (!regex.test(keter)) {
+                    alert("Pastikan penggunaan tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#keterangan").after(
+                        '<span id="keteranganError" style="color: red;">Pastikan penggunaan tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#keterangan").focus();
+                    return;
                 }
                 // Add to Table
                 $("#submit").attr("disabled", false);
@@ -241,17 +295,35 @@
                         <td>${$("#nopaket").val()}<input type="hidden" name="nopaket[]" value="${$("#nopaket").val()}"></td>
                         <td>${agenda}<input type="hidden" name="agenda[]" value="${agenda}"></td>
                         <td>${keter}<input type="hidden" name="keterangan[]" value="${keter}"></td>
-                        <td>${$("#biaya").val()}<input type="hidden" name="biaya[]" id="biaya" value="${$("#biaya").val()}"></td>
+                        <td>${formatted_biaya}<input type="hidden" name="biaya[]" id="biaya" value="${$("#biaya").val()}"></td>
                         <td><a class="btn btn-danger btn-block" id="deleteRow"><i class="fa fa-trash-o"></i></a></td>
                     </tr>`
                 $("#table-container").append(rows);
                 $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) + parseInt($("#biaya")
                     .val()));
+                let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
+                let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                });
+                $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
+                $("#asalKotaError").remove();
+                $("#tujuanError").remove();
+                $("#agendaError").remove();
+                $("#keteranganError").remove();
             });
             $(document).on("click", "#deleteRow", function() {
                 const totalPengeluaran = $(this).parent().parent().find("#biaya").val()
                 $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) - parseInt(
                     totalPengeluaran));
+                let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
+                let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                });
+                $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
                 $(this).parent().parent().remove()
                 if ($("#table-container tr").length < 1) {
                     $("#submit").attr("disabled", true);

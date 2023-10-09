@@ -21,6 +21,8 @@ class CreateAccsTable extends Migration
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->enum('status', ['Terima','Diproses','Revisi','Tolak'])->nullable();
             $table->integer('level');
+            $table->integer('threshold');
+            $table->string('keteranganAcc')->nullable();
             $table->string('keteranganTolak')->nullable();
             $table->string('keteranganRevisi')->nullable();
             $table->timestamps();
