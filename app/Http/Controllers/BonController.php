@@ -556,6 +556,19 @@ class BonController extends Controller
         $bon->save();
         return redirect()->route('bon.index')->with('status', 'Bon telah di tolak');
     }
+    public function FmRevBon(Request $request, $id)
+    {
+        $data = new Acc;
+        $data->bons_id = $id;
+        $data->users_id = Auth::user()->id;
+        $confirmationInput = $request->get('revisi');
+        $data->status = 'Revisi';
+        $data->keteranganRevisi = $confirmationInput;
+        $data->level = 6;
+        $data->threshold = 0;
+        $data->save();
+        return redirect()->route('bon.index')->with('status', 'Bon telah diajukan untuk revisi');
+    }
     public function fmIndex()
     {
         $acc = DB::table('accs')

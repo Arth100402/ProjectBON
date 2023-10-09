@@ -44,6 +44,7 @@ Route::middleware("auth")->group(function () {
     Route::get("/fmindex", [BonController::class, "fmIndex"])->name("fmindex");
     Route::post('/FmAccBon/{id}', [BonController::class, 'FmAccBon'])->name('FmAccBon');
     Route::post('/FmDecBon/{id}', [BonController::class, 'FmDecBon'])->name('FmDecBon');
+    Route::post('/FmRevBon/{id}', [BonController::class, 'FmRevBon'])->name('FmRevBon');
 
     // Kasir
     Route::get("/kasirIndex", [BonController::class, "loadKasir"])->name("kasirIndex");

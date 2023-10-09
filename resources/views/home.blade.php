@@ -460,6 +460,7 @@
                                         <i class="fa fa-check-circle"></i>
                                     </button>
                                 </form>
+                                <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisiFm(${data.id})"><i class="fa fa-comment"></i></a>
                                 <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolakFM(${data.id})"><i class="fa fa-times"></i></a></div>`;
                             },
                             width: "15%"
@@ -912,6 +913,10 @@
 
         function revisi(id) {
             $("#kirimRevisi").attr("action", "/revBon/" + id);
+        }
+
+        function revisiFm(id) {
+            $("#kirimRevisi").attr("action", "/FmRevBon/" + id);
         }
 
         function getDetail(id) {
