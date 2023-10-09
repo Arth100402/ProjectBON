@@ -33,6 +33,7 @@ Route::middleware("auth")->group(function () {
     Route::post('/getDetailHistory', [BonController::class, 'getDetailHistory'])->name('bon.getDetailHistory');
     Route::get('/jsonShowIndexSelf', [BonController::class, 'jsonShowIndexSelf'])->name('bon.jsonShowIndexSelf');
     Route::get('/accBont/{id}', [BonController::class, 'accBon'])->name('bon.accBon');
+    Route::get('/accBontThres/{id}', [BonController::class, 'accBontThres'])->name('bon.accBontThres');
     Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
     Route::post('/revBon/{id}', [BonController::class, 'revBon'])->name('bon.revBon');
     Route::get('/HistoryAcc', [BonController::class, 'HistoryAcc'])->name('bon.HistoryAcc');

@@ -85,7 +85,9 @@
                                     <td>{{ $a->acc_name }}</td>
                                     @if ($a->status == 'Tolak')
                                         <td>{{ $a->status }}, Karena {{ $a->keteranganTolak }}</td>
-                                    @else
+                                    @elseif ($a->status == 'Terima' && $a->keteranganAcc != null)
+                                        <td>{{ $a->status }} dan {{ $a->keteranganAcc }}</td>
+                                    @else 
                                         <td>{{ $a->status }}</td>
                                     @endif
                                 </tr>

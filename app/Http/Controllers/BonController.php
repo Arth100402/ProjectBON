@@ -35,7 +35,7 @@ class BonController extends Controller
         $query = DB::table('bons AS b')
             ->join('users as u', 'b.users_id', '=', 'u.id')
             ->join('accs AS a', 'b.id', '=', 'a.bons_id')
-            ->select('a.id', 'b.id', 'u.name', 'b.tglPengajuan', 'b.total', 'a.status', 'a.level')
+            ->select('a.id', 'b.id', 'u.name', 'b.tglPengajuan', 'b.total', 'a.status', 'a.level', 'a.threshold')
             ->where('a.users_id', Auth::user()->id)
             ->where('a.status', 'Diproses')
             ->where(function ($query) {
@@ -113,7 +113,14 @@ class BonController extends Controller
             ->join("users", "users.id", "revisionhistory.users_id")
             ->where("revisionhistory.bons_id", $id)
             ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
-        $acc = null;
+        $acc = DB::table('accs')
+            ->join('bons', 'bons.id', '=', 'accs.bons_id')
+            ->join('users as acc', 'acc.id', '=', 'accs.users_id')
+            ->join('users as aju', 'aju.id', '=', 'bons.users_id')
+            ->where('bons.id', '=', $id)
+            ->orderBy("accs.level")
+            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.keteranganAcc', 'accs.updated_at')
+            ->get();
         $file = Bon::find($id);
         $pdf = ['filename' => $file->file];
         return response()->json(array(
@@ -158,7 +165,7 @@ class BonController extends Controller
             ->where('bons.users_id', '=', Auth::user()->id)
             ->where('bons.id', '=', $id)
             ->orderBy("accs.level")
-            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
+            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.keteranganAcc', 'accs.updated_at')
             ->get();
         $revises = DB::table("revisionhistory")
             ->join("users", "users.id", "revisionhistory.users_id")
@@ -266,6 +273,7 @@ class BonController extends Controller
             $newBon->users_id = $datas[$i]->idAcc;
             $newBon->status = "Diproses";
             $newBon->level = $datas[$i]->level;
+            $newBon->threshold = $datas[$i]->threshold;
             $newBon->save();
             if ($request->get("biayaPerjalanan") < $datas[$i]->threshold) break;
         }
@@ -440,6 +448,29 @@ class BonController extends Controller
             return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
         }
     }
+
+    public function accBontThres($id)
+    {
+        $data = Acc::where('bons_id', $id)
+            ->where('users_id', Auth::user()->id)
+            ->first();
+        $data->status = 'Terima';
+        $data->keteranganAcc = 'Menyetujui bon sementara diluar threshold';
+        $data->save();
+        $query = DB::table('accs as a')
+            ->join('users as u', 'a.users_id', '=', 'u.id')
+            ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
+            ->where('bons_id', $id)
+            ->where('level', $data->level + 1)
+            ->get();
+        if ($query->first()) {
+            Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
+            return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
+        } else {
+            return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
+        }
+    }
+
     public function HistoryAcc()
     {
         $data = DB::table('accs')
@@ -503,6 +534,7 @@ class BonController extends Controller
         $data->users_id = Auth::user()->id;
         $data->status = 'Terima';
         $data->level = 6;
+        $data->threshold = 0;
         $data->save();
         return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
     }
@@ -515,6 +547,7 @@ class BonController extends Controller
         $data->status = 'Tolak';
         $data->keteranganTolak = $confirmationInput;
         $data->level = 6;
+        $data->threshold = 0;
         $data->save();
         $bon = Bon::find($id);
         $bon->status = "Tolak";
@@ -596,7 +629,7 @@ class BonController extends Controller
             ->join('users as aju', 'aju.id', '=', 'bons.users_id')
             ->where('bons.id', '=', $id)
             ->orderBy("accs.level")
-            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
+            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.keteranganAcc', 'accs.updated_at')
             ->get();
         $pdf = null;
         $revises = DB::table("revisionhistory")
