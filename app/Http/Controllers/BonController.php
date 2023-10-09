@@ -309,7 +309,6 @@ class BonController extends Controller
             ->join('users', 'detailbons.users_id', '=', 'users.id')
             ->where('detailbons.bons_id', $id)
             ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
-        // dd($bon, $data);
         return view('bon.edit', compact('bon', 'data'));
     }
 
@@ -380,6 +379,14 @@ class BonController extends Controller
         }
     }
 
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    public function destroyDetail(Request $req)
+    {
+        $aff = DetailBon::find($req->get("id"))->delete();
+        DetailBon::where("detailbons_revision_id", $req->get("id"))->delete();
+        return response()->json(["status" => $aff]);
+    }
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     /**
      * Remove the specified resource from storage.
      *
@@ -396,8 +403,15 @@ class BonController extends Controller
             ->leftJoin('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('users', 'detailbons.users_id', '=', 'users.id')
             ->where('detailbons.bons_id', $request->get('id'))
+            ->whereNull('detailbons.detailbons_revision_id')
             ->get(['detailbons.*', 'projects.namaOpti', 'projects.id AS pid', 'projects.noPaket', 'users.name']);
-        return response()->json($data);
+        $dataRevision = DB::table('detailbons')
+            ->leftJoin('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->join('users', 'detailbons.users_id', '=', 'users.id')
+            ->where('detailbons.bons_id', $request->get('id'))
+            ->whereNotNull('detailbons.detailbons_revision_id')
+            ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
+        return response()->json(compact("data", "dataRevision"));
     }
 
     public function  loadPPC(Request $request)

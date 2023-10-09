@@ -37,6 +37,7 @@ Route::middleware("auth")->group(function () {
     Route::post('/revBon/{id}', [BonController::class, 'revBon'])->name('bon.revBon');
     Route::get('/HistoryAcc', [BonController::class, 'HistoryAcc'])->name('bon.HistoryAcc');
     Route::post('/loadDetailBon', [BonController::class, 'loadDetailBon'])->name('bon.loadDetailBon');
+    Route::post("/bon/detail/delete", [BonController::class, 'destroyDetail'])->name("bon.destroyDetail");
 
 
     // FM

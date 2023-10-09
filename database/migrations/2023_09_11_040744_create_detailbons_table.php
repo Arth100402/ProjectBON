@@ -17,6 +17,8 @@ class CreateDetailbonsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('bons_id');
             $table->foreign('bons_id')->references('id')->on('bons')->onDelete('cascade');
+            $table->unsignedBigInteger('detailbons_revision_id')->nullable();
+            $table->foreign('detailbons_revision_id')->references('id')->on('detailbons')->onDelete('cascade');
             $table->date("tglMulai");
             $table->date("tglAkhir");
             $table->string("asalKota");
@@ -29,6 +31,7 @@ class CreateDetailbonsTable extends Migration
             $table->text('agenda');
             $table->string('penggunaan')->nullable();
             $table->double('biaya');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
