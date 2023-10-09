@@ -149,7 +149,8 @@
         <div class="form-group">
             <label for="sadaw">Surat (Jika Ada):</label>
             <input type="file" name="filenames[]" id="files" class="form-control" multiple>
-            <small>Types: .pdf</small>
+            <small>Types: .docx .jpg .jpeg .png .pdf</small>
+            <small>Max: 10mb</small>
         </div>
 
         <button type="submit" class="btn btn-success" id="submit" disabled>Ajukan</button>

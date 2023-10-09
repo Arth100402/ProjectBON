@@ -171,7 +171,8 @@ class BonController extends Controller
             ->join("users", "users.id", "revisionhistory.users_id")
             ->where("revisionhistory.bons_id", $id)
             ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
-        $pdf = null;
+        $file = Bon::find($id);
+        $pdf = ['filename' => $file->file];
         return response()->json(array(
             'status' => 'oke',
             'msg' => view('detail', compact('detail', 'acc', 'pdf', 'revises'))->render()
@@ -198,7 +199,8 @@ class BonController extends Controller
             ->where("revisionhistory.bons_id", $id)
             ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
         $acc = null;
-        $pdf = null;
+        $file = Bon::find($id);
+        $pdf = ['filename' => $file->file];
         return response()->json(array(
             'status' => 'oke',
             'msg' => view('detail', compact('detail', 'acc', 'pdf', 'revises'))->render()
@@ -224,7 +226,7 @@ class BonController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'filenames.*' => 'mimes:pdf|max:10240',
+            'filenames.*' => 'mimes:jpg,jpeg,png,pdf,docx|max:10240',
         ]);
 
         $filenames = null;
@@ -233,7 +235,7 @@ class BonController extends Controller
             foreach ($request->file('filenames') as $key => $file) {
                 $fileExt = $file->getClientOriginalExtension();
                 $date = now()->format('YmdHis');
-                $temp = $date . "surat" . $key . "." . $fileExt;
+                $temp = $date . "surat" . $key . "." . $fileExt . " ";
                 $file->storeAs('files', $temp, 'public');
                 $filenamed .= $temp . ",";
             }
