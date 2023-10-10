@@ -40,6 +40,13 @@ Route::middleware("auth")->group(function () {
     Route::post('/loadDetailBon', [BonController::class, 'loadDetailBon'])->name('bon.loadDetailBon');
     Route::post("/bon/detail/delete", [BonController::class, 'destroyDetail'])->name("bon.destroyDetail");
 
+    // Admin
+    Route::get('/admindashboard', [BonController::class, "dashboardAdmin"])->name('admin.dashboard');
+    Route::get('/indexAdminShow', [BonController::class, "indexAdmin"])->name('admin.index');
+    Route::post('/getDetailAdmin', [BonController::class, 'getDetailAdmin'])->name('bon.getDetailAdmin');
+    Route::get('/admincreate', [BonController::class, "admincreate"])->name('admin.create');
+    Route::post('/adminstore', [BonController::class, "adminstore"])->name('admin.store');
+
 
     // FM
     Route::get("/fmindex", [BonController::class, "fmIndex"])->name("fmindex");
