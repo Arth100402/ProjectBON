@@ -765,12 +765,16 @@ class BonController extends Controller
         $new->penggunaan  = $request->get("keterangan");
         $new->biaya = $request->get("biaya");
         $new->save();
-        return response()->json(["status" => "ok"]);
+
+        $bon = Bon::find($request->get("bid"));
+        $bon->total = $bon->total + $request->get("biaya");
+        $bon->save();
+        return response()->json(["status" => "ok", "id" => $new->id]);
     }
     public function addNewDetailRevision(Request $request)
     {
-        $oriDetailAff = DetailBon::find($request->get("id"))->delete();
-        $others = DetailBon::where("detailbons_revision_id", $request->get("id"))->delete();
+        $oriDetailAff = DetailBon::withTrashed()->find($request->get("id"))->delete();
+        $others = DetailBon::withTrashed()->where("detailbons_revision_id", $request->get("id"))->delete();
         $new = new DetailBon();
         $new->bons_id = $request->get("bid");
         $new->tglMulai = $this->convertDTPtoDatabaseDT($request->get("tglMulai"));
@@ -785,13 +789,19 @@ class BonController extends Controller
         $new->biaya = $request->get("biaya");
         $new->detailbons_revision_id = $request->get("id");
         $new->save();
-        return response()->json(["status" => "ok", "id" => $new->id]);
+        $bon = Bon::find($request->get("bid"));
+        $bon->total = $bon->total + $request->get("biaya") - $request->get("biayaDeduct");
+        $bon->save();
+        return response()->json(["status" => "ok"]);
     }
 
     public function destroyDetail(Request $req)
     {
-        $aff = DetailBon::find($req->get("id"))->delete();
-        DetailBon::where("detailbons_revision_id", $req->get("id"))->delete();
+        $bon = Bon::find($req->get("bid"));
+        $bon->total = $bon->total - $req->get("biaya");
+        $bon->save();
+        $aff = DetailBon::withTrashed()->find($req->get("id"))->delete();
+        DetailBon::withTrashed()->where("detailbons_revision_id", $req->get("id"))->delete();
         return response()->json(["status" => $aff]);
     }
     public function decKasir(Request $request, $id)

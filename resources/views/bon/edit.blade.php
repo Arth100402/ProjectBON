@@ -26,6 +26,10 @@
         .lineStrike {
             text-decoration: line-through;
         }
+
+        .salmon {
+            background-color: rgb(171, 171, 171);
+        }
     </style>
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -134,7 +138,7 @@
         @csrf
         @method('PUT')
         <div class="table-responsive" style="overflow: scroll">
-            <table id="myTable" class="table table-striped table-bordered">
+            <table id="myTable" class="table table-bordered">
                 <thead>
                     <tr>
                         <th>Mulai Tanggal</th>
@@ -175,6 +179,7 @@
         <a class="btn btn-danger" href="/">Batal Ubah</a>
     </form>
 
+    <button id="test" class="btn btn-warning btn-block"> Test</button>
 @endsection
 @section('javascript')
     <script>
@@ -258,7 +263,7 @@
                 const proj = $("#select-ppc").val()
 
                 const regex = /^(?!.*\s\s)[a-zA-Z0-9\s\W]{3,}$/;
-                let biaya = parseInt($("#biaya").val());
+                var biaya = parseInt($("#biaya").val());
                 let formatter = new Intl.NumberFormat('id-ID', {
                     style: 'currency',
                     currency: 'IDR',
@@ -354,16 +359,19 @@
                             </div>
                         </td>`
                         $("#table-container").append(rows);
-                        $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) +
-                            parseInt($("#biaya").val()));
-                        let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
+                        let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val()) +
+                            biaya;
                         let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString(
                             'id-ID', {
                                 style: 'currency',
                                 currency: 'IDR',
                                 minimumFractionDigits: 0
                             });
+                        console.log($("#biayaPerjalanan").val());
+                        console.log(biaya);
+                        console.log(biayaPerjalananDisplay);
                         $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
+                        $("#biayaPerjalanan").val(biayaPerjalananDisplay);
                         $("#asalKotaError").remove();
                         $("#tujuanError").remove();
                         $("#agendaError").remove();
@@ -445,22 +453,11 @@
                         cache: true
                     }
                 }).on("change", function(e) {
-                    console.log("TEST");
                     var selectedData = $(this).select2('data');
                     $('#nopaket' + id).val(selectedData[0].noPaket);
                 }).on('select2:unselect', function(e) {
                     $('#nopaket' + id).val('');
                 });
-                const totalPengeluaran = $(this).parent().parent().find("#biaya").val()
-                $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) - parseInt(
-                    totalPengeluaran));
-                let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
-                let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0
-                });
-                $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
                 $("#submit").attr("disabled", $("#table-container tr").length < 1);
             });
 
@@ -474,19 +471,36 @@
                 const id = tr.attr("data-id")
                 const trs = $(tr).next().find("#table-revise-container > tr")
                 const par = $(this).parent();
+                const biaya = (!$(tr).hasClass("lineStrike") ? $(this).parent().parent().prev().find(
+                    "input#biaya").val() : (!$(trs).last().hasClass("lineStrike") ? $(trs).not(
+                    ".lineStrike").find("input#biaya").val() : 0))
                 $.ajax({
                     type: "POST",
                     url: "{{ route('bon.destroyDetail') }}",
                     data: {
                         "_token": "{{ csrf_token() }}",
-                        "id": id
+                        "id": id,
+                        "bid": bid,
+                        "biaya": biaya
                     },
                     success: function(response) {
                         $(tr).addClass("lineStrike")
                         $.each(trs, function(i, val) {
                             $(val).addClass("lineStrike")
                         });
-                        $(par).remove();
+                        let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val()) -
+                            parseInt(biaya);
+                        let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString(
+                            'id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0
+                            });
+                        console.log($("#biayaPerjalanan").val());
+                        console.log(biaya);
+                        console.log(biayaPerjalananDisplay);
+                        $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
+                        $("#biayaPerjalanan").val(biayaPerjalananDisplay);
                     },
                     error: function(err) {
                         console.log(err);
@@ -504,7 +518,12 @@
                 const nopaket = $("#nopaket" + id).val()
                 const sales = {!! Auth::user()->id !!}
                 const proj = $("#select-ppc" + id).val()
-                let biaya = parseInt($("#biaya" + id).val());
+                var biaya = parseInt($("#biaya" + id).val());
+                const Btn = $(this)
+                var biayaDeduct = (!$("tr[data-id='" + id + "']").hasClass("lineStrike") ? $(
+                    "tr[data-id='" + id + "']").find("input#biaya").val() : (!$(this).parent()
+                    .parent().parent().prev().hasClass("lineStrike") ? $(this).parent().parent()
+                    .parent().prev().find("input#biaya").val() : 0))
                 $.ajax({
                     type: "POST",
                     url: "{{ route('bon.addNewDetailRevision') }}",
@@ -520,10 +539,21 @@
                         "agenda": agenda,
                         "keterangan": keter,
                         "biaya": biaya,
+                        "biayaDeduct": biayaDeduct,
                         "id": id,
                         "bid": bid
                     },
                     success: function(response) {
+                        let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val()) +
+                            parseInt(biaya) - parseInt(biayaDeduct)
+                        let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString(
+                            'id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0
+                            });
+                        $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
+                        $("#biayaPerjalanan").val(biayaPerjalananDisplay);
                         const new_row =
                             `<tr><input type = "hidden" name = "detailbonsId[]" value = "${id}" ><td>${$("#tglMulai"+id).val()}<input type = "hidden" name = "tglMulaiRev[]" value = "${$("#tglMulai"+id).val()}" > ` +
                             '</td>' +
@@ -545,14 +575,13 @@
                             '</td>' +
                             `<td>${$("#biaya"+id).val()}<input type = "hidden" name = "biayaRev[]" id = "biaya" value = "${$("#biaya"+id).val()}" > ` +
                             '</td></tr>'
-                        const table = $(this).parent().parent().parent().parent()
-                        console.log(table);
+                        const table = $(Btn).parent().parent().parent().parent()
                         const originalDetail = $("tr[data-id='" + id + "']")
-                        const cur_tr = $(this).parent().parent().parent();
-                        $(originalDetail).attr("style", "text-decoration:line-through;")
-                        $(cur_tr).prev().attr("style", "text-decoration:line-through;");
+                        const cur_tr = $(Btn).parent().parent().parent();
+                        $(originalDetail).addClass("lineStrike")
+                        $(cur_tr).prev().addClass("lineStrike")
                         $(table).append(new_row);
-                        $(this).parent().parent().parent().remove()
+                        $(Btn).parent().parent().parent().remove()
                     },
                     error: function(err) {
                         console.log(err);
@@ -590,7 +619,8 @@
                     tbody.empty(); // Clear the tbody
                     $.each(data, function(i, item) {
                         var row = '<tr data-toggle="collapse" class="' + (item.deleted_at ?
-                                "lineStrike" : "") + '" href="#collapse' +
+                                "lineStrike" : "") +
+                            '" href="#collapse' +
                             item.id +
                             '" data-id="' + item.id + '"><td>' + (item.tglMulai ? item
                                 .tglMulai : '') +
@@ -631,7 +661,7 @@
                             '<td>' +
                             `<div style="display:flex;"><a class="btn btn-warning revision"><i class="fa fa-pencil"></i></a>&nbsp;<a class="btn btn-danger remove-detail"><i class="fa fa-times-circle"></i></a>` +
                             '</td></tr>'
-                        var row_child = `<td colspan="12" class="nopading" ><div id="collapse${item.id}" class="panel-collapse collapse padding table-responsive">
+                        var row_child = `<td colspan="12" class="nopading" ><div id="collapse${item.id}" class="panel-collapse collapse padding table-responsive salmon">
                                         <table id="tableRevise" class="table table-striped table-bordered">
                                         <tbody id="table-revise-container">`;
                         if (dataRevision != undefined || dataRevision != null) {
@@ -666,6 +696,12 @@
                         tbody.append(row);
                     });
                 }
+            });
+
+
+            $("#test").on("click", function() {
+                console.log("TEST: ");
+                console.log($("#biayaPerjalanan").val());
             });
         })
     </script>
