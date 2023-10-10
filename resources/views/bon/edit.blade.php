@@ -22,6 +22,10 @@
         #table-revise-container td {
             white-space: nowrap;
         }
+
+        .lineStrike {
+            text-decoration: line-through;
+        }
     </style>
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -174,6 +178,7 @@
 @endsection
 @section('javascript')
     <script>
+        const bid = {!! $bon->id !!}
         const biayaPerjalanan = 0;
         const appendDate = (option, id) => {
             var date = $(id).data("DateTimePicker").date()
@@ -201,144 +206,184 @@
             }).data("DateTimePicker").date(moment(date))
         }
         $(document).ready(function() {
+            let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
+            let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            });
+            $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
 
-                    let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
-                    let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                        minimumFractionDigits: 0
-                    });
-                    $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
+            var today = new Date();
+            initDTP("#tglMulai", today)
+            initDTP("#tglAkhir", today)
 
-                    var today = new Date();
-                    initDTP("#tglMulai", today)
-                    initDTP("#tglAkhir", today)
-
-                    $("#select-ppc").select2({
-                        placeholder: 'Tidak ada ID Opti',
-                        allowClear: true,
-                        ajax: {
-                            url: '{{ route('loadPPC') }}',
-                            dataType: 'json',
-                            delay: 250,
-                            processResults: function(data) {
+            $("#select-ppc").select2({
+                placeholder: 'Tidak ada ID Opti',
+                allowClear: true,
+                ajax: {
+                    url: '{{ route('loadPPC') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function(data) {
+                        return {
+                            results: $.map(data.data, function(item) {
                                 return {
-                                    results: $.map(data.data, function(item) {
-                                        return {
-                                            text: item.namaOpti,
-                                            id: item.id,
-                                            noPaket: item.noPaket
-                                        }
-                                    })
-                                };
-                            },
-                            cache: true
-                        }
-                    }).on("change", function(e) {
-                        var selectedData = $(this).select2('data');
-                        $('#nopaket').val(selectedData[0].noPaket);
-                    }).on('select2:unselect', function(e) {
-                        $('#nopaket').val('');
-                    });
+                                    text: item.namaOpti,
+                                    id: item.id,
+                                    noPaket: item.noPaket
+                                }
+                            })
+                        };
+                    },
+                    cache: true
+                }
+            }).on("change", function(e) {
+                var selectedData = $(this).select2('data');
+                $('#nopaket').val(selectedData[0].noPaket);
+            }).on('select2:unselect', function(e) {
+                $('#nopaket').val('');
+            });
 
-                    $("#addDetail").on("click", function(e) {
-                        // Validation
-                        const asal = $("#asalKota").val();
-                        const tujuan = $("#tujuan").val();
-                        const agenda = $("#agenda").val()
-                        const keter = $("#keterangan").val()
-                        const regex = /^(?!.*\s\s)[a-zA-Z0-9\s\W]{3,}$/;
-                        let biaya = parseInt($("#biaya").val());
-                        let formatter = new Intl.NumberFormat('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0
-                        });
-                        let formatted_biaya = formatter.format(biaya);
-                        if (!regex.test(asal)) {
-                            alert("Pastikan asal kota tidak kosong dan format pengisian benar");
-                            $("#asalKotaError").remove();
-                            $("#tujuanError").remove();
-                            $("#agendaError").remove();
-                            $("#keteranganError").remove();
-                            $("#asalKota").after(
-                                '<span id="asalKotaError" style="color: red;">Pastikan asal kota tidak kosong dan format pengisian benar</span>'
-                            );
-                            $("#asalKota").focus();
-                            return;
-                        } else if (!regex.test(tujuan)) {
-                            alert(
-                                "Pastikan kota tujuan tidak kosong dan format pengisian benar");
-                            $("#asalKotaError").remove();
-                            $("#tujuanError").remove();
-                            $("#agendaError").remove();
-                            $("#keteranganError").remove();
-                            $("#tujuan").after(
-                                '<span id="tujuanError" style="color: red;">Pastikan kota tujuan tidak kosong dan format pengisian benar</span>'
-                            );
-                            $("#tujuan").focus();
-                            return;
-                        } else if (!regex.test(agenda)) {
-                            alert("Pastikan agenda tidak kosong dan format pengisian benar");
-                            $("#asalKotaError").remove();
-                            $("#tujuanError").remove();
-                            $("#agendaError").remove();
-                            $("#keteranganError").remove();
-                            $("#agenda").after(
-                                '<span id="agendaError" style="color: red;">Pastikan agenda kegiatan tidak kosong dan format pengisian benar</span>'
-                            );
-                            $("#agenda").focus();
-                            return;
-                        } else if (!regex.test(keter)) {
-                            alert("Pastikan penggunaan tidak kosong dan format pengisian benar");
-                            $("#asalKotaError").remove();
-                            $("#tujuanError").remove();
-                            $("#agendaError").remove();
-                            $("#keteranganError").remove();
-                            $("#keterangan").after(
-                                '<span id="keteranganError" style="color: red;">Pastikan penggunaan tidak kosong dan format pengisian benar</span>'
-                            );
-                            $("#keterangan").focus();
-                            return;
-                        }
-                        // Add to Table
-                        $("#submit").attr("disabled", false);
-                        var rows = `
-                    <tr>
-                        <td>${$("#tglMulai").val()}<input type="hidden" name="tglMulai[]" value="${$("#tglMulai").val()}"></td>
-                        <td>${$("#tglAkhir").val()}<input type="hidden" name="tglAkhir[]" value="${$("#tglAkhir").val()}"></td>
-                        <td>${asal}<input type="hidden" name="asalKota[]" value="${asal}"></td>
-                        <td>${tujuan}<input type="hidden" name="tujuan[]" value="${tujuan}"></td>
-                        <td>${$("#select-sales option:selected").text()}<input type="hidden" name="select-sales[]" value="${$("#select-sales").val()}"></td>
-                        <td>${$("#select-ppc option:selected").text()}<input type="hidden" name="select-ppc[]" value="${$("#select-ppc").val()}"></td>
-                        <td>${$("#nopaket").val()}<input type="hidden" name="nopaket[]" value="${$("#nopaket").val()}"></td>
-                        <td>${agenda}<input type="hidden" name="agenda[]" value="${agenda}"></td>
-                        <td>${keter}<input type="hidden" name="keterangan[]" value="${keter}"></td>
-                        <td>${formatted_biaya}<input type="hidden" name="biaya[]" id="biaya" value="${$("#biaya").val()}"></td>
-                        <td><a class="btn btn-danger remove-detail-instant"><i class="fa fa-times-circle"></i></a></td>
-                    </tr>`
+            $("#addDetail").on("click", function(e) {
+                // Validation
+                const asal = $("#asalKota").val();
+                const tujuan = $("#tujuan").val();
+                const agenda = $("#agenda").val()
+                const keter = $("#keterangan").val()
+                const tglMulai = $("#tglMulai").val()
+                const tglAkhir = $("#tglAkhir").val();
+                const nopaket = $("#nopaket").val()
+                const sales = $("#select-sales").val()
+                const proj = $("#select-ppc").val()
+
+                const regex = /^(?!.*\s\s)[a-zA-Z0-9\s\W]{3,}$/;
+                let biaya = parseInt($("#biaya").val());
+                let formatter = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                });
+                let formatted_biaya = formatter.format(biaya);
+                if (!regex.test(asal)) {
+                    alert("Pastikan asal kota tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#asalKota").after(
+                        '<span id="asalKotaError" style="color: red;">Pastikan asal kota tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#asalKota").focus();
+                    return;
+                } else if (!regex.test(tujuan)) {
+                    alert(
+                        "Pastikan kota tujuan tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#tujuan").after(
+                        '<span id="tujuanError" style="color: red;">Pastikan kota tujuan tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#tujuan").focus();
+                    return;
+                } else if (!regex.test(agenda)) {
+                    alert("Pastikan agenda tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#agenda").after(
+                        '<span id="agendaError" style="color: red;">Pastikan agenda kegiatan tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#agenda").focus();
+                    return;
+                } else if (!regex.test(keter)) {
+                    alert("Pastikan penggunaan tidak kosong dan format pengisian benar");
+                    $("#asalKotaError").remove();
+                    $("#tujuanError").remove();
+                    $("#agendaError").remove();
+                    $("#keteranganError").remove();
+                    $("#keterangan").after(
+                        '<span id="keteranganError" style="color: red;">Pastikan penggunaan tidak kosong dan format pengisian benar</span>'
+                    );
+                    $("#keterangan").focus();
+                    return;
+                }
+                // Add to Table
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('bon.addNewDetail') }}",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "tglMulai": tglMulai,
+                        "tglAkhir": tglAkhir,
+                        "asalKota": asal,
+                        "tujuan": tujuan,
+                        "select-sales": sales,
+                        "select-ppc": proj,
+                        "nopaket": nopaket,
+                        "agenda": agenda,
+                        "keterangan": keter,
+                        "biaya": biaya,
+                        "bid": bid
+                    },
+                    success: function(response) {
+                        const id = response.id
+                        const rows = `
+                        <tr data-toggle="collapse" href="#collapse${id}" data-id="${id}">
+                            <td>${tglMulai}<input type="hidden" name="tglMulai[]" value="${tglMulai}"></td>
+                            <td>${tglAkhir}<input type="hidden" name="tglAkhir[]" value="${tglAkhir}"></td>
+                            <td>${asal}<input type="hidden" name="asalKota[]" value="${asal}"></td>
+                            <td>${tujuan}<input type="hidden" name="tujuan[]" value="${tujuan}"></td>
+                            <td>${$("#select-sales option:selected").text()}<input type="hidden" name="select-sales[]" value="${sales}"></td>
+                            <td>${$("#select-ppc option:selected").text()}<input type="hidden" name="select-ppc[]" value="${proj}"></td>
+                            <td>${nopaket}<input type="hidden" name="nopaket[]" value="${nopaket}"></td>
+                            <td>${agenda}<input type="hidden" name="agenda[]" value="${agenda}"></td>
+                            <td>${keter}<input type="hidden" name="keterangan[]" value="${keter}"></td>
+                            <td>${formatted_biaya}<input type="hidden" name="biaya[]" id="biaya" value="${biaya}"></td>
+                            <td><div style="display:flex;"><a class="btn btn-warning revision"><i class="fa fa-pencil"></i></a>&nbsp;<a class="btn btn-danger remove-detail"><i class="fa fa-times-circle"></i></a>
+                            </td>
+                        </tr>
+                        <td colspan="12" class="nopading" >
+                            <div id="collapse${id}" class="panel-collapse collapse padding table-responsive">
+                                <table id="tableRevise" class="table table-striped table-bordered">
+                                    <tbody id="table-revise-container"></tbody>
+                                </table>
+                            </div>
+                        </td>`
                         $("#table-container").append(rows);
-                        $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) + parseInt($("#biaya")
-                            .val()));
+                        $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) +
+                            parseInt($("#biaya").val()));
                         let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
-                        let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0
-                        });
+                        let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString(
+                            'id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0
+                            });
                         $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
                         $("#asalKotaError").remove();
                         $("#tujuanError").remove();
                         $("#agendaError").remove();
                         $("#keteranganError").remove();
-                    });
-                    $(document).on("click", ".revision", function(e) {
-                        const tr = $(this).parent().parent().parent()
-                        const table = tr.next().find("#table-revise-container")
-                        const id = $(tr).attr("data-id");
-                        if ($(table).parent().parent().hasClass("in")) e.stopPropagation()
-                        $(table).append(
-                            `<tr><td><div class="form-group required">
+                        $("#submit").attr("disabled", false);
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            });
+
+
+            $(document).on("click", ".revision", function(e) {
+                const tr = $(this).parent().parent().parent()
+                const table = tr.next().find("#table-revise-container")
+                const id = $(tr).attr("data-id");
+                if ($(table).parent().parent().hasClass("in")) e.stopPropagation()
+                $(table).append(
+                    `<tr><td><div class="form-group required">
                         <div class="input-group datepick">
                             <input type="text" class="form-control dateTimePicker" id="tglMulai${id}"
                                 placeholder="Masukkan Tanggal Mulai" required readonly style="width:200px;">
@@ -346,9 +391,9 @@
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </div>
                         </div>
-                    </div> ` +
-                            '</td>' +
-                            `<td><div class="form-group required">
+                        </div> ` +
+                    '</td>' +
+                    `<td><div class="form-group required">
                         <div class="input-group datepick">
                             <input type="text" class="form-control dateTimePicker" id="tglAkhir${id}"
                                 placeholder="Masukkan Tanggal Mulai" required readonly style="width:200px;">
@@ -356,235 +401,272 @@
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </div>
                         </div>
-                    </div>` +
-                            '</td>' +
-                            `<td><input type = "text" class="form-control" id="asalKota${id}" style="width:100px;"> ` +
-                            '</td>' +
-                            `<td><input type = "text" class="form-control" id="tujuan${id}" style="width:100px;"> ` +
-                            '</td>' +
-                            `<td><input type = "text" class="form-control" id="select-sales${id}" readonly value = "{{ Auth::user()->name }}" style="width:100px;"> ` +
-                            '</td>' +
-                            `<td><select class="form-control"  id="select-ppc${id}" style="width:150px;"></select> ` +
-                            '</td>' +
-                            `<td><input type="text"  id="nopaket${id}" class="form-control" placeholder="Masukkan No Paket"
-            disabled style="width:150px;"></select> ` +
-                            '</td>' +
-                            `<td><textarea class="form-control" row=10 col=10 id="agenda${id}" ></textarea> ` +
-                            '</td>' +
-                            `<td><textarea class="form-control" row=10 col=10 id="keterangan${id}" ></textarea> ` +
-                            '</td>' +
-                            `<td><input type = "number" min="0" step="1000" value="0" class="form-control" id="biaya${id}" style="width:100px;"> ` +
-                            '</td>' +
-                            `<td><div style="display:flex;"><a class="btn btn-success add-revision" data-id="${id}"><i class="fa fa-plus-square-o"></i></a> &nbsp;<a class="btn btn-danger remove-revision"><i class="fa fa-times-circle"></i></a></div></td></tr>`
-                        )
-                        initDTP("#tglMulai" + id, today)
-                        initDTP("#tglAkhir" + id, today)
-                        $("#select-ppc" + id).select2({
-                            placeholder: 'Tidak ada ID Opti',
-                            allowClear: true,
-                            ajax: {
-                                url: '{{ route('loadPPC') }}',
-                                dataType: 'json',
-                                delay: 250,
-                                processResults: function(data) {
+                        </div>` +
+                    '</td>' +
+                    `<td><input type = "text" class="form-control" id="asalKota${id}" style="width:100px;"> ` +
+                    '</td>' +
+                    `<td><input type = "text" class="form-control" id="tujuan${id}" style="width:100px;"> ` +
+                    '</td>' +
+                    `<td><input type = "text" class="form-control" id="select-sales${id}" readonly value = "{{ Auth::user()->name }}" style="width:100px;"> ` +
+                    '</td>' +
+                    `<td><select class="form-control"  id="select-ppc${id}" style="width:150px;"></select> ` +
+                    '</td>' +
+                    `<td><input type="text"  id="nopaket${id}" class="form-control" placeholder="Masukkan No Paket"
+                            disabled style="width:150px;"></select> ` +
+                    '</td>' +
+                    `<td><textarea class="form-control" row=10 col=10 id="agenda${id}" style="width:150px;"></textarea> ` +
+                    '</td>' +
+                    `<td><textarea class="form-control" row=10 col=10 id="keterangan${id}" style="width:150px;"></textarea> ` +
+                    '</td>' +
+                    `<td><input type = "number" min="0" step="1000" value="0" class="form-control" id="biaya${id}" style="width:100px;"> ` +
+                    '</td>' +
+                    `<td><div style="display:flex;"><a class="btn btn-success add-revision" data-id="${id}"><i class="fa fa-plus-square-o"></i></a> &nbsp;<a class="btn btn-danger remove-revision"><i class="fa fa-times-circle"></i></a></div></td></tr>`
+                )
+                initDTP("#tglMulai" + id, today)
+                initDTP("#tglAkhir" + id, today)
+                $("#select-ppc" + id).select2({
+                    placeholder: 'Tidak ada ID Opti',
+                    allowClear: true,
+                    ajax: {
+                        url: '{{ route('loadPPC') }}',
+                        dataType: 'json',
+                        delay: 250,
+                        processResults: function(data) {
+                            return {
+                                results: $.map(data.data, function(item) {
                                     return {
-                                        results: $.map(data.data, function(item) {
-                                            return {
-                                                text: item.namaOpti,
-                                                id: item.id,
-                                                noPaket: item.noPaket
-                                            }
-                                        })
-                                    };
-                                },
-                                cache: true
-                            }
-                        }).on("change", function(e) {
-                            console.log("TEST");
-                            var selectedData = $(this).select2('data');
-                            $('#nopaket' + id).val(selectedData[0].noPaket);
-                        }).on('select2:unselect', function(e) {
-                            $('#nopaket' + id).val('');
-                        });
-                        // const totalPengeluaran = tr.find("#biaya").val()
-                        // $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) - parseInt(
-                        //     totalPengeluaran));
-                        const totalPengeluaran = $(this).parent().parent().find("#biaya").val()
-                        $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) - parseInt(
-                            totalPengeluaran));
-                        let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
-                        let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0
-                        });
-                        $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
-                        $(this).parent().parent().remove()
-                        if ($("#table-container tr").length < 1) {
-                            $("#submit").attr("disabled", true);
-                        }
-                        $("#submit").attr("disabled", $("#table-container tr").length < 1);
-
-
-                        $(document).on("click", ".remove-revision", function() {
-                            $(this).parent().parent().parent().remove();
-                        });
-                        $(document).on("click", ".remove-detail", function(e) {
-                            e.stopPropagation();
-                            const tr = $(this).parent().parent().parent()
-                            const id = tr.attr("data-id")
-                            $.ajax({
-                                type: "POST",
-                                url: "{{ route('bon.destroyDetail') }}",
-                                data: {
-                                    "_token": "{{ csrf_token() }}",
-                                    "id": id
-                                },
-                                success: function(response) {
-                                    $(tr).attr("style", "text-decoration:line-through")
-                                },
-                                error: function(err) {
-                                    console.log(err);
-                                }
-                            });
-                        });
-                        $(document).on("click", ".add-revision", function() {
-                            const id = $(this).attr("data-id")
-                            const new_row =
-                                `<tr><input type = "hidden" name = "detailbonsId[]" value = "${id}" ><td>${$("#tglMulai"+id).val()}<input type = "hidden" name = "tglMulaiRev[]" value = "${$("#tglMulai"+id).val()}" > ` +
-                                '</td>' +
-                                `<td>${$("#tglAkhir"+id).val()}<input type = "hidden" name = "tglAkhirRev[]" value = "${$("#tglAkhir"+id).val()}" > ` +
-                                '</td>' +
-                                `<td>${$("#asalKota"+id).val()}<input type = "hidden" name = "asalKotaRev[]"value = "${$("#asalKota"+id).val()}" > ` +
-                                '</td>' +
-                                `<td>${$("#tujuan"+id).val()}<input type = "hidden" name = "tujuanRev[]" value = "${$("#tujuan"+id).val()}" > ` +
-                                '</td>' +
-                                `<td>{{ Auth::user()->name }}<input type = "hidden" name = "select-salesRev[]" value = "{{ Auth::user()->id }}" > ` +
-                                '</td>' +
-                                `<td>${$("#select-ppc"+id+" option:selected").text()}<input type = "hidden" name = "select-ppcRev[]" value = "${$("#select-ppc"+id).val()}" > ` +
-                                '</td>' +
-                                `<td>${$("#nopaket"+id).val()}<input type = "hidden" name = "nopaketRev[]" value = "${$("#nopaket"+id).val()}" > ` +
-                                '</td>' +
-                                `<td>${$("#agenda"+id).val()}<input type = "hidden" name = "agendaRev[]" value = "${$("#agenda"+id).val() }" > ` +
-                                '</td>' +
-                                `<td>${$("#keterangan"+id).val()}<input type = "hidden" name = "keteranganRev[]" value = "${$("#keterangan"+id).val()}" > ` +
-                                '</td>' +
-                                `<td>${$("#biaya"+id).val()}<input type = "hidden" name = "biayaRev[]" id = "biaya" value = "${$("#biaya"+id).val()}" > ` +
-                                '</td></tr>'
-                            const table = $(this).parent().parent().parent().parent()
-                            $(table).append(new_row);
-                            $(this).parent().parent().parent().remove()
-                        });
-                        $(document).on("click", ".remove-detail-instant", function() {
-                            $(this).parent().parent().remove();
-                        });
-                        $(document).on("click", ".datepick", function() {
-                            $(this).find(".dateTimePicker").focus()
-                        });
-                        $(".dateTimePicker").on("dp.change", function() {
-                            let mulai = $('#tglMulai').data("DateTimePicker").date()
-                            let deadline = $('#tglAkhir').data("DateTimePicker").date()
-                            if ($(this).attr("id") == "tglMulai") {
-                                if (deadline.isBefore(mulai)) {
-                                    $('#tglAkhir').data("DateTimePicker").date(mulai)
-                                } else return
-                            } else {
-                                if (deadline.isBefore(mulai)) {
-                                    $('#tglMulai').data("DateTimePicker").date(deadline)
-                                } else return
-                            }
-                        });
-                        $.ajax({
-                            type: "POST",
-                            url: "{{ route('bon.loadDetailBon') }}",
-                            data: {
-                                "_token": "{{ csrf_token() }}",
-                                "id": {{ $bon->id }}
-                            },
-                            dataType: 'JSON',
-                            success: function(response) {
-                                const data = response.data
-                                const dataRevision = response.dataRevision
-                                var tbody = $('#table-container'); // Get the tbody element
-                                tbody.empty(); // Clear the tbody
-
-                                $.each(data, function(i, item) {
-                                    console.log(i, item);
-                                    var row = '<tr><td>' + (item.tglMulai ? item.tglMulai :
-                                        '') +
-                                        `<input type="hidden" name="tglMulai[]" value="${item.tglMulai}">` +
-                                        '</td>' +
-                                        '<td>' + (item.tglAkhir ? item.tglAkhir : '') +
-                                        `<input type="hidden" name="tglAkhir[]" value="${item.tglAkhir}">` +
-                                        '</td>' +
-                                        '<td>' + (item.asalKota ? item.asalKota : '') +
-                                        `<input type="hidden" name="asalKota[]" value="${item.asalKota}">` +
-                                        '</td>' +
-                                        '<td>' + (item.tujuan ? item.tujuan : '') +
-                                        `<input type="hidden" name="tujuan[]" value="${item.tujuan}">` +
-                                        '</td>' +
-                                        '<td>' + (item.name ? item.name : '-') +
-                                        `<input type="hidden" name="select-sales[]" value="{{ Auth::user()->id }}">` +
-                                        '</td>' +
-                                        '<td>' + (item.namaOpti ? item.namaOpti : '-') +
-                                        `<input type="hidden" name="select-ppc[]" value="${item.pid}">` +
-                                        '</td>' +
-                                        '<td>' + (item.noPaket ? item.noPaket : '-') +
-                                        `<input type="hidden" name="nopaket[]" value="${item.noPaket}">` +
-                                        '</td>' +
-                                        '<td>' + (item.agenda ? item.agenda : '') +
-                                        `<input type="hidden" name="agenda[]" value="${item.agenda }">` +
-                                        '</td>' +
-                                        '<td>' + (item.penggunaan ? item.penggunaan : '') +
-                                        `<input type="hidden" name="keterangan[]" value="${item.penggunaan}">` +
-                                        '</td>' +
-                                        '<td>' + (item.biaya ? item.biaya.toLocaleString(
-                                            'id-ID', {
-                                                style: 'currency',
-                                                currency: 'IDR',
-                                                minimumFractionDigits: 0
-                                            }) : '') +
-                                        `<input type="hidden" name="biaya[]" id="biaya" value="${item.biaya }">` +
-                                        '</td>' +
-                                        '<td>' +
-                                        `<div style="display:flex;"><a class="btn btn-warning revision"><i class="fa fa-pencil"></i></a>&nbsp;<a class="btn btn-danger remove-detail"><i class="fa fa-times-circle"></i></a>` +
-                                        '</td></tr>'
-                                    var row_child = `<td colspan="12" class="nopading" ><div id="collapse${item.id}" class="panel-collapse collapse padding table-responsive">
-                            <table id="tableRevise" class="table table-striped table-bordered">
-                                <tbody id="table-revise-container">`;
-                                    if (dataRevision != undefined || dataRevision != null) {
-                                        for (const iterator of dataRevision) {
-                                            if (iterator.detailbons_revision_id == item.id) {
-                                                row_child +=
-                                                    `<tr><input type = "hidden" name = "detailbonsId[]" value = "${item.id}" ><td>${(iterator.tglMulai ? iterator.tglMulai : '-')}<input type = "hidden" name = "tglMulai[]" value = "${iterator.tglMulai}" > ` +
-                                                    '</td>' +
-                                                    `<td>${(iterator.tglAkhir ? iterator.tglAkhir : '-')}<input type = "hidden" name = "tglAkhirRev[]" value = "${iterator.tglAkhir}" > ` +
-                                                    '</td>' +
-                                                    `<td>${(iterator.asalKota ? iterator.asalKota : '-')}<input type = "hidden" name = "asalKotaRev[]"value = "${iterator.asalKota}" > ` +
-                                                    '</td>' +
-                                                    `<td>${(iterator.tujuan ? iterator.tujuan : '-')}<input type = "hidden" name = "tujuanRev[]" value = "${iterator.tujuan}" > ` +
-                                                    '</td>' +
-                                                    `<td>${(iterator.name ? iterator.name : '-')}<input type = "hidden" name = "select-salesRev[]" value = "{{ Auth::user()->id }}" > ` +
-                                                    '</td>' +
-                                                    `<td>${(iterator.namaOpti ? iterator.namaOpti : '-')}<input type = "hidden" name = "select-ppcRev[]" value = "${iterator.pid}" > ` +
-                                                    '</td>' +
-                                                    `<td>${(iterator.noPaket ? iterator.noPaket : '-')}<input type = "hidden" name = "nopaketRev[]" value = "${iterator.noPaket}" > ` +
-                                                    '</td>' +
-                                                    `<td>${(iterator.agenda ? iterator.agenda : '-')}<input type = "hidden" name = "agendaRev[]" value = "${iterator.agenda }" > ` +
-                                                    '</td>' +
-                                                    `<td>${(iterator.penggunaan ? iterator.penggunaan : '-')}<input type = "hidden" name = "keteranganRev[]" value = "${iterator.penggunaan}" > ` +
-                                                    '</td>' +
-                                                    `<td>${(iterator.biaya ? iterator.biaya : '')}<input type = "hidden" name = "biayaRev[]" id = "biaya" value = "${iterator.biaya }" > ` +
-                                                    '</td></tr>'
-                                            }
-                                        }
+                                        text: item.namaOpti,
+                                        id: item.id,
+                                        noPaket: item.noPaket
                                     }
-                                    row_child += `</tbody></table></div></td>`;
-                                    row += row_child
-                                    tbody.append(row);
-                                });
-                            }
+                                })
+                            };
+                        },
+                        cache: true
+                    }
+                }).on("change", function(e) {
+                    console.log("TEST");
+                    var selectedData = $(this).select2('data');
+                    $('#nopaket' + id).val(selectedData[0].noPaket);
+                }).on('select2:unselect', function(e) {
+                    $('#nopaket' + id).val('');
+                });
+                const totalPengeluaran = $(this).parent().parent().find("#biaya").val()
+                $("#biayaPerjalanan").val(parseInt($("#biayaPerjalanan").val()) - parseInt(
+                    totalPengeluaran));
+                let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val());
+                let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                });
+                $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
+                $("#submit").attr("disabled", $("#table-container tr").length < 1);
+            });
+
+            $(document).on("click", ".remove-revision", function() {
+                $(this).parent().parent().parent().remove();
+            });
+
+            $(document).on("click", ".remove-detail", function(e) {
+                e.stopPropagation();
+                const tr = $(this).parent().parent().parent()
+                const id = tr.attr("data-id")
+                const trs = $(tr).next().find("#table-revise-container > tr")
+                const par = $(this).parent();
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('bon.destroyDetail') }}",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "id": id
+                    },
+                    success: function(response) {
+                        $(tr).addClass("lineStrike")
+                        $.each(trs, function(i, val) {
+                            $(val).addClass("lineStrike")
                         });
+                        $(par).remove();
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            });
+            $(document).on("click", ".add-revision", function() {
+                const id = $(this).attr("data-id")
+                const asal = $("#asalKota" + id).val();
+                const tujuan = $("#tujuan" + id).val();
+                const agenda = $("#agenda" + id).val()
+                const keter = $("#keterangan" + id).val()
+                const tglMulai = $("#tglMulai" + id).val()
+                const tglAkhir = $("#tglAkhir" + id).val();
+                const nopaket = $("#nopaket" + id).val()
+                const sales = {!! Auth::user()->id !!}
+                const proj = $("#select-ppc" + id).val()
+                let biaya = parseInt($("#biaya" + id).val());
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('bon.addNewDetailRevision') }}",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "tglMulai": tglMulai,
+                        "tglAkhir": tglAkhir,
+                        "asalKota": asal,
+                        "tujuan": tujuan,
+                        "select-sales": sales,
+                        "select-ppc": proj,
+                        "nopaket": nopaket,
+                        "agenda": agenda,
+                        "keterangan": keter,
+                        "biaya": biaya,
+                        "id": id,
+                        "bid": bid
+                    },
+                    success: function(response) {
+                        const new_row =
+                            `<tr><input type = "hidden" name = "detailbonsId[]" value = "${id}" ><td>${$("#tglMulai"+id).val()}<input type = "hidden" name = "tglMulaiRev[]" value = "${$("#tglMulai"+id).val()}" > ` +
+                            '</td>' +
+                            `<td>${$("#tglAkhir"+id).val()}<input type = "hidden" name = "tglAkhirRev[]" value = "${$("#tglAkhir"+id).val()}" > ` +
+                            '</td>' +
+                            `<td>${$("#asalKota"+id).val()}<input type = "hidden" name = "asalKotaRev[]"value = "${$("#asalKota"+id).val()}" > ` +
+                            '</td>' +
+                            `<td>${$("#tujuan"+id).val()}<input type = "hidden" name = "tujuanRev[]" value = "${$("#tujuan"+id).val()}" > ` +
+                            '</td>' +
+                            `<td>{{ Auth::user()->name }}<input type = "hidden" name = "select-salesRev[]" value = "{{ Auth::user()->id }}" > ` +
+                            '</td>' +
+                            `<td>${$("#select-ppc"+id+" option:selected").text()}<input type = "hidden" name = "select-ppcRev[]" value = "${$("#select-ppc"+id).val()}" > ` +
+                            '</td>' +
+                            `<td>${$("#nopaket"+id).val()}<input type = "hidden" name = "nopaketRev[]" value = "${$("#nopaket"+id).val()}" > ` +
+                            '</td>' +
+                            `<td>${$("#agenda"+id).val()}<input type = "hidden" name = "agendaRev[]" value = "${$("#agenda"+id).val() }" > ` +
+                            '</td>' +
+                            `<td>${$("#keterangan"+id).val()}<input type = "hidden" name = "keteranganRev[]" value = "${$("#keterangan"+id).val()}" > ` +
+                            '</td>' +
+                            `<td>${$("#biaya"+id).val()}<input type = "hidden" name = "biayaRev[]" id = "biaya" value = "${$("#biaya"+id).val()}" > ` +
+                            '</td></tr>'
+                        const table = $(this).parent().parent().parent().parent()
+                        console.log(table);
+                        const originalDetail = $("tr[data-id='" + id + "']")
+                        const cur_tr = $(this).parent().parent().parent();
+                        $(originalDetail).attr("style", "text-decoration:line-through;")
+                        $(cur_tr).prev().attr("style", "text-decoration:line-through;");
+                        $(table).append(new_row);
+                        $(this).parent().parent().parent().remove()
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            });
+            $(document).on("click", ".datepick", function() {
+                $(this).find(".dateTimePicker").focus()
+            });
+            $(".dateTimePicker").on("dp.change", function() {
+                let mulai = $('#tglMulai').data("DateTimePicker").date()
+                let deadline = $('#tglAkhir').data("DateTimePicker").date()
+                if ($(this).attr("id") == "tglMulai") {
+                    if (deadline.isBefore(mulai)) {
+                        $('#tglAkhir').data("DateTimePicker").date(mulai)
+                    } else return
+                } else {
+                    if (deadline.isBefore(mulai)) {
+                        $('#tglMulai').data("DateTimePicker").date(deadline)
+                    } else return
+                }
+            });
+            $.ajax({
+                type: "POST",
+                url: "{{ route('bon.loadDetailBon') }}",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    "id": {{ $bon->id }}
+                },
+                dataType: 'JSON',
+                success: function(response) {
+                    const data = response.data
+                    const dataRevision = response.dataRevision
+                    var tbody = $('#table-container'); // Get the tbody element
+                    tbody.empty(); // Clear the tbody
+                    $.each(data, function(i, item) {
+                        var row = '<tr data-toggle="collapse" class="' + (item.deleted_at ?
+                                "lineStrike" : "") + '" href="#collapse' +
+                            item.id +
+                            '" data-id="' + item.id + '"><td>' + (item.tglMulai ? item
+                                .tglMulai : '') +
+                            `<input type="hidden" name="tglMulai[]" value="${item.tglMulai}">` +
+                            '</td>' +
+                            '<td>' + (item.tglAkhir ? item.tglAkhir : '') +
+                            `<input type="hidden" name="tglAkhir[]" value="${item.tglAkhir}">` +
+                            '</td>' +
+                            '<td>' + (item.asalKota ? item.asalKota : '') +
+                            `<input type="hidden" name="asalKota[]" value="${item.asalKota}">` +
+                            '</td>' +
+                            '<td>' + (item.tujuan ? item.tujuan : '') +
+                            `<input type="hidden" name="tujuan[]" value="${item.tujuan}">` +
+                            '</td>' +
+                            '<td>' + (item.name ? item.name : '-') +
+                            `<input type="hidden" name="select-sales[]" value="{{ Auth::user()->id }}">` +
+                            '</td>' +
+                            '<td>' + (item.namaOpti ? item.namaOpti : '-') +
+                            `<input type="hidden" name="select-ppc[]" value="${item.pid}">` +
+                            '</td>' +
+                            '<td>' + (item.noPaket ? item.noPaket : '-') +
+                            `<input type="hidden" name="nopaket[]" value="${item.noPaket}">` +
+                            '</td>' +
+                            '<td>' + (item.agenda ? item.agenda : '') +
+                            `<input type="hidden" name="agenda[]" value="${item.agenda }">` +
+                            '</td>' +
+                            '<td>' + (item.penggunaan ? item.penggunaan : '') +
+                            `<input type="hidden" name="keterangan[]" value="${item.penggunaan}">` +
+                            '</td>' +
+                            '<td>' + (item.biaya ? item.biaya.toLocaleString(
+                                'id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0
+                                }) : '') +
+                            `<input type="hidden" name="biaya[]" id="biaya" value="${item.biaya }">` +
+                            '</td>' +
+                            '<td>' +
+                            `<div style="display:flex;"><a class="btn btn-warning revision"><i class="fa fa-pencil"></i></a>&nbsp;<a class="btn btn-danger remove-detail"><i class="fa fa-times-circle"></i></a>` +
+                            '</td></tr>'
+                        var row_child = `<td colspan="12" class="nopading" ><div id="collapse${item.id}" class="panel-collapse collapse padding table-responsive">
+                                        <table id="tableRevise" class="table table-striped table-bordered">
+                                        <tbody id="table-revise-container">`;
+                        if (dataRevision != undefined || dataRevision != null) {
+                            for (const iterator of dataRevision) {
+                                if (iterator.detailbons_revision_id == item.id) {
+                                    row_child +=
+                                        `<tr class="${(iterator.deleted_at?"lineStrike":"")}"><input type = "hidden" name = "detailbonsId[]" value = "${item.id}" ><td>${(iterator.tglMulai ? iterator.tglMulai : '-')}<input type = "hidden" name = "tglMulai[]" value = "${iterator.tglMulai}" > ` +
+                                        '</td>' +
+                                        `<td>${(iterator.tglAkhir ? iterator.tglAkhir : '-')}<input type = "hidden" name = "tglAkhirRev[]" value = "${iterator.tglAkhir}" > ` +
+                                        '</td>' +
+                                        `<td>${(iterator.asalKota ? iterator.asalKota : '-')}<input type = "hidden" name = "asalKotaRev[]"value = "${iterator.asalKota}" > ` +
+                                        '</td>' +
+                                        `<td>${(iterator.tujuan ? iterator.tujuan : '-')}<input type = "hidden" name = "tujuanRev[]" value = "${iterator.tujuan}" > ` +
+                                        '</td>' +
+                                        `<td>${(iterator.name ? iterator.name : '-')}<input type = "hidden" name = "select-salesRev[]" value = "{{ Auth::user()->id }}" > ` +
+                                        '</td>' +
+                                        `<td>${(iterator.namaOpti ? iterator.namaOpti : '-')}<input type = "hidden" name = "select-ppcRev[]" value = "${iterator.pid}" > ` +
+                                        '</td>' +
+                                        `<td>${(iterator.noPaket ? iterator.noPaket : '-')}<input type = "hidden" name = "nopaketRev[]" value = "${iterator.noPaket}" > ` +
+                                        '</td>' +
+                                        `<td>${(iterator.agenda ? iterator.agenda : '-')}<input type = "hidden" name = "agendaRev[]" value = "${iterator.agenda }" > ` +
+                                        '</td>' +
+                                        `<td>${(iterator.penggunaan ? iterator.penggunaan : '-')}<input type = "hidden" name = "keteranganRev[]" value = "${iterator.penggunaan}" > ` +
+                                        '</td>' +
+                                        `<td>${(iterator.biaya ? iterator.biaya : '')}<input type = "hidden" name = "biayaRev[]" id = "biaya" value = "${iterator.biaya }" > ` +
+                                        '</td></tr>'
+                                }
+                            }
+                        }
+                        row_child += `</tbody></table></div></td>`;
+                        row += row_child
+                        tbody.append(row);
                     });
+                }
+            });
+        })
     </script>
 @endsection
