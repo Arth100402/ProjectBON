@@ -51,8 +51,6 @@
                                 <th>Departemen</th>
                                 <th>Tanggal Pengajuan</th>
                                 <th>Total Biaya Perjalanan</th>
-                                <th>Nama Finance Manager</th>
-                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -326,7 +324,7 @@
                     scrollCollapse: true,
                     scrollY: '445px',
                     columns: [{
-                            data: "uname",
+                            data: "pengaju",
                             width: "10%"
                         }, {
                             data: "dname",
@@ -363,23 +361,16 @@
                             }
                         },
                         {
-                            data: "ACC",
-                            width: "10%"
-                        },
-                        {
-                            data: "status",
-                            defaultContent: "Menunggu",
-                            width: "5%"
-                        },
-                        {
                             data: null,
                             render: (data, type, row, meta) => {
                                 return `<a class="btn btn-info" href="#modalEditB" data-toggle="modal" onclick="getDetailKasir(${data.id})">
                                 <i class="fa fa-info-circle"></i>
                                 </a>
-                                <a class="btn btn-success" href="/accKasir/${data.id}"><i class="fa fa-check-circle"></i></a>`
+                                <a class="btn btn-success" href="/accKasir/${data.id}"><i class="fa fa-check-circle"></i></a>
+                                <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revKasir(${data.id})"><i class="fa fa-comment"></i></a>
+                                <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="decKasir(${data.id})"><i class="fa fa-times"></i></a></div>`
                             },
-                            width: "10%"
+                            width: "13%"
                         }
                     ]
                 })
@@ -388,7 +379,11 @@
                     url: "{{ route('kasirIndex') }}",
                     success: function(response) {
                         tableCair.clear().draw()
-                        tableCair.rows.add(response).draw()
+                        tableCair.rows.add(response["data"]).draw()
+                    },
+                    error: function(error) {
+                        console.log("Error: ");
+                        console.log(error);
                     }
                 });
             } else if (jabatanID == 3 && departID == 8) {
@@ -411,7 +406,7 @@
                         },
                     ],
                     columns: [{
-                            data: "pengaju",
+                            data: "uname",
                             width: "10%"
                         },
                         {
@@ -556,7 +551,7 @@
                     url: "{{ route('fmindex') }}",
                     success: function(data) {
                         tablefm.clear().draw()
-                        tablefm.rows.add(data["data"]).draw()
+                        tablefm.rows.add(data).draw()
                     },
                     error: function(error) {
                         console.log("Error: ");
@@ -639,8 +634,7 @@
                                     <a class="btn btn-success" href="/accBontThres/${data.id}" onclick="return confirm('Total melebihi threshold, Apakah masih ingin menyetujui?')"><i class="fa fa-check-circle"></i></a>
                                     <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisi(${data.id})"><i class="fa fa-comment"></i></a>
                                     <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
-                                }
-                                else {
+                                } else {
                                     return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
                                     onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
                                     <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
@@ -883,7 +877,7 @@
         });
 
         // Functions
-        const tolakKasir = (id) => {
+        const decKasir = (id) => {
             $("#kirimTolak").attr("action", "/decKasir/" + id);
         }
         const tolakFM = (id) => {
@@ -917,6 +911,9 @@
 
         function revisiFm(id) {
             $("#kirimRevisi").attr("action", "/FmRevBon/" + id);
+        }
+        function revKasir(id) {
+            $("#kirimRevisi").attr("action", "/revKasir/" + id);
         }
 
         function getDetail(id) {

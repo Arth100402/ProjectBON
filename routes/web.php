@@ -50,6 +50,8 @@ Route::middleware("auth")->group(function () {
     // Kasir
     Route::get("/kasirIndex", [BonController::class, "loadKasir"])->name("kasirIndex");
     Route::get('/accKasir/{id}', [BonController::class, 'accKasir'])->name('accKasir');
+    Route::post('/decKasir/{id}', [BonController::class, 'decKasir'])->name('decKasir');
+    Route::post('/revKasir/{id}', [BonController::class, 'revKasir'])->name('revKasir');
     Route::post("/kasir/acc/detail", [BonController::class, 'getDetailKasir'])->name("detailKasir");
 
     // Setting Controller
@@ -62,7 +64,7 @@ Route::middleware("auth")->group(function () {
     ROUTE::post("/upadteThres", [SettingController::class, 'updateThr'])->name("setting.thr");
 });
 // Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
-Route::get("/test", [BonController::class, "jsonShowIndexSelf"]);
+Route::get("/test", [BonController::class, "fmIndex"]);
 // Route::get("/test", function(){
 //     return DB::table('detailbons')->where('bons_id',3)->delete();
 // });
