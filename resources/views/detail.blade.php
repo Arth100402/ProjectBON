@@ -96,9 +96,9 @@
                         @endforeach
                     </tbody>
                 </table><br>
-                <h4>Finance Manager: </h4>
+                <h4>Kasir: </h4>
                 @foreach ($acc as $a)
-                    @if ($a->acc_jabatan == 3 && $a->acc_depart == 8)
+                    @if ($a->acc_jabatan == 8)
                         <table class="table table-bordered" style="background-color: white">
                             <thead>
                                 <tr>
@@ -119,9 +119,9 @@
                         </table>
                     @endif
                 @endforeach
-                <h4>Kasir: </h4>
+                <h4>Finance Manager: </h4>
                 @foreach ($acc as $a)
-                    @if ($a->acc_jabatan == 8)
+                    @if ($a->acc_jabatan == 3 && $a->acc_depart == 8)
                         <table class="table table-bordered" style="background-color: white">
                             <thead>
                                 <tr>
