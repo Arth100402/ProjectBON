@@ -334,7 +334,6 @@ class BonController extends Controller
             ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
         return view('bon.edit', compact('bon', 'data'));
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -414,15 +413,6 @@ class BonController extends Controller
             return redirect()->route('bon.index');
         }
     }
-
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    public function destroyDetail(Request $req)
-    {
-        $aff = DetailBon::find($req->get("id"))->delete();
-        DetailBon::where("detailbons_revision_id", $req->get("id"))->delete();
-        return response()->json(["status" => $aff]);
-    }
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     /**
      * Remove the specified resource from storage.
      *
@@ -713,6 +703,50 @@ class BonController extends Controller
         return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
     }
 
+    public function addNewDetail(Request $request)
+    {
+        $new = new DetailBon();
+        $new->bons_id = $request->get("bid");
+        $new->tglMulai = $this->convertDTPtoDatabaseDT($request->get("tglMulai"));
+        $new->tglAkhir = $this->convertDTPtoDatabaseDT($request->get("tglAkhir"));
+        $new->asalKota = $request->get("asalKota");
+        $new->tujuan = $request->get("tujuan");
+        $new->projects_id = ($request->get("select-ppc")) ? $request->get("select-ppc") : null;
+        $new->users_id = $request->get("select-sales");
+        $new->noPaket = ($request->get("noPaket")) ? $request->get("noPaket") : null;
+        $new->agenda = $request->get("agenda");
+        $new->penggunaan  = $request->get("keterangan");
+        $new->biaya = $request->get("biaya");
+        $new->save();
+        return response()->json(["status" => "ok"]);
+    }
+    public function addNewDetailRevision(Request $request)
+    {
+        $oriDetailAff = DetailBon::find($request->get("id"))->delete();
+        $others = DetailBon::where("detailbons_revision_id", $request->get("id"))->delete();
+        $new = new DetailBon();
+        $new->bons_id = $request->get("bid");
+        $new->tglMulai = $this->convertDTPtoDatabaseDT($request->get("tglMulai"));
+        $new->tglAkhir = $this->convertDTPtoDatabaseDT($request->get("tglAkhir"));
+        $new->asalKota = $request->get("asalKota");
+        $new->tujuan = $request->get("tujuan");
+        $new->projects_id = ($request->get("select-ppc")) ? $request->get("select-ppc") : null;
+        $new->users_id = $request->get("select-sales");
+        $new->noPaket = ($request->get("noPaket")) ? $request->get("noPaket") : null;
+        $new->agenda = $request->get("agenda");
+        $new->penggunaan  = $request->get("keterangan");
+        $new->biaya = $request->get("biaya");
+        $new->detailbons_revision_id = $request->get("id");
+        $new->save();
+        return response()->json(["status" => "ok", "id" => $new->id]);
+    }
+
+    public function destroyDetail(Request $req)
+    {
+        $aff = DetailBon::find($req->get("id"))->delete();
+        DetailBon::where("detailbons_revision_id", $req->get("id"))->delete();
+        return response()->json(["status" => $aff]);
+    }
     public function test4()
     {
     }
