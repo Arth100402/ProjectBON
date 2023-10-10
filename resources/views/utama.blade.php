@@ -145,13 +145,15 @@
                             </div>
                         </form>
                     </li>
-                    <li id="dashboard" class="start">
-                        <a href="/">
-                            <i class="icon-home"></i>
-                            <span class="title">Dashboard</span>
-                            <span class="selected"></span>
-                        </a>
-                    </li>
+                    @if (Auth::user()->jabatan_id != 9)
+                        <li id="dashboard" class="start">
+                            <a href="/">
+                                <i class="icon-home"></i>
+                                <span class="title">Dashboard</span>
+                                <span class="selected"></span>
+                            </a>
+                        </li>
+                    @endif
                     {{-- GM  Keatas & super admin --}}
                     @if (Auth::user()->jabatan_id > 4 && Auth::user()->jabatan_id <= 7)
                         <li id="setting">
@@ -165,6 +167,23 @@
                                     <a href="/hierarchy">
                                         <i class="fa fa-sitemap"></i>
                                         Configure Hierarchy
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
+                    @if (Auth::user()->jabatan_id == 9)
+                        <li id="admin">
+                            <a href="/">
+                                <i class="icon-home"></i>
+                                <span class="title">Admin</span>
+                                <span class="selected"></span>
+                            </a>
+                            <ul class="sub-menu">
+                                <li id="admindashboard">
+                                    <a href="/admindashboard">
+                                        <i class="fa fa-sitemap"></i>
+                                        Dashboard
                                     </a>
                                 </li>
                             </ul>

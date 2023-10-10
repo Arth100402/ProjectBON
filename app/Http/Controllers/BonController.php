@@ -95,6 +95,65 @@ class BonController extends Controller
             'data' => $data
         ]);
     }
+
+    public function dashboardAdmin()
+    {
+        return view('admin.home');
+    }
+
+    public function indexAdmin()
+    {
+        $data = DB::table('bons')
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->join('departements', 'users.departement_id', '=', 'departements.id')
+            ->where('users.departement_id', '=', Auth::user()->departement_id)
+            ->get([
+                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name',
+                'departements.name as dname'
+            ]);
+        $acc = collect();
+
+        foreach ($data as $item) {
+            $acc->push(
+                DB::table('accs')
+                    ->join('bons', 'bons.id', '=', 'accs.bons_id')
+                    ->join('users as acc', 'acc.id', '=', 'accs.users_id')
+                    ->join('users as aju', 'aju.id', '=', 'bons.users_id')
+                    ->where('bons.users_id', '=', $item->users_id)
+                    ->select('accs.bons_id', 'acc.name as acc_name', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
+                    ->get()
+            );
+        }
+
+        $x = [];
+        $remove = [];
+
+        foreach ($acc as $items) {
+            foreach ($items as $item) {
+                if ($item->status != 'Diproses') {
+                    array_push($x, $item->bons_id);
+                }
+                if ($item->status == 'Revisi') {
+                    array_push($remove, $item->bons_id);
+                }
+            }
+        }
+
+        $x = array_diff($x, $remove);
+
+        foreach ($data as $item) {
+            $item->editable = true;
+            if (in_array($item->id, $x, true)) {
+                $item->editable = false;
+            }
+        }
+
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+
     public function getDetail(Request $request)
     {
         $id = $request->get('id');
@@ -180,6 +239,58 @@ class BonController extends Controller
         ));
     }
 
+    public function getDetailAdmin(Request $request)
+    {
+        $id = $request->get('id');
+        $users_id = $request->get('users_id');
+        $detail = DB::table('detailbons')
+            ->join('bons', 'detailbons.bons_id', '=', 'bons.id')
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->leftJoin('projects', 'detailbons.projects_id', '=', 'projects.id')
+            ->join('departements', 'users.departement_id', '=', 'departements.id')
+            ->where('detailbons.bons_id', '=', $id)
+            ->get([
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
+                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name',
+                'projects.idOpti'
+            ]);
+        $subquery = DB::table('accs AS a')
+            ->join('users AS u', 'a.users_id', '=', 'u.id')
+            ->join('jabatans AS j', 'j.id', '=', 'u.jabatan_id')
+            ->join('departements AS d', 'd.id', '=', 'u.departement_id')
+            ->where('a.bons_id', '=', $id)
+            ->select(
+                'a.users_id',
+                'u.jabatan_id',
+                'u.name AS uname',
+                'j.name AS jname',
+                'd.name AS dname',
+                'a.bons_id',
+                'a.status as status',
+                'a.keteranganTolak as keteranganTolak'
+            );
+        $acc = DB::table('accs')
+            ->join('bons', 'bons.id', '=', 'accs.bons_id')
+            ->join('users as acc', 'acc.id', '=', 'accs.users_id')
+            ->join('users as aju', 'aju.id', '=', 'bons.users_id')
+            ->where('bons.users_id', '=', $users_id)
+            ->where('bons.id', '=', $id)
+            ->orderBy("accs.level")
+            ->select('acc.name as acc_name', 'acc.jabatan_id as acc_jabatan', 'acc.departement_id as acc_depart', 'accs.status', 'accs.keteranganTolak', 'accs.keteranganAcc', 'accs.updated_at')
+            ->get();
+        $revises = DB::table("revisionhistory")
+            ->join("users", "users.id", "revisionhistory.users_id")
+            ->where("revisionhistory.bons_id", $id)
+            ->get(["users.name AS atasan", "revisionhistory.history", "revisionhistory.created_at AS tglRevisi"]);
+        $file = Bon::find($id);
+        $pdf = ['filename' => $file->file];
+        return response()->json(array(
+            'status' => 'oke',
+            'msg' => view('detail', compact('detail', 'acc', 'pdf', 'revises'))->render()
+        ));
+    }
+
     public function getDetailHistory(Request $request)
     {
         $id = $request->get('id');
@@ -218,6 +329,12 @@ class BonController extends Controller
         return view('bon.formCreate');
     }
 
+    public function admincreate()
+    {
+        return view('admin.formCreate');
+    }
+
+
     /**
      * Store a newly created resource in storage.
      *
@@ -226,29 +343,16 @@ class BonController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'filenames.*' => 'mimes:jpg,jpeg,png,pdf|max:10240',
-                'biayaPerjalanan' => 'required|integer',
-            ],
-            [
-                'filenames.mimes' => 'Pastikan anda mengunggah file dengan format pdf',
-                'filenames.max' => 'Pastikan anda mengunggah file dengan ukuran maksimal 10MB',
-                'biayaPerjalanan.required' => 'Biaya perjalanan harus diisi',
-                'biayaPerjalanan.integer' => 'Biaya perjalanan harus berupa angka',
-            ]
-        );
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-        $filenames = null;
+        $request->validate([
+            'filenames.*' => 'mimes:jpg,jpeg,png,pdf,docx|max:10240',
+        ]);
+
         $filenamed = "";
         if ($request->hasFile('filenames')) {
             foreach ($request->file('filenames') as $key => $file) {
                 $fileExt = $file->getClientOriginalExtension();
                 $date = now()->format('YmdHis');
-                $temp = $date . "surat" . $key . "." . $fileExt . " ";
+                $temp = $date . "surat" . $key . "." . $fileExt;
                 $file->storeAs('files', $temp, 'public');
                 $filenamed .= $temp . ",";
             }
@@ -304,6 +408,64 @@ class BonController extends Controller
             return redirect()->route('bon.index');
         }
         return redirect()->route('bon.index');
+    }
+
+    public function adminstore(Request $request)
+    {
+        $request->validate([
+            'filenames.*' => 'mimes:jpg,jpeg,png,pdf,docx|max:10240',
+        ]);
+
+        $filenamed = "";
+        if ($request->hasFile('filenames')) {
+            foreach ($request->file('filenames') as $key => $file) {
+                $fileExt = $file->getClientOriginalExtension();
+                $date = now()->format('YmdHis');
+                $temp = $date . "surat" . $key . "." . $fileExt;
+                $file->storeAs('files', $temp, 'public');
+                $filenamed .= $temp . ",";
+            }
+            $filenames = rtrim($filenamed, ",");
+        }
+        $user = User::find($request->get('select-sales')[0]);
+        if ($user) {
+            $bon = DB::table('bons')->insertGetId([
+                "tglPengajuan" => now(),
+                "users_id" => $user->id,
+                "total" => $request->get("biayaPerjalanan"),
+                "status" => null,
+                "file" => $filenames
+            ]);
+
+            if ($bon) {
+                foreach ($request->get("select-sales") as $key => $value) {
+                    DB::table('detailbons')->insert([
+                        "bons_id" => $bon,
+                        "tglMulai" => $this->convertDTPtoDatabaseDT($request->get("tglMulai")[$key]),
+                        "tglAkhir" => $this->convertDTPtoDatabaseDT($request->get("tglAkhir")[$key]),
+                        "asalKota" => $request->get("asalKota")[$key],
+                        "tujuan" => $request->get("tujuan")[$key],
+                        "users_id" => $request->get("select-sales")[$key],
+                        "projects_id" => ($request->get("select-ppc")[$key] === 'null') ? null : $request->get("select-ppc")[$key],
+                        "noPaket" => ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : null,
+                        "agenda" => $request->get("agenda")[$key],
+                        "penggunaan" => $request->get("keterangan")[$key],
+                        "biaya" => $request->get("biaya")[$key],
+                    ]);
+                }
+
+                $newBon = new Acc;
+                $newBon->bons_id = $bon;
+                $newBon->users_id = $user->id;
+                $newBon->status = "Diproses";
+                $newBon->level = 0;
+                $newBon->threshold = 0;
+                $newBon->save();
+
+                Mail::to($user->email)->send(new Email($bon, $user->name));
+            }
+        }
+        return redirect()->route('admin.dashboard');
     }
 
     /**
@@ -443,6 +605,14 @@ class BonController extends Controller
     public function  loadPPC(Request $request)
     {
         $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti", "noPaket"]);
+        return response()->json(["data" => $data]);
+    }
+
+    public function  loadSales(Request $request)
+    {
+        $data = User::where("name", "LIKE", "%$request->q%")
+            ->where("departement_id", '=', Auth::user()->departement_id)
+            ->get(["id", "name"]);
         return response()->json(["data" => $data]);
     }
 

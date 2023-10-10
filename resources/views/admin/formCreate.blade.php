@@ -69,9 +69,7 @@
     </div>
     <div class="form-group">
         <label for="sales">Pilih Sales: </label>
-        <select class="form-control" name="sales" id="select-sales" disabled>
-            <option value="{{ Auth::user()->id }}">{{ Auth::user()->name }}</option>
-        </select>
+        <select class="form-control" name="sales" id="select-sales"></select>
         @error('sales')
             <span class="text-danger">{{ $message }}</span>
         @enderror
@@ -117,7 +115,7 @@
     </div>
     <br>
     <button id="addDetail" class="btn btn-info btn-block">Tambahkan</button><br>
-    <form method="POST" action="{{ route('bon.store') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('admin.store') }}" enctype="multipart/form-data">
         @csrf
         <div class="table-responsive" style="overflow: scroll">
             <table id="myTable" class="table table-striped table-bordered">
@@ -194,6 +192,27 @@
             var today = new Date();
             initDTP("#tglMulai", today)
             initDTP("#tglAkhir", today)
+
+            $("#select-sales").select2({
+                placeholder: 'Pilih Sales',
+                allowClear: true,
+                ajax: {
+                    url: '{{ route('loadSales') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function(data) {
+                        return {
+                            results: $.map(data.data, function(item) {
+                                return {
+                                    text: item.name,
+                                    id: item.id,
+                                }
+                            })
+                        };
+                    },
+                    cache: true
+                }
+            });
 
             $("#select-ppc").select2({
                 placeholder: 'Tidak ada ID Opti',
