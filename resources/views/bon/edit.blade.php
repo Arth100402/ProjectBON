@@ -90,15 +90,28 @@
             <span class="text-danger">{{ $message }}</span>
         @enderror
     </div>
-    <div class="form-group">
-        <label for="sales">Pilih Sales: </label>
-        <select class="form-control" name="sales" id="select-sales" disabled>
-            <option value="{{ Auth::user()->id }}">{{ Auth::user()->name }}</option>
-        </select>
-        @error('sales')
-            <span class="text-danger">{{ $message }}</span>
-        @enderror
-    </div>
+    {{-- Admin --}}
+    @if (Auth::user()->jabatan_id == 9)
+        <div class="form-group">
+            <label for="sales">Pilih Sales: </label>
+            <select class="form-control" name="sales" id="select-sales" disabled>
+                <option value="{{ $bon->name }}">{{ $bon->name }}</option>
+            </select>
+            @error('sales')
+                <span class="text-danger">{{ $message }}</span>
+            @enderror
+        </div>
+    @else
+        <div class="form-group">
+            <label for="sales">Pilih Sales: </label>
+            <select class="form-control" name="sales" id="select-sales" disabled>
+                <option value="{{ Auth::user()->id }}">{{ Auth::user()->name }}</option>
+            </select>
+            @error('sales')
+                <span class="text-danger">{{ $message }}</span>
+            @enderror
+        </div>
+    @endif
     <div class="form-group">
         <label for="ppc">Pilih PPC: </label>
         <select class="form-control" name="ppc" id="select-ppc"></select>
