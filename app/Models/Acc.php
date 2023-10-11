@@ -9,6 +9,7 @@ class Acc extends Model
 {
     use HasFactory;
     protected $table = "accs";
+    protected $attributes = ['level' => 0, 'threshold' => 0, 'thresholdChange' => 0];
 
     function bon()
     {

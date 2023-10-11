@@ -19,9 +19,10 @@ class CreateAccsTable extends Migration
             $table->foreign('bons_id')->references('id')->on('bons')->onDelete('cascade');
             $table->unsignedBigInteger('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
-            $table->enum('status', ['Terima','Diproses','Revisi','Tolak'])->nullable();
-            $table->integer('level');
-            $table->integer('threshold');
+            $table->enum('status', ['Terima', 'Diproses', 'Revisi', 'Tolak'])->nullable();
+            $table->integer('level')->default('0');
+            $table->integer('threshold')->default("0");
+            $table->integer('thresholdChange')->default("0");
             $table->string('keteranganAcc')->nullable();
             $table->string('keteranganTolak')->nullable();
             $table->string('keteranganRevisi')->nullable();

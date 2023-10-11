@@ -96,16 +96,44 @@
                     }
                 });
             });
+            $("#myTable").on("change", ".threshold-change-input", function() {
+                const thres = $(this).val();
+                const idAcc = $(this).siblings("div").find(".select-acc");
+                const level = parseInt($(idAcc).attr("id").split('-')[1])
+                const karyawanID = $("#select-karyawan").val();
+                const departID = $("#select-department").val();
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('setting.thrChg') }}",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "idAcc": idAcc.val(),
+                        "thres": thres,
+                        "level": level,
+                        "idPart": departID,
+                        "idKar": karyawanID
+                    },
+                    success: function(response) {
+                        console.log(response);
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            });
             $("#myTable").on("change", ".select-acc", function() {
                 const idAcc = $(this).val();
                 const thres = $(this).parent().siblings(".threshold-input");
+                const thresChang = $(this).parent().siblings(".threshold-change-input");
                 const level = parseInt($(this).attr("id").split('-')[1])
                 const karyawanID = $("#select-karyawan").val();
                 const departID = $("#select-department").val();
                 const st = ($(this).is(":has(option:selected[value!=''])") ? "true" : "false")
                 const ch = $(this);
                 thres.attr("disabled", idAcc ? false : true)
-                if (!idAcc) thres.val("0")
+                thresChang.attr("disabled", idAcc ? false : true)
+                if (!idAcc) thres.val("0");
+                thresChang.val("0");
                 $.ajax({
                     type: "POST",
                     url: "{{ route('setting.changeAcc') }}",
@@ -113,6 +141,7 @@
                         "_token": "{{ csrf_token() }}",
                         "idAcc": idAcc,
                         "thres": thres.val(),
+                        "thresChang": thresChang.val(),
                         "level": level,
                         "idPart": departID,
                         "idKar": karyawanID
@@ -165,6 +194,8 @@
                                         </select></div>
                                         <label>Threshold: </label>
                                         <input type="number" class="form-control threshold-input" min="0" step="any" value="${status[level-1] ? status[level-1].threshold:0}" ${!status[level-1]?"disabled":""}>
+                                        <label>Threshold Perubahan: </label>
+                                        <input type="number" class="form-control threshold-change-input" min="0" step="any" value="${status[level-1] ? status[level-1].thresholdChange:0}" ${!status[level-1]?"disabled":""}>
                                     </td>`
                         }
                         header += `</tr></thead>`

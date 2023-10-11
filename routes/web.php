@@ -73,6 +73,7 @@ Route::middleware("auth")->group(function () {
     ROUTE::post("/changeCheck", [SettingController::class, 'checked'])->name("setting.checked");
     ROUTE::post("/changeAcc", [SettingController::class, 'updateAcc'])->name("setting.changeAcc");
     ROUTE::post("/upadteThres", [SettingController::class, 'updateThr'])->name("setting.thr");
+    ROUTE::post("/upadteThresChange", [SettingController::class, 'updateThrChange'])->name("setting.thrChg");
 });
 // Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
 Route::get("/test", [BonController::class, "fmIndex"]);

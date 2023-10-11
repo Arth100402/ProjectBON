@@ -52,7 +52,7 @@ class SettingController extends Controller
             ->join("users AS u", "u.id", "aa.idAcc")
             ->where([["idPengaju", $request->get("idKar")], ["departId", $request->get("idPart")]])
             ->orderBy("level")
-            ->get(["aa.idAcc", "aa.threshold", "u.name"]);
+            ->get(["aa.idAcc", "aa.threshold", "aa.thresholdChange", "u.name"]);
         return response()->json(["status" => $access]);
     }
 
@@ -76,7 +76,8 @@ class SettingController extends Controller
                 ],
                 [
                     "idAcc" => $request->get("idAcc"),
-                    "threshold" => $request->get("thres")
+                    "threshold" => $request->get("thres"),
+                    "thresholdChange" => $request->get("thresChang")
                 ]
             );
         return response()->json($aff);
@@ -91,6 +92,17 @@ class SettingController extends Controller
                 ["level", $request->get("level")],
                 ["idAcc", $request->get("idAcc")],
             ])->update(["threshold" => $request->get("thres")]);
+        return response()->json($af);
+    }
+    public function updateThrChange(Request $request)
+    {
+        $af = DB::table("acc_access")
+            ->where([
+                ["idPengaju", $request->get("idKar")],
+                ["departId", $request->get("idPart")],
+                ["level", $request->get("level")],
+                ["idAcc", $request->get("idAcc")],
+            ])->update(["thresholdChange" => $request->get("thres")]);
         return response()->json($af);
     }
 
