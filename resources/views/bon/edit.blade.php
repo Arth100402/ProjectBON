@@ -95,7 +95,7 @@
         <div class="form-group">
             <label for="sales">Pilih Sales: </label>
             <select class="form-control" name="sales" id="select-sales" disabled>
-                <option value="{{ $bon->name }}">{{ $bon->name }}</option>
+                <option value="{{ $bon->users_id }}">{{ $bon->name }}</option>
             </select>
             @error('sales')
                 <span class="text-danger">{{ $message }}</span>
@@ -202,6 +202,7 @@
         const bid = {!! $bon->id !!}
         const biayaPerjalanan = 0;
         const level1 = {!! $level1 ? 'true' : 'false' !!}
+        const adminsss = {!! Auth::user()->jabatan_id == 9 ? 'true' : 'false' !!}
         const appendDate = (option, id) => {
             var date = $(id).data("DateTimePicker").date()
             switch (option) {
@@ -394,6 +395,7 @@
                         $("#agendaError").remove();
                         $("#keteranganError").remove();
                         if (!level1) $("#submit").attr("disabled", false);
+                        if (adminsss) $("#submit").attr("disabled", false);
                     },
                     error: function(err) {
                         console.log(err);
@@ -519,6 +521,9 @@
                         $("#biayaPerjalanan").val(biayaPerjalananDisplay);
                         if (!level1) $("#submit").attr("disabled", $("#table-container tr")
                             .length < 1);
+                        if (adminsss) $("#submit").attr("disabled", $("#table-container tr")
+                            .length < 1);
+
                     },
                     error: function(err) {
                         console.log(err);
@@ -602,6 +607,8 @@
                         $(table).append(new_row);
                         $(Btn).parent().parent().parent().remove()
                         if (!level1) $("#submit").attr("disabled", false);
+                        if (adminsss) $("#submit").attr("disabled", false);
+
                     },
                     error: function(err) {
                         console.log(err);

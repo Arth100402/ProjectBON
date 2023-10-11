@@ -426,6 +426,7 @@ class BonController extends Controller
             'filenames.*' => 'mimes:jpg,jpeg,png,pdf,docx|max:10240',
         ]);
 
+        $filenames = null;
         $filenamed = "";
         if ($request->hasFile('filenames')) {
             foreach ($request->file('filenames') as $key => $file) {
@@ -506,7 +507,7 @@ class BonController extends Controller
             ->join('users', 'detailbons.users_id', '=', 'users.id')
             ->where('detailbons.bons_id', $id)
             ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
-        $level1 = Acc::where("bons_id", $id)->where("level", 1)->first("status")["status"] == "Diproses";
+        $level1 = Acc::where("bons_id", $id)->where("level", 1)->orWhere("level", 0)->first("status")["status"] == "Diproses";
         return view('bon.edit', compact('bon', 'data', 'level1'));
     }
     /**
@@ -551,6 +552,8 @@ class BonController extends Controller
         $bon->total = $request->get("biayaPerjalanan");
         $bon->save();
 
+        $userbon = DB::table('bons')->join('users', 'bons.users_id', '=', 'users.id')->select('bons.*', 'users.name', 'users.email')
+            ->where('bons.id', $id)->first();
         $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->first();
         $change->status = 'Diproses';
 
@@ -562,14 +565,16 @@ class BonController extends Controller
             ->get();
 
         $change->save();
-
-
-        if ($query->first()) {
-            Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
+        if (Auth::user()->jabatan_id == 9) {
+            Mail::to($userbon->email)->send(new revMail($userbon->id, $userbon->name));
             return redirect()->route('bon.index');
         } else {
-            return redirect()->route('bon.index');
+            if ($query->first()) {
+                Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
+                return redirect()->route('bon.index');
+            }
         }
+        return redirect()->route('bon.index');
     }
     /**
      * Remove the specified resource from storage.
