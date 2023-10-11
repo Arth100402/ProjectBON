@@ -72,10 +72,11 @@ class BonController extends Controller
             ->join('users as acc', 'acc.id', '=', 'accs.users_id')
             ->join('users as aju', 'aju.id', '=', 'bons.users_id')
             ->where('bons.users_id', '=', Auth::user()->id)
-            ->select('accs.bons_id', 'acc.name as acc_name', 'accs.status', 'accs.keteranganTolak', 'accs.updated_at')
+            ->select('accs.bons_id', 'acc.name as acc_name', 'accs.status', 'accs.level', 'accs.keteranganTolak', 'accs.updated_at')
             ->get();
         $x = [];
         $remove = [];
+        $level = [];
         foreach ($acc as $item) {
             if ($item->status != 'Diproses') {
                 array_push($x, $item->bons_id);
@@ -84,13 +85,22 @@ class BonController extends Controller
                 array_push($remove, $item->bons_id);
                 $x = array_diff($x, $remove);
             }
+            if ($item->level == 0 && $item->status == 'Diproses') {
+                array_push($level,$item->bons_id);
+            }
         }
+
         foreach ($data as $item) {
             $item->editable = true;
+            $item->ktt = false;
             if (in_array($item->id, $x)) {
                 $item->editable = false;
             }
+            if (in_array($item->id, $level)) {
+                $item->ktt = true;
+            }
         }
+
         return response()->json([
             'data' => $data
         ]);
@@ -628,6 +638,45 @@ class BonController extends Controller
             ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
             ->where('bons_id', $id)
             ->where('level', $data->level + 1)
+            ->get();
+        if ($query->first()) {
+            Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
+            return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
+        } else {
+            return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
+        }
+    }
+
+    public function accAdmin($id)
+    {
+        $data = Acc::where('bons_id', $id)
+            ->where('users_id', Auth::user()->id)
+            ->first();
+        $data->status = 'Terima';
+        $data->save();
+
+        $bon = Bon::find($id);
+
+        $datas = DB::table("acc_access")
+            ->where([
+                ["departId", Auth::user()->departement_id],
+                ["idPengaju", Auth::user()->id]
+            ])->get();
+        for ($i = 0; $i < count($datas); $i++) {
+            $newBon = new Acc;
+            $newBon->bons_id = $bon->id;
+            $newBon->users_id = $datas[$i]->idAcc;
+            $newBon->status = "Diproses";
+            $newBon->level = $datas[$i]->level;
+            $newBon->threshold = $datas[$i]->threshold;
+            $newBon->save();
+            if ($bon->total < $datas[$i]->threshold) break;
+        }
+        $query = DB::table('accs as a')
+            ->join('users as u', 'a.users_id', '=', 'u.id')
+            ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
+            ->where('bons_id', $id)
+            ->where('level', 1)
             ->get();
         if ($query->first()) {
             Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));

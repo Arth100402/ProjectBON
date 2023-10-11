@@ -50,6 +50,7 @@ Route::middleware("auth")->group(function () {
     Route::post('/getDetailAdmin', [BonController::class, 'getDetailAdmin'])->name('bon.getDetailAdmin');
     Route::get('/admincreate', [BonController::class, "admincreate"])->name('admin.create');
     Route::post('/adminstore', [BonController::class, "adminstore"])->name('admin.store');
+    Route::get('/accAdmin/{id}', [BonController::class, "accAdmin"])->name('admin.accAdmin');
 
 
     // FM
@@ -76,7 +77,7 @@ Route::middleware("auth")->group(function () {
     ROUTE::post("/upadteThresChange", [SettingController::class, 'updateThrChange'])->name("setting.thrChg");
 });
 // Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
-Route::get("/test", [BonController::class, "fmIndex"]);
+Route::get("/test", [BonController::class, "jsonShowIndexSelf"]);
 // Route::get("/test", function(){
 //     return DB::table('detailbons')->where('bons_id',3)->delete();
 // });

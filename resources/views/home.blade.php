@@ -726,6 +726,10 @@
                                     result +=
                                         `<a class="btn btn-success" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
                                 }
+                                if (type === 'display' && data.ktt == true) {
+                                    result +=
+                                        ` <a class="btn btn-success" href="/accAdmin/${data.id}"><i class="fa fa-check-circle"></i></a>`;
+                                }
                                 return result;
                             },
                             width: "10%"
@@ -741,6 +745,7 @@
                     success: function(data) {
                         tableSelf.clear().draw()
                         tableSelf.rows.add(data["data"]).draw()
+                        tableSelf.rows.add(data["level"]).draw()
                         console.log(data);
                     },
                     error: function(error) {
