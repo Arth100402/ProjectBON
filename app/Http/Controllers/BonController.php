@@ -494,7 +494,8 @@ class BonController extends Controller
             ->join('users', 'detailbons.users_id', '=', 'users.id')
             ->where('detailbons.bons_id', $id)
             ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
-        return view('bon.edit', compact('bon', 'data'));
+        $level1 = Acc::where("bons_id", $id)->where("level", 1)->first("status")["status"] == "Diproses";
+        return view('bon.edit', compact('bon', 'data', 'level1'));
     }
     /**
      * Update the specified resource in storage.

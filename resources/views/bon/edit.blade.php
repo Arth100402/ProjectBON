@@ -188,6 +188,7 @@
     <script>
         const bid = {!! $bon->id !!}
         const biayaPerjalanan = 0;
+        const level1 = {!! $level1 ? 'true' : 'false' !!}
         const appendDate = (option, id) => {
             var date = $(id).data("DateTimePicker").date()
             switch (option) {
@@ -379,7 +380,7 @@
                         $("#tujuanError").remove();
                         $("#agendaError").remove();
                         $("#keteranganError").remove();
-                        $("#submit").attr("disabled", false);
+                        if (!level1) $("#submit").attr("disabled", false);
                     },
                     error: function(err) {
                         console.log(err);
@@ -461,7 +462,6 @@
                 }).on('select2:unselect', function(e) {
                     $('#nopaket' + id).val('');
                 });
-                $("#submit").attr("disabled", $("#table-container tr").length < 1);
             });
 
             $(document).on("click", ".remove-revision", function() {
@@ -504,7 +504,8 @@
                         console.log(biayaPerjalananDisplay);
                         $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
                         $("#biayaPerjalanan").val(biayaPerjalananDisplay);
-                        $("#submit").attr("disabled", false);
+                        if (!level1) $("#submit").attr("disabled", $("#table-container tr")
+                            .length < 1);
                     },
                     error: function(err) {
                         console.log(err);
@@ -587,7 +588,7 @@
                         $(cur_tr).prev().addClass("lineStrike")
                         $(table).append(new_row);
                         $(Btn).parent().parent().parent().remove()
-                        $("#submit").attr("disabled", false);
+                        if (!level1) $("#submit").attr("disabled", false);
                     },
                     error: function(err) {
                         console.log(err);
