@@ -164,7 +164,7 @@ class BonController extends Controller
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', '=', $id)
             ->get([
-                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket', 'detailbons.deleted_at',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
                 'projects.idOpti'
@@ -198,7 +198,7 @@ class BonController extends Controller
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', '=', $id)
             ->get([
-                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket', 'detailbons.deleted_at',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
                 'projects.idOpti'
@@ -250,7 +250,7 @@ class BonController extends Controller
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', '=', $id)
             ->get([
-                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket', 'detailbons.deleted_at',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
                 'projects.idOpti'
@@ -301,7 +301,7 @@ class BonController extends Controller
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', '=', $id)
             ->get([
-                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket', 'detailbons.deleted_at',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
                 'projects.idOpti'
@@ -870,7 +870,7 @@ class BonController extends Controller
             ->join('departements', 'users.departement_id', '=', 'departements.id')
             ->where('detailbons.bons_id', '=', $id)
             ->get([
-                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket',
+                'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket', 'detailbons.deleted_at',
                 'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
                 'users.name',
                 'projects.idOpti'

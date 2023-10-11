@@ -1,4 +1,4 @@
-{{-- require_once 'vendor/autoload.php'--}}
+{{-- require_once 'vendor/autoload.php' --}}
 <div class="panel card-background-color">
     <div class="panel-heading">
         <h3>Detail Bon</h3>
@@ -22,7 +22,7 @@
                 </thead>
                 <tbody>
                     @foreach ($detail as $d)
-                        <tr>
+                        <tr class="{{ $d->deleted_at ? 'lineStrike' : '' }}">
                             <td>{{ $d->tglMulai }}</td>
                             <td>{{ $d->tglAkhir }}</td>
                             <td>{{ $d->asalKota }}</td>

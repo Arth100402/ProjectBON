@@ -18,6 +18,11 @@
         .setAlign {
             text-align: right;
         }
+
+        .lineStrike {
+            text-decoration: line-through;
+            background-color: #F8D7DA;
+        }
     </style>
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -912,6 +917,7 @@
         function revisiFm(id) {
             $("#kirimRevisi").attr("action", "/FmRevBon/" + id);
         }
+
         function revKasir(id) {
             $("#kirimRevisi").attr("action", "/revKasir/" + id);
         }
