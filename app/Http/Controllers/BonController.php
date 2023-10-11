@@ -488,12 +488,15 @@ class BonController extends Controller
     public function edit($id)
     {
         $bon = DB::table('bons')
-            ->where('id', $id)->get()[0];
+            ->join('users', 'bons.users_id', '=', 'users.id')
+            ->select('bons.*', 'users.name')
+            ->where('bons.id', $id)->get()[0];
         $data = DB::table('detailbons')
             ->join('projects', 'detailbons.projects_id', '=', 'projects.id')
             ->join('users', 'detailbons.users_id', '=', 'users.id')
             ->where('detailbons.bons_id', $id)
             ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
+        // dd($bon, $data);
         return view('bon.edit', compact('bon', 'data'));
     }
     /**
