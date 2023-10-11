@@ -588,7 +588,7 @@ class BonController extends Controller
         } else {
             $bon = Bon::find($id);
             if ($request->get("biayaPerjalanan") > $query->first()->thresholdChange) {
-                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima');
+                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->orWhere('accs.level','!=',0);
                 foreach ($change as $item) {
                     $item->status = 'Diproses';
                     $item->save();
