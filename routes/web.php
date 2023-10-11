@@ -22,8 +22,9 @@ use PHPUnit\TextUI\XmlConfiguration\Group;
 
 Auth::routes();
 Route::middleware("auth")->group(function () {
+    Route::get("/", [HomeController::class, 'redirect']);
+
     // BON Controller
-    Route::redirect('/', '/bon', 301);
     Route::resource('/bon', BonController::class);
     Route::get("/loadppc", [BonController::class, "loadPPC"])->name("loadPPC");
     Route::get("/loadsales", [BonController::class, "loadSales"])->name("loadSales");

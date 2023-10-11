@@ -46,8 +46,7 @@ class BonController extends Controller
                         ->whereColumn('a1.bons_id', 'a.bons_id')
                         ->where('a1.level', DB::raw('a.level - 1'))
                         ->where('a1.status', 'Terima');
-                })
-                    ->orWhere('a.level', 1);
+                })->orWhere('a.level', 1);
             })
             ->get();
         $data = $query;

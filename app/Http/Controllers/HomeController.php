@@ -29,4 +29,12 @@ class HomeController extends Controller
     {
         return view('home');
     }
+
+    public function redirect()
+    {
+        if (Auth::user()->jabatan_id == 9) {
+            return redirect('/admindashboard');
+        }
+        return redirect('/bon');
+    }
 }
