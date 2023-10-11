@@ -346,7 +346,7 @@ class BonController extends Controller
         $request->validate([
             'filenames.*' => 'mimes:jpg,jpeg,png,pdf,docx|max:10240',
         ]);
-
+        $filenames = null;
         $filenamed = "";
         if ($request->hasFile('filenames')) {
             foreach ($request->file('filenames') as $key => $file) {
@@ -537,26 +537,9 @@ class BonController extends Controller
         $bon = Bon::find($id);
         $bon->total = $request->get("biayaPerjalanan");
         $bon->save();
-        $aff = DB::table('detailbons')->where('bons_id', $id)->delete();
-        foreach ($request->get("select-sales") as $key => $value) {
-            $data = new DetailBon();
-            $data->bons_id = $id;
-            $data->tglMulai = $this->convertDTPtoDatabaseDT($request->get("tglMulai")[$key]);
-            $data->tglAkhir = $this->convertDTPtoDatabaseDT($request->get("tglAkhir")[$key]);
-            $data->asalKota = $request->get("asalKota")[$key];
-            $data->tujuan = $request->get("tujuan")[$key];
-            $data->users_id = $request->get("select-sales")[$key];
-            $data->projects_id = ($request->get("select-ppc")[$key] === 'null') ? null : $request->get("select-ppc")[$key];
-            $data->noPaket = ($request->get('nopaket')[$key]) ? $request->get('nopaket')[$key] : "tesst";
-            $data->agenda = $request->get("agenda")[$key];
-            $data->penggunaan = $request->get("keterangan")[$key];
-            $data->biaya = $request->get("biaya")[$key];
-            $data->save();
-        }
 
         $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->first();
         $change->status = 'Diproses';
-
 
         $query = DB::table('accs')
             ->join('users', 'accs.users_id', '=', 'users.id')

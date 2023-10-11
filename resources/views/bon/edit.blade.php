@@ -25,10 +25,15 @@
 
         .lineStrike {
             text-decoration: line-through;
+            background-color: #F8D7DA;
+        }
+
+        .maroon {
+            background-color: maroon;
         }
 
         .salmon {
-            background-color: rgb(171, 171, 171);
+            background-color: #fafafa;
         }
     </style>
     @if ($errors->any())
@@ -138,7 +143,7 @@
         @csrf
         @method('PUT')
         <div class="table-responsive" style="overflow: scroll">
-            <table id="myTable" class="table table-bordered">
+            <table id="myTable" class="table table-hover">
                 <thead>
                     <tr>
                         <th>Mulai Tanggal</th>
@@ -175,11 +180,9 @@
             <input type="file" name="filenames[]" id="files" class="form-control" multiple>
             <small>Types: .doc, .docx, .pdf, .xlx, .csv</small>
         </div>
-        <button type="submit" id="submit" disabled class="btn btn-primary">Ubah</button>
-        <a class="btn btn-danger" href="/">Batal Ubah</a>
+        <button type="submit" id="submit" disabled class="btn btn-primary">Kirim</button>
+        <a class="btn btn-danger" href="/">Batal Kirim</a>
     </form>
-
-    <button id="test" class="btn btn-warning btn-block"> Test</button>
 @endsection
 @section('javascript')
     <script>
@@ -501,6 +504,7 @@
                         console.log(biayaPerjalananDisplay);
                         $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
                         $("#biayaPerjalanan").val(biayaPerjalananDisplay);
+                        $("#submit").attr("disabled", false);
                     },
                     error: function(err) {
                         console.log(err);
@@ -522,7 +526,8 @@
                 const Btn = $(this)
                 var biayaDeduct = (!$("tr[data-id='" + id + "']").hasClass("lineStrike") ? $(
                     "tr[data-id='" + id + "']").find("input#biaya").val() : (!$(this).parent()
-                    .parent().parent().prev().hasClass("lineStrike") ? $(this).parent().parent()
+                    .parent().parent().prev().hasClass("lineStrike") && $(this).parent()
+                    .parent().parent().prev().length > 0 ? $(this).parent().parent()
                     .parent().prev().find("input#biaya").val() : 0))
                 $.ajax({
                     type: "POST",
@@ -582,6 +587,7 @@
                         $(cur_tr).prev().addClass("lineStrike")
                         $(table).append(new_row);
                         $(Btn).parent().parent().parent().remove()
+                        $("#submit").attr("disabled", false);
                     },
                     error: function(err) {
                         console.log(err);
@@ -662,7 +668,7 @@
                             `<div style="display:flex;"><a class="btn btn-warning revision"><i class="fa fa-pencil"></i></a>&nbsp;<a class="btn btn-danger remove-detail"><i class="fa fa-times-circle"></i></a>` +
                             '</td></tr>'
                         var row_child = `<td colspan="12" class="nopading" ><div id="collapse${item.id}" class="panel-collapse collapse padding table-responsive salmon">
-                                        <table id="tableRevise" class="table table-striped table-bordered">
+                                        <table id="tableRevise" class="table table-hover">
                                         <tbody id="table-revise-container">`;
                         if (dataRevision != undefined || dataRevision != null) {
                             for (const iterator of dataRevision) {
@@ -696,12 +702,6 @@
                         tbody.append(row);
                     });
                 }
-            });
-
-
-            $("#test").on("click", function() {
-                console.log("TEST: ");
-                console.log($("#biayaPerjalanan").val());
             });
         })
     </script>
