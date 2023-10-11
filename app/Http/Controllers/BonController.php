@@ -86,7 +86,7 @@ class BonController extends Controller
                 $x = array_diff($x, $remove);
             }
             if ($item->level == 0 && $item->status == 'Diproses') {
-                array_push($level,$item->bons_id);
+                array_push($level, $item->bons_id);
             }
         }
 
@@ -403,10 +403,10 @@ class BonController extends Controller
             $newBon->status = "Diproses";
             $newBon->level = $datas[$i]->level;
             $newBon->threshold = $datas[$i]->threshold;
+            $newBon->thresholdChange = $datas[$i]->thresholdChange;
             $newBon->save();
             if ($request->get("biayaPerjalanan") < $datas[$i]->threshold) break;
         }
-
         $query = DB::table('accs as a')
             ->join('users as u', 'a.users_id', '=', 'u.id')
             ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
@@ -548,27 +548,60 @@ class BonController extends Controller
             }
             $filenames = rtrim($filenamed, ",");
         }
-        $bon = Bon::find($id);
-        $bon->total = $request->get("biayaPerjalanan");
-        $bon->save();
 
         $userbon = DB::table('bons')->join('users', 'bons.users_id', '=', 'users.id')->select('bons.*', 'users.name', 'users.email')
             ->where('bons.id', $id)->first();
-        $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->first();
-        $change->status = 'Diproses';
 
         $query = DB::table('accs')
             ->join('users', 'accs.users_id', '=', 'users.id')
-            ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name')
+            ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name', 'accs.thresholdChange', 'accs.level', 'accs.status')
             ->where('accs.bons_id', $id)
             ->where('accs.status', 'Revisi')
             ->get();
-
-        $change->save();
+        $query2 = DB::table('accs')
+            ->join('users', 'accs.users_id', '=', 'users.id')
+            ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name', 'accs.thresholdChange', 'accs.level', 'accs.status')
+            ->where('accs.bons_id', $id)
+            ->where('accs.level',0)
+            ->get();
         if (Auth::user()->jabatan_id == 9) {
+            $bon = Bon::find($id);
+            $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima');
+            foreach ($change as $item) {
+                $item->status = 'Diproses';
+                $item->save();
+            }
+            if ($query2) {
+                $query2->first()->status= "Diproses";
+            } else {
+                $newBon = new Acc;
+                $newBon->bons_id = $bon;
+                $newBon->users_id = $bon->users_id;
+                $newBon->status = "Diproses";
+                $newBon->level = 0;
+                $newBon->save();
+            }
+            $bon->total = $request->get("biayaPerjalanan");
+            $bon->save();
             Mail::to($userbon->email)->send(new revMail($userbon->id, $userbon->name));
             return redirect()->route('bon.index');
         } else {
+            $bon = Bon::find($id);
+            if ($request->get("biayaPerjalanan") > $query->first()->thresholdChange) {
+                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima');
+                foreach ($change as $item) {
+                    $item->status = 'Diproses';
+                    $item->save();
+                }
+                $bon->total = $request->get("biayaPerjalanan");
+            } else {
+                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->first();
+                $change->status = 'Diproses';
+                $change->save();
+                $bon->total = $request->get("biayaPerjalanan");
+            }
+
+            $bon->save();
             if ($query->first()) {
                 Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
                 return redirect()->route('bon.index');
