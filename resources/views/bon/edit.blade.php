@@ -490,7 +490,8 @@
                 const trs = $(tr).next().find("#table-revise-container > tr")
                 const par = $(this).parent();
                 const biaya = (!$(tr).hasClass("lineStrike") ? $(this).parent().parent().prev().find(
-                    "input#biaya").val() : (!$(trs).last().hasClass("lineStrike") ? $(trs).not(
+                    "input#biaya").val() : (!$(trs).last().hasClass("lineStrike") && $(trs).is(
+                    ":parent") ? $(trs).not(
                     ".lineStrike").find("input#biaya").val() : 0))
                 $.ajax({
                     type: "POST",
