@@ -11,6 +11,7 @@ class DetailBon extends Model
     use HasFactory;
     use SoftDeletes;
     protected $table = "detailbons";
+    protected $fillable = ["detailbons_revision_id"];
 
     function user()
     {

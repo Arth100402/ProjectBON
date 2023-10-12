@@ -371,7 +371,7 @@
                         </tr>
                         <td colspan="12" class="nopading" >
                             <div id="collapse${id}" class="panel-collapse collapse padding table-responsive">
-                                <table id="tableRevise" class="table table-striped table-bordered">
+                                <table id="tableRevise" class="table table-hover">
                                     <tbody id="table-revise-container"></tbody>
                                 </table>
                             </div>
@@ -531,7 +531,8 @@
                 });
             });
             $(document).on("click", ".add-revision", function() {
-                const id = $(this).attr("data-id")
+                const Btn = $(this)
+                const id = $(Btn).attr("data-id")
                 const asal = $("#asalKota" + id).val();
                 const tujuan = $("#tujuan" + id).val();
                 const agenda = $("#agenda" + id).val()
@@ -542,7 +543,6 @@
                 const sales = {!! Auth::user()->id !!}
                 const proj = $("#select-ppc" + id).val()
                 var biaya = parseInt($("#biaya" + id).val());
-                const Btn = $(this)
                 var biayaDeduct = (!$("tr[data-id='" + id + "']").hasClass("lineStrike") ? $(
                     "tr[data-id='" + id + "']").find("input#biaya").val() : (!$(this).parent()
                     .parent().parent().prev().hasClass("lineStrike") && $(this).parent()
@@ -568,6 +568,7 @@
                         "bid": bid
                     },
                     success: function(response) {
+                        const idNew = response.idNew
                         let biayaPerjalananDisplay = parseInt($("#biayaPerjalanan").val()) +
                             parseInt(biaya) - parseInt(biayaDeduct)
                         let formattedBiayaPerjalanan = biayaPerjalananDisplay.toLocaleString(
@@ -579,7 +580,7 @@
                         $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
                         $("#biayaPerjalanan").val(biayaPerjalananDisplay);
                         const new_row =
-                            `<tr><input type = "hidden" name = "detailbonsId[]" value = "${id}" ><td>${$("#tglMulai"+id).val()}<input type = "hidden" name = "tglMulaiRev[]" value = "${$("#tglMulai"+id).val()}" > ` +
+                            `<input type = "hidden" name = "detailbonsId[]" value = "${id}" ><td>${$("#tglMulai"+id).val()}<input type = "hidden" name = "tglMulaiRev[]" value = "${$("#tglMulai"+id).val()}" > ` +
                             '</td>' +
                             `<td>${$("#tglAkhir"+id).val()}<input type = "hidden" name = "tglAkhirRev[]" value = "${$("#tglAkhir"+id).val()}" > ` +
                             '</td>' +
@@ -597,15 +598,29 @@
                             '</td>' +
                             `<td>${$("#keterangan"+id).val()}<input type = "hidden" name = "keteranganRev[]" value = "${$("#keterangan"+id).val()}" > ` +
                             '</td>' +
-                            `<td>${$("#biaya"+id).val()}<input type = "hidden" name = "biayaRev[]" id = "biaya" value = "${$("#biaya"+id).val()}" > ` +
-                            '</td></tr>'
+                            `<td>${(parseInt($("#biaya"+id).val()) ? parseInt($("#biaya"+id).val()).toLocaleString(
+                                'id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0
+                                }) : '')}<input type = "hidden" name = "biayaRev[]" id = "biaya" value = "${$("#biaya"+id).val()}" > ` +
+                            '</td>' +
+                            '<td>' +
+                            `<div style="display:flex;"><a class="btn btn-warning revision"><i class="fa fa-pencil"></i></a>&nbsp;<a class="btn btn-danger remove-detail"><i class="fa fa-times-circle"></i></a>` +
+                            '</td>'
                         const table = $(Btn).parent().parent().parent().parent()
                         const originalDetail = $("tr[data-id='" + id + "']")
                         const cur_tr = $(Btn).parent().parent().parent();
                         $(originalDetail).addClass("lineStrike")
+                        $(originalDetail).children().last().remove();
                         $(cur_tr).prev().addClass("lineStrike")
-                        $(table).append(new_row);
                         $(Btn).parent().parent().parent().remove()
+                        $(table).prepend($(originalDetail).clone())
+                        $(originalDetail).html(new_row)
+                        $(originalDetail).removeClass("lineStrike")
+                        $(originalDetail).attr("data-id", idNew);
+                        $(originalDetail).attr("href", "#collapse" + idNew);
+                        $("div#collapse" + id).attr("id", "collapse" + idNew)
                         if (!level1) $("#submit").attr("disabled", false);
                         if (adminsss) $("#submit").attr("disabled", false);
 
@@ -713,7 +728,12 @@
                                         '</td>' +
                                         `<td>${(iterator.penggunaan ? iterator.penggunaan : '-')}<input type = "hidden" name = "keteranganRev[]" value = "${iterator.penggunaan}" > ` +
                                         '</td>' +
-                                        `<td>${(iterator.biaya ? iterator.biaya : '')}<input type = "hidden" name = "biayaRev[]" id = "biaya" value = "${iterator.biaya }" > ` +
+                                        `<td>${(iterator.biaya ? iterator.biaya.toLocaleString(
+                                'id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    minimumFractionDigits: 0
+                                }) : '')}<input type = "hidden" name = "biayaRev[]" id = "biaya" value = "${iterator.biaya }" > ` +
                                         '</td></tr>'
                                 }
                             }

@@ -376,7 +376,7 @@ class BonController extends Controller
             "file" => $filenames
         ]);
         foreach ($request->get("select-sales") as $key => $value) {
-            DB::table('detailbons')->insert([
+            $id = DB::table('detailbons')->insertGetId([
                 "bons_id" => $bon,
                 "tglMulai" => $this->convertDTPtoDatabaseDT($request->get("tglMulai")[$key]),
                 "tglAkhir" => $this->convertDTPtoDatabaseDT($request->get("tglAkhir")[$key]),
@@ -389,6 +389,7 @@ class BonController extends Controller
                 "penggunaan" => $request->get("keterangan")[$key],
                 "biaya" => $request->get("biaya")[$key],
             ]);
+            // DB::table("detailbons")->where("id", $id)->update(["detailbons_revision_id" => $id]);
         }
         $datas = DB::table("acc_access")
             ->where([
@@ -1045,6 +1046,7 @@ class BonController extends Controller
     }
     public function addNewDetailRevision(Request $request)
     {
+        $oriDetailAffChg = DetailBon::withTrashed()->find($request->get("id"))->update(["detailbons_revision_id" => $request->get("id")]);
         $oriDetailAff = DetailBon::withTrashed()->find($request->get("id"))->delete();
         $others = DetailBon::withTrashed()->where("detailbons_revision_id", $request->get("id"))->delete();
         $new = new DetailBon();
@@ -1059,12 +1061,14 @@ class BonController extends Controller
         $new->agenda = $request->get("agenda");
         $new->penggunaan  = $request->get("keterangan");
         $new->biaya = $request->get("biaya");
-        $new->detailbons_revision_id = $request->get("id");
+        // $new->detailbons_revision_id = $request->get("id");
         $new->save();
+        $otAff = DetailBon::withTrashed()->where("detailbons_revision_id", $request->get("id"))->update(["detailbons_revision_id" => $new->id]);
+
         $bon = Bon::find($request->get("bid"));
         $bon->total = $bon->total + $request->get("biaya") - $request->get("biayaDeduct");
         $bon->save();
-        return response()->json(["status" => "ok"]);
+        return response()->json(["status" => "ok", "idNew" => $new->id]);
     }
 
     public function destroyDetail(Request $req)
