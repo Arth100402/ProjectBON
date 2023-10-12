@@ -385,9 +385,6 @@
                                 currency: 'IDR',
                                 minimumFractionDigits: 0
                             });
-                        console.log($("#biayaPerjalanan").val());
-                        console.log(biaya);
-                        console.log(biayaPerjalananDisplay);
                         $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
                         $("#biayaPerjalanan").val(biayaPerjalananDisplay);
                         $("#asalKotaError").remove();
@@ -520,10 +517,12 @@
                         console.log(biayaPerjalananDisplay);
                         $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
                         $("#biayaPerjalanan").val(biayaPerjalananDisplay);
-                        if (!level1) $("#submit").attr("disabled", $("#table-container tr")
-                            .length < 1);
-                        if (adminsss) $("#submit").attr("disabled", $("#table-container tr")
-                            .length < 1);
+                        var notDeleted = $("#table-container tr").filter(function(index) {
+                            return $(this).children().length > 2 && !$(this).hasClass(
+                                "lineStrike")
+                        })
+                        if (!level1) $("#submit").attr("disabled", !notDeleted.length > 0);
+                        if (adminsss) $("#submit").attr("disabled", !notDeleted.length > 0);
 
                     },
                     error: function(err) {
@@ -723,6 +722,12 @@
                         row += row_child
                         tbody.append(row);
                     });
+                    var notDeleted = $("#table-container tr").filter(function(index) {
+                        return $(this).children().length > 2 && !$(this).hasClass("lineStrike")
+                    })
+
+                    if (!level1 && notDeleted.length > 0) $("#submit").attr("disabled", false);
+                    if (adminsss && notDeleted.length > 0) $("#submit").attr("disabled", false);
                 }
             });
         })
