@@ -536,12 +536,12 @@
                         {
                             data: null,
                             render: (data, type, row, meta) => {
-                                let result = `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
+                                let result = `<a class="btn btn-info" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
                                 <i class="fa fa-info-circle"></i>
                                 </a>`
                                 if (type === 'display' && data.editable == true) {
                                     result +=
-                                        `<a class="btn btn-success" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
+                                        `<a class="btn btn-warning" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
                                 }
                                 return result;
                             },
@@ -563,6 +563,7 @@
                         console.log(error);
                     }
                 });
+
                 $.ajax({
                     type: "GET",
                     dataType: "json",
@@ -719,12 +720,12 @@
                         {
                             data: null,
                             render: (data, type, row, meta) => {
-                                let result = `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
+                                let result = `<a class="btn btn-info" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id})">
                                 <i class="fa fa-info-circle"></i>
                                 </a>`
                                 if (type === 'display' && data.editable == true) {
                                     result +=
-                                        `<a class="btn btn-success" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
+                                        `<a class="btn btn-warning" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
                                 }
                                 if (type === 'display' && data.ktt == true) {
                                     result +=
@@ -860,7 +861,7 @@
                     {
                         data: null,
                         render: (data, type, row, meta) => {
-                            let result = `<a class="btn btn-success" href="#modalEditD" data-toggle="modal" onclick="getDetailHistory(${data.id})">
+                            let result = `<a class="btn btn-info" href="#modalEditD" data-toggle="modal" onclick="getDetailHistory(${data.id})">
                                 <i class="fa fa-info-circle"></i>
                                 </a>`
                             return result;
