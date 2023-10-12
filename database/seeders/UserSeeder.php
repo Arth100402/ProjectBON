@@ -45,6 +45,16 @@ class UserSeeder extends Seeder
                 "departement_id" => 8
             ]
         ]);
+        DB::table('users')->insert([
+            [
+                "name" => "Admin",
+                "email" => "admin@gmail.com",
+                "password" => Hash::make("admin"),
+                "jabatan_id" => 9,
+                "username" => "admin",
+                "departement_id" => 4
+            ]
+        ]);
         for ($i = 0; $i <= 10; $i++) {
             DB::table('users')->insert([
                 [

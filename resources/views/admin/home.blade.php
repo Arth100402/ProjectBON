@@ -153,12 +153,12 @@
                     {
                         data: null,
                         render: (data, type, row, meta) => {
-                            let result = `<a class="btn btn-success" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id},${data.users_id})">
+                            let result = `<a class="btn btn-info" href="#modalEditB" data-toggle="modal" onclick="getDetailSelf(${data.id},${data.users_id})">
                                 <i class="fa fa-info-circle"></i>
                                 </a>`
                             if (type === 'display' && data.editable == true) {
                                 result +=
-                                    `<a class="btn btn-success" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
+                                    `<a class="btn btn-warning" href="/bon/${data.id}/edit"><i class="fa fa-edit"></i></a>`;
                             }
                             return result;
                         },
