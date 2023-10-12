@@ -561,8 +561,9 @@ class BonController extends Controller
             ->join('users', 'accs.users_id', '=', 'users.id')
             ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name', 'accs.thresholdChange', 'accs.level', 'accs.status')
             ->where('accs.bons_id', $id)
-            ->where('accs.level',0)
+            ->where('accs.level', 0)
             ->get();
+
         if (Auth::user()->jabatan_id == 9) {
             $bon = Bon::find($id);
             $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima');
@@ -571,7 +572,7 @@ class BonController extends Controller
                 $item->save();
             }
             if ($query2) {
-                $query2->first()->status= "Diproses";
+                $query2->first()->status = "Diproses";
             } else {
                 $newBon = new Acc;
                 $newBon->bons_id = $bon;
@@ -586,9 +587,10 @@ class BonController extends Controller
             return redirect()->route('bon.index');
         } else {
             $bon = Bon::find($id);
-            if ($request->get("biayaPerjalanan") > $query->first()->thresholdChange) {
-                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima');
+            if ($request->get("biayaPerjalanan") > $query[0]->thresholdChange) {
+                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->get();
                 foreach ($change as $item) {
+                    if ($item->level == 0) continue;
                     $item->status = 'Diproses';
                     $item->save();
                 }
