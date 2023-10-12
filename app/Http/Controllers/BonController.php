@@ -548,7 +548,7 @@ class BonController extends Controller
             $filenames = rtrim($filenamed, ",");
         }
 
-        $userbon = DB::table('bons')->join('users', 'bons.users_id', '=', 'users.id')->select('bons.*', 'users.name', 'users.email')
+        $userbon = DB::table('bons')->join('users', 'bons.users_id', '=', 'users.id')->select('bons.*', 'users.name', 'users.email', 'users.id as uid', 'users.departement_id as depid')
             ->where('bons.id', $id)->first();
 
         $query = DB::table('accs')
@@ -563,6 +563,12 @@ class BonController extends Controller
             ->where('accs.bons_id', $id)
             ->where('accs.level', 0)
             ->get();
+        $levelTertinggi = DB::table('accs')
+            ->join('users', 'accs.users_id', '=', 'users.id')
+            ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name', 'accs.thresholdChange', 'accs.threshold', 'accs.level', 'accs.status')
+            ->where('accs.bons_id', $id)
+            ->orderBy('accs.level', 'desc')
+            ->first();
 
         if (Auth::user()->jabatan_id == 9) {
             $bon = Bon::find($id);
@@ -587,8 +593,27 @@ class BonController extends Controller
             return redirect()->route('bon.index');
         } else {
             $bon = Bon::find($id);
-            if ($request->get("biayaPerjalanan") > $query[0]->thresholdChange) {
-                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->get();
+            if ($request->get("biayaPerjalanan") > $levelTertinggi->threshold) {
+                $datas = DB::table("acc_access")
+                    ->where([
+                        ["departId", $userbon->depid],
+                        ["idPengaju", $userbon->uid]
+                    ])->get();
+                for ($i = 0; $i < count($datas); $i++) {
+                    if ($datas[$i]->threshold > $request->get("biayaPerjalanan")) {
+                        $newAcc = new Acc;
+                        $newAcc->bons_id = $id;
+                        $newAcc->users_id = $datas[$i]->users_id;
+                        $newAcc->status = "Diproses";
+                        $newAcc->level = $datas[$i]->level;
+                        $newAcc->thresholdChange = $datas[$i]->thresholdChange;
+                        $newAcc->save();
+                        break;
+                    }
+                }
+            }
+            if ($request->get("biayaPerjalanan") > $query->first()->thresholdChange) {
+                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->orWhere('accs.level', '!=', 0);
                 foreach ($change as $item) {
                     if ($item->level == 0) continue;
                     $item->status = 'Diproses';
