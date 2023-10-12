@@ -512,9 +512,6 @@
                                 currency: 'IDR',
                                 minimumFractionDigits: 0
                             });
-                        console.log($("#biayaPerjalanan").val());
-                        console.log(biaya);
-                        console.log(biayaPerjalananDisplay);
                         $("#biayaPerjalananDisplay").val(formattedBiayaPerjalanan);
                         $("#biayaPerjalanan").val(biayaPerjalananDisplay);
                         var notDeleted = $("#table-container tr").filter(function(index) {
@@ -590,9 +587,9 @@
                             '</td>' +
                             `<td>{{ Auth::user()->name }}<input type = "hidden" name = "select-salesRev[]" value = "{{ Auth::user()->id }}" > ` +
                             '</td>' +
-                            `<td>${$("#select-ppc"+id+" option:selected").text()}<input type = "hidden" name = "select-ppcRev[]" value = "${$("#select-ppc"+id).val()}" > ` +
+                            `<td>${($("#select-ppc"+id+" option:selected").text()==""?"-":$("#select-ppc"+id+" option:selected").text())}<input type = "hidden" name = "select-ppcRev[]" value = "${$("#select-ppc"+id).val()}" > ` +
                             '</td>' +
-                            `<td>${$("#nopaket"+id).val()}<input type = "hidden" name = "nopaketRev[]" value = "${$("#nopaket"+id).val()}" > ` +
+                            `<td>${($("#nopaket"+id).val()==""?"-":$("#nopaket"+id).val())}<input type = "hidden" name = "nopaketRev[]" value = "${$("#nopaket"+id).val()}" > ` +
                             '</td>' +
                             `<td>${$("#agenda"+id).val()}<input type = "hidden" name = "agendaRev[]" value = "${$("#agenda"+id).val() }" > ` +
                             '</td>' +
