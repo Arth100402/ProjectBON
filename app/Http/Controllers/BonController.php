@@ -572,7 +572,7 @@ class BonController extends Controller
 
         if (Auth::user()->jabatan_id == 9) {
             $bon = Bon::find($id);
-            $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima');
+            $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->get();
             foreach ($change as $item) {
                 $item->status = 'Diproses';
                 $item->save();
@@ -593,6 +593,7 @@ class BonController extends Controller
             return redirect()->route('bon.index');
         } else {
             $bon = Bon::find($id);
+            //apabila melebihi threshold level tertinggi maka tambah atasan
             if ($request->get("biayaPerjalanan") > $levelTertinggi->threshold) {
                 $datas = DB::table("acc_access")
                     ->where([
@@ -606,14 +607,16 @@ class BonController extends Controller
                         $newAcc->users_id = $datas[$i]->users_id;
                         $newAcc->status = "Diproses";
                         $newAcc->level = $datas[$i]->level;
+                        $newAcc->threshold = $datas[$i]->threshold;
                         $newAcc->thresholdChange = $datas[$i]->thresholdChange;
                         $newAcc->save();
                         break;
                     }
                 }
             }
+            //apabila biaya perjalanan melebihi threshold change perevisi maka reset penerimaan
             if ($request->get("biayaPerjalanan") > $query->first()->thresholdChange) {
-                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->orWhere('accs.level', '!=', 0);
+                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->orWhere('accs.level', '!=', 0)->get();
                 foreach ($change as $item) {
                     if ($item->level == 0) continue;
                     $item->status = 'Diproses';
