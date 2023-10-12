@@ -412,6 +412,9 @@ class BonController extends Controller
             ->where('bons_id', $bon)
             ->where('level', 1)
             ->get();
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Bon Dibuat', 'bons_id' => $bon, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         if ($query->first()) {
             Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
             return redirect()->route('bon.index');
@@ -471,6 +474,10 @@ class BonController extends Controller
                 $newBon->level = 0;
                 $newBon->threshold = 0;
                 $newBon->save();
+
+                $history = DB::table('revisionhistory')->insert(
+                    ['history' => 'Bon dibuat oleh ' . Auth::user()->name . ' untuk ' . $user->name, 'bons_id' => $bon, 'users_id' => Auth::user()->id, 'created_at' => now()]
+                );
 
                 Mail::to($user->email)->send(new Email($bon, $user->name));
             }
@@ -589,6 +596,10 @@ class BonController extends Controller
             }
             $bon->total = $request->get("biayaPerjalanan");
             $bon->save();
+
+            $history = DB::table('revisionhistory')->insert(
+                ['history' => 'Direvisi oleh ' . Auth::user()->name . ' untuk '. $bon->user()->name, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+            );
             Mail::to($userbon->email)->send(new revMail($userbon->id, $userbon->name));
             return redirect()->route('bon.index');
         } else {
@@ -600,19 +611,32 @@ class BonController extends Controller
                         ["departId", $userbon->depid],
                         ["idPengaju", $userbon->uid]
                     ])->get();
+                Acc::where("bons_id",$id)->delete();
                 for ($i = 0; $i < count($datas); $i++) {
-                    if ($datas[$i]->threshold > $request->get("biayaPerjalanan")) {
+                    if ($datas[$i]->threshold < $request->get("biayaPerjalanan")) {
                         $newAcc = new Acc;
                         $newAcc->bons_id = $id;
-                        $newAcc->users_id = $datas[$i]->users_id;
+                        $newAcc->users_id = $datas[$i]->idAcc;
                         $newAcc->status = "Diproses";
                         $newAcc->level = $datas[$i]->level;
                         $newAcc->threshold = $datas[$i]->threshold;
                         $newAcc->thresholdChange = $datas[$i]->thresholdChange;
                         $newAcc->save();
-                        break;
+                        continue;
                     }
+                    break;
                 }
+                $newAcc = new Acc;
+                $newAcc->bons_id = $id;
+                $newAcc->users_id = $datas[$i]->idAcc;
+                $newAcc->status = "Diproses";
+                $newAcc->level = $datas[$i]->level;
+                $newAcc->threshold = $datas[$i]->threshold;
+                $newAcc->thresholdChange = $datas[$i]->thresholdChange;
+                $newAcc->save();
+                $history = DB::table('revisionhistory')->insert(
+                    ['history' => 'Threshold melebihi batas threshold tertinggi, Menambah level Acc', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+                );
             }
             //apabila biaya perjalanan melebihi threshold change perevisi maka reset penerimaan
             if ($request->get("biayaPerjalanan") > $query->first()->thresholdChange) {
@@ -620,14 +644,24 @@ class BonController extends Controller
                 foreach ($change as $item) {
                     if ($item->level == 0) continue;
                     $item->status = 'Diproses';
+                    $item->keteranganAcc = null;
+                    $item->keteranganRevisi = null;
                     $item->save();
                 }
                 $bon->total = $request->get("biayaPerjalanan");
+
+                $history = DB::table('revisionhistory')->insert(
+                    ['history' => 'Threshold Revisi melebihi batas threshold change, Status terima direset', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+                );
             } else {
                 $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->first();
                 $change->status = 'Diproses';
                 $change->save();
                 $bon->total = $request->get("biayaPerjalanan");
+
+                $history = DB::table('revisionhistory')->insert(
+                    ['history' => 'Telah Direvisi', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+                );
             }
 
             $bon->save();
@@ -706,6 +740,9 @@ class BonController extends Controller
             ->where('bons_id', $id)
             ->where('level', $data->level + 1)
             ->get();
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Terima', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         if ($query->first()) {
             Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
             return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
@@ -739,6 +776,9 @@ class BonController extends Controller
             $newBon->save();
             if ($bon->total < $datas[$i]->threshold) break;
         }
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Terima', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         $query = DB::table('accs as a')
             ->join('users as u', 'a.users_id', '=', 'u.id')
             ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
@@ -767,6 +807,9 @@ class BonController extends Controller
             ->where('bons_id', $id)
             ->where('level', $data->level + 1)
             ->get();
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Terima bon sementara diluar threshold', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         if ($query->first()) {
             Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
             return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
@@ -799,6 +842,10 @@ class BonController extends Controller
         $bon = Bon::find($id);
         $bon->status = "Tolak";
         $bon->save();
+
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Tolak karena ' . $confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         return redirect()->route('bon.index')->with('status', 'Bon telah di tolak');
     }
 
@@ -844,6 +891,10 @@ class BonController extends Controller
         $bon = Bon::find($id);
         $bon->status = "Terima";
         $bon->save();
+
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Terima', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
     }
     public function FmDecBon(Request $request, $id)
@@ -860,6 +911,10 @@ class BonController extends Controller
         $bon = Bon::find($id);
         $bon->status = "Tolak";
         $bon->save();
+
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Tolak karena ' . $confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         return redirect()->route('bon.index')->with('status', 'Bon telah di tolak');
     }
     public function FmRevBon(Request $request, $id)
@@ -873,35 +928,14 @@ class BonController extends Controller
         $data->level = 6;
         $data->threshold = 0;
         $data->save();
+
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Revisi karena ' . $confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         return redirect()->route('bon.index')->with('status', 'Bon telah diajukan untuk revisi');
     }
     public function fmIndex()
     {
-        // $acc = DB::table('accs')
-        //     ->join('bons', 'bons.id', '=', 'accs.bons_id')
-        //     ->join('users as acc', 'acc.id', '=', 'accs.users_id')
-        //     ->join('users as aju', 'aju.id', '=', 'bons.users_id')
-        //     ->select('accs.bons_id', 'accs.status', 'acc.departement_id as dname', 'acc.jabatan_id as jabatan')
-        //     ->get();
-        // $x = [];
-        // foreach ($acc as $item) {
-        //     if ($item->status != 'Terima' || $item->jabatan == 3 && $item->dname == 8) {
-        //         array_push($x, $item->bons_id);
-        //     }
-        // }
-        // $data = DB::table('bons')
-        //     ->join('users', 'bons.users_id', '=', 'users.id')
-        //     ->join('departements', 'users.departement_id', '=', 'departements.id')
-        //     ->join('accs', 'bons.id', '=', 'accs.bons_id')
-        //     ->whereNotIn('bons.id', $x)->distinct()
-        //     ->get([
-        //         'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total',
-        //         'users.name as pengaju',
-        //         'departements.name as dname'
-        //     ]);
-        // return response()->json([
-        //     'data' => $data
-        // ]);
         $data = DB::table("accs AS a")
             ->join("users AS u", "u.id", "=", "a.users_id")
             ->join("jabatans AS j", "j.id", "=", "u.jabatan_id")
@@ -920,36 +954,13 @@ class BonController extends Controller
                     ->from('accs')
                     ->join('users', 'users.id', '=', 'accs.users_id')
                     ->join('jabatans', 'jabatans.id', '=', 'users.jabatan_id')
-                    ->where('users.jabatan_id', '=', Auth::user()->jabatan_id);
+                    ->where('users.id', '=', Auth::user()->id);
             })
             ->get(['aju.uname', 'aju.dname', 'b.tglPengajuan', 'b.total', 'u.name as ACC', 'b.status', 'b.id']);
         return response()->json($data);
     }
     public function loadKasir()
     {
-        // 3=Manager, 8=Finance
-        // $data = DB::table("accs AS a")
-        //     ->join("users AS u", "u.id", "=", "a.users_id")
-        //     ->join("jabatans AS j", "j.id", "=", "u.jabatan_id")
-        //     ->join("departements AS d", "d.id", "=", "u.departement_id")
-        //     ->join("bons AS b", "b.id", "a.bons_id")
-        //     ->joinSub(function ($q) {
-        //         $q->select('users.id', 'users.name as uname', 'departements.name as dname')
-        //             ->from("users")
-        //             ->join('departements', 'users.departement_id', '=', 'departements.id');
-        //     }, "aju", function ($join) {
-        //         $join->on("aju.id", "=", "b.users_id");
-        //     })
-        //     ->where([["u.jabatan_id", 3], ["u.departement_id", 8], ["a.status", "Terima"]])
-        //     ->whereNotIn('a.bons_id', function ($subquery) {
-        //         $subquery->select('bons_id')
-        //             ->from('accs')
-        //             ->join('users', 'users.id', '=', 'accs.users_id')
-        //             ->join('jabatans', 'jabatans.id', '=', 'users.jabatan_id')
-        //             ->where('users.jabatan_id', '=', Auth::user()->jabatan_id);
-        //     })
-        //     ->get(['aju.uname', 'aju.dname', 'b.tglPengajuan', 'b.total', 'u.name as ACC', 'b.status', 'b.id']);
-        // return response()->json($data);
         $acc = DB::table('accs')
             ->join('bons', 'bons.id', '=', 'accs.bons_id')
             ->join('users as acc', 'acc.id', '=', 'accs.users_id')
@@ -1019,6 +1030,10 @@ class BonController extends Controller
         $data->level = 7;
         $data->threshold = 0;
         $data->save();
+
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Terima', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
     }
 
@@ -1090,6 +1105,10 @@ class BonController extends Controller
         $bon = Bon::find($id);
         $bon->status = "Tolak";
         $bon->save();
+
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Tolak karena ' . $confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         return redirect()->route('bon.index')->with('status', 'Bon telah di tolak');
     }
     public function revKasir(Request $request, $id)
@@ -1103,6 +1122,10 @@ class BonController extends Controller
         $data->level = 7;
         $data->threshold = 0;
         $data->save();
+
+        $history = DB::table('revisionhistory')->insert(
+            ['history' => 'Revisi karena ' . $confirmationInput, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+        );
         return redirect()->route('bon.index')->with('status', 'Bon telah diajukan untuk revisi');
     }
     public function test4()
