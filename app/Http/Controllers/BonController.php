@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Email;
+use App\Mail\PengajuMail;
 use App\Mail\revMail;
 use App\Models\Acc;
 use App\Models\Bon;
@@ -728,8 +729,9 @@ class BonController extends Controller
         return $date;
     }
 
-    public function accBon($id)
+    public function accBon(Request $request)
     {
+        $id = $request->get('id');
         $data = Acc::where('bons_id', $id)
             ->where('users_id', Auth::user()->id)
             ->first();
@@ -752,8 +754,9 @@ class BonController extends Controller
         }
     }
 
-    public function accAdmin($id)
+    public function accAdmin(Request $request)
     {
+        $id = $request->get('id');
         $data = Acc::where('bons_id', $id)
             ->where('users_id', Auth::user()->id)
             ->first();
@@ -794,8 +797,9 @@ class BonController extends Controller
         }
     }
 
-    public function accBontThres($id)
+    public function accBontThres(Request $request)
     {
+        $id = $request->get('id');
         $data = Acc::where('bons_id', $id)
             ->where('users_id', Auth::user()->id)
             ->first();
@@ -871,7 +875,7 @@ class BonController extends Controller
             ->get();
 
         if ($query->first()) {
-            Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
+            Mail::to($query->first()->email)->send(new PengajuMail($query->first()->bons_id, $query->first()->name));
             return redirect()->route('bon.index');
         } else {
             return redirect()->route('bon.index');

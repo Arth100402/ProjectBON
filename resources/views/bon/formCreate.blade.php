@@ -345,6 +345,12 @@
                     } else return
                 }
             });
+            $('#submit').click(function() {
+                setTimeout(() => {
+                    $(this).prop('disabled', true);
+                }, 100);
+
+            });
         });
     </script>
 @endsection

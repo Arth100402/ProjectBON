@@ -285,7 +285,7 @@
                             <input type="text" class="form-control" name="revisi" id="revisi"
                                 placeholder="Masukkan Alasan Revisi">
                         </div>
-                        <button type="submit" class="btn btn-success">Submit</button>
+                        <button type="submit" class="btn btn-success" onclick="revisiload()">Submit</button>
                     </form>
                 </div>
             </div>
@@ -296,6 +296,16 @@
             <div class="modal-content">
                 <div class="modal-body" id="modalContentHistory">
                     <!--loading animated gif can put here-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loadingModalLabel">Loading...</h5>
                 </div>
             </div>
         </div>
@@ -641,13 +651,13 @@
                                 if (data.threshold < data.total) {
                                     return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
                                     onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
-                                    <a class="btn btn-success" href="/accBontThres/${data.id}" onclick="return confirm('Total melebihi threshold, Apakah masih ingin menyetujui?')"><i class="fa fa-check-circle"></i></a>
+                                    <a class="btn btn-success" onclick="if(confirm('Total melebihi threshold, Apakah masih ingin menyetujui?')) { accAdminThres(${data.id}); }"><i class="fa fa-check-circle"></i></a>
                                     <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisi(${data.id})"><i class="fa fa-comment"></i></a>
                                     <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
                                 } else {
                                     return `<a class="btn btn-info" href="#modalEditA" data-toggle="modal"
                                     onclick="getDetail(${data.id})"><i class="fa fa-info-circle"></i></a>
-                                    <a class="btn btn-success" href="/accBont/${data.id}"><i class="fa fa-check-circle"></i></a>
+                                    <a class="btn btn-success" onclick="accAdmin(${data.id})"><i class="fa fa-check-circle"></i></a>
                                     <a class="btn btn-warning" href="#modalEditE" data-toggle="modal" onclick="revisi(${data.id})"><i class="fa fa-comment"></i></a>
                                     <a class="btn btn-danger" href="#modalEditC" data-toggle="modal" onclick="tolak(${data.id})"><i class="fa fa-times"></i></a>`;
                                 }
@@ -733,7 +743,7 @@
                                 }
                                 if (type === 'display' && data.ktt == true) {
                                     result +=
-                                        ` <a class="btn btn-success" href="/accAdmin/${data.id}"><i class="fa fa-check-circle"></i></a>`;
+                                        ` <a class="btn btn-success" onclick="accSelf(${data.id})"><i class="fa fa-check-circle"></i></a>`;
                                 }
                                 return result;
                             },
@@ -915,11 +925,82 @@
             });
         }
 
+        function accAdmin(id) {
+            $('#loadingModal').modal('show');
+            setTimeout(function() {
+                $('#loadingModal').modal('hide');
+            }, 5000);
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('bon.accBon') }}",
+                data: {
+                    '_token': '<?php echo csrf_token(); ?>',
+                    'id': id
+                },
+                success: function(data) {
+                    location.reload(); 
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function accSelf(id) {
+            $('#loadingModal').modal('show');
+            setTimeout(function() {
+                $('#loadingModal').modal('hide');
+            }, 5000);
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('admin.accAdmin') }}",
+                data: {
+                    '_token': '<?php echo csrf_token(); ?>',
+                    'id': id
+                },
+                success: function(data) {
+                    location.reload(); 
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        function revisiload(){
+            $('#loadingModal').modal('show');
+            setTimeout(function() {
+                $('#loadingModal').modal('hide');
+            }, 5000);
+        }
+
+        function accAdminThres(id) {
+            $('#loadingModal').modal('show');
+            setTimeout(function() {
+                $('#loadingModal').modal('hide');
+            }, 5000);
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('bon.accBontThres') }}",
+                data: {
+                    '_token': '<?php echo csrf_token(); ?>',
+                    'id': id
+                },
+                success: function(data) {
+                    location.reload(); 
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+        }
+
         function tolak(id) {
             $("#kirimTolak").attr("action", "/decBon/" + id);
         }
 
         function revisi(id) {
+
             $("#kirimRevisi").attr("action", "/revBon/" + id);
         }
 
