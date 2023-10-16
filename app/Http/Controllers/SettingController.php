@@ -65,7 +65,29 @@ class SettingController extends Controller
                     ["departId", $request->get("idPart")],
                     ["level", $request->get("level")]
                 ])->delete();
+            if ($request->get("level") != "1")
+                DB::table("acc_access")->where([
+                    ["departId", $request->get("idPart")],
+                    ["idPengaju", $request->get("idKar")],
+                    ["level", $request->get("level") - 1]
+                ])->update(["threshold" => "999999999"]);
+
             return response()->json($del);
+        }
+        if ($request->get("level") != 1) {
+            $before = DB::table("acc_access")->where([
+                ["departId", $request->get("idPart")],
+                ["idPengaju", $request->get("idKar")],
+                ["level", $request->get("level") - 1]
+            ])->first("threshold");
+
+            if ($before->threshold == 999999999) {
+                DB::table("acc_access")->where([
+                    ["departId", $request->get("idPart")],
+                    ["idPengaju", $request->get("idKar")],
+                    ["level", $request->get("level") - 1]
+                ])->update(["threshold" => "0"]);
+            }
         }
         $aff = DB::table('acc_access')
             ->updateOrInsert(
@@ -80,6 +102,7 @@ class SettingController extends Controller
                     "thresholdChange" => $request->get("thresChang")
                 ]
             );
+
         return response()->json($aff);
     }
 

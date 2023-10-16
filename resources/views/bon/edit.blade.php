@@ -350,7 +350,8 @@
                         "agenda": agenda,
                         "keterangan": keter,
                         "biaya": biaya,
-                        "bid": bid
+                        "bid": bid,
+                        "level1Status": level1
                     },
                     success: function(response) {
                         const id = response.id
@@ -497,7 +498,8 @@
                         "_token": "{{ csrf_token() }}",
                         "id": id,
                         "bid": bid,
-                        "biaya": biaya
+                        "biaya": biaya,
+                        "level1Status": level1
                     },
                     success: function(response) {
                         $(tr).addClass("lineStrike")
@@ -562,7 +564,8 @@
                         "biaya": biaya,
                         "biayaDeduct": biayaDeduct,
                         "id": id,
-                        "bid": bid
+                        "bid": bid,
+                        "level1Status": level1
                     },
                     success: function(response) {
                         const idNew = response.idNew

@@ -134,6 +134,25 @@
                 thresChang.attr("disabled", idAcc ? false : true)
                 if (!idAcc) thres.val("0");
                 thresChang.val("0");
+
+
+                if (st == "true" && !$("#level-" + (level + 1)).is(
+                        ":has(option:selected)")) {
+                    const th = $(ch).parent().parent().prev().find(".threshold-input")
+                    if ($(th).val() == "999999999") $(th).val("0")
+                    $(ch).parent().parent().find(".threshold-input").val(
+                        "999999999")
+
+                }
+                if (st == "false" && $("#level-" + (level - 1)).attr(
+                        "disabled")) {
+                    const th = $(ch).parent().parent().find(".threshold-input")
+                    if ($(th).val() == "999999999") $(th).val("0")
+                    if (level != 1) $(ch).parent().parent().prev().find(
+                        ".threshold-input").val(
+                        "999999999")
+                }
+
                 $.ajax({
                     type: "POST",
                     url: "{{ route('setting.changeAcc') }}",
@@ -147,18 +166,28 @@
                         "idKar": karyawanID
                     },
                     success: function(response) {
+                        console.log(response);
                         reDisable();
                         const id = $(ch).attr("id").split('-')
                         if (st == "true" && !$("#level-" + (parseInt(id[1]) + 1)).is(
                                 ":has(option:selected)")) {
                             $("#level-" + (parseInt(id[1]) + 1)).attr("disabled",
                                 false);
+                            const th = $(ch).parent().parent().prev().find(".threshold-input")
+                            if ($(th).val() == "999999999") $(th).val("0")
+                            $(ch).parent().parent().find(".threshold-input").val(
+                                "999999999")
+
                         }
                         if (st == "false" && $("#level-" + (parseInt(id[1]) - 1)).attr(
                                 "disabled")) {
-                            console.log($("#level-" + (parseInt(id[1]) - 1)));
                             $("#level-" + (parseInt(id[1]) - 1)).attr("disabled",
                                 false);
+                            const th = $(ch).parent().parent().find(".threshold-input")
+                            if ($(th).val() == "999999999") $(th).val("0")
+                            if (level != 1) $(ch).parent().parent().prev().find(
+                                ".threshold-input").val(
+                                "999999999")
                         }
                     },
                     error: function(err) {

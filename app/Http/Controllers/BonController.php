@@ -137,6 +137,7 @@ class BonController extends Controller
 
         $x = [];
         $remove = [];
+        $terima = [];
 
         foreach ($acc as $items) {
             foreach ($items as $item) {
@@ -146,6 +147,9 @@ class BonController extends Controller
                 if ($item->status == 'Revisi') {
                     array_push($remove, $item->bons_id);
                 }
+                if ($item->status == 'Terima') {
+                    array_push($terima, $item->bons_id);
+                }
             }
         }
 
@@ -154,6 +158,9 @@ class BonController extends Controller
         foreach ($data as $item) {
             $item->editable = true;
             if (in_array($item->id, $x, true)) {
+                $item->editable = false;
+            }
+            if (in_array($item->id, $terima, true)) {
                 $item->editable = false;
             }
         }
@@ -372,6 +379,7 @@ class BonController extends Controller
             "tglPengajuan" => now(),
             "users_id" => $user->id,
             "total" => $request->get("biayaPerjalanan"),
+            "total_before" => $request->get("biayaPerjalanan"),
             "status" => null,
             "file" => $filenames
         ]);
@@ -447,6 +455,7 @@ class BonController extends Controller
                 "tglPengajuan" => now(),
                 "users_id" => $user->id,
                 "total" => $request->get("biayaPerjalanan"),
+                "total_before" => $request->get("biayaPerjalanan"),
                 "status" => null,
                 "file" => $filenames
             ]);
@@ -570,7 +579,7 @@ class BonController extends Controller
             ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name', 'accs.thresholdChange', 'accs.level', 'accs.status')
             ->where('accs.bons_id', $id)
             ->where('accs.level', 0)
-            ->get();
+            ->first();
         $levelTertinggi = DB::table('accs')
             ->join('users', 'accs.users_id', '=', 'users.id')
             ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name', 'accs.thresholdChange', 'accs.threshold', 'accs.level', 'accs.status')
@@ -586,10 +595,10 @@ class BonController extends Controller
                 $item->save();
             }
             if ($query2) {
-                $query2->first()->status = "Diproses";
+                $query2->status = "Diproses";
             } else {
                 $newBon = new Acc;
-                $newBon->bons_id = $bon;
+                $newBon->bons_id = $id;
                 $newBon->users_id = $bon->users_id;
                 $newBon->status = "Diproses";
                 $newBon->level = 0;
@@ -599,10 +608,10 @@ class BonController extends Controller
             $bon->save();
 
             $history = DB::table('revisionhistory')->insert(
-                ['history' => 'Direvisi oleh ' . Auth::user()->name . ' untuk '. $bon->user()->name, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+                ['history' => 'Direvisi oleh ' . Auth::user()->name . ' untuk ' . $bon->user->name, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
             );
             Mail::to($userbon->email)->send(new revMail($userbon->id, $userbon->name));
-            return redirect()->route('bon.index');
+            return redirect("/");
         } else {
             $bon = Bon::find($id);
             //apabila melebihi threshold level tertinggi maka tambah atasan
@@ -612,7 +621,7 @@ class BonController extends Controller
                         ["departId", $userbon->depid],
                         ["idPengaju", $userbon->uid]
                     ])->get();
-                Acc::where("bons_id",$id)->delete();
+                Acc::where("bons_id", $id)->delete();
                 for ($i = 0; $i < count($datas); $i++) {
                     if ($datas[$i]->threshold < $request->get("biayaPerjalanan")) {
                         $newAcc = new Acc;
@@ -640,7 +649,7 @@ class BonController extends Controller
                 );
             }
             //apabila biaya perjalanan melebihi threshold change perevisi maka reset penerimaan
-            if ($request->get("biayaPerjalanan") > $query->first()->thresholdChange) {
+            if (abs($request->get("biayaPerjalanan") - $bon->total_before) > $query->first()->thresholdChange) {
                 $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->orWhere('accs.level', '!=', 0)->get();
                 foreach ($change as $item) {
                     if ($item->level == 0) continue;
@@ -664,7 +673,7 @@ class BonController extends Controller
                     ['history' => 'Telah Direvisi', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
                 );
             }
-
+            $bon->total_before = $request->get("biayaPerjalanan");
             $bon->save();
             if ($query->first()) {
                 Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
@@ -759,9 +768,7 @@ class BonController extends Controller
             ->first();
         $data->status = 'Terima';
         $data->save();
-
         $bon = Bon::find($id);
-
         $datas = DB::table("acc_access")
             ->where([
                 ["departId", Auth::user()->departement_id],
@@ -1056,6 +1063,7 @@ class BonController extends Controller
 
         $bon = Bon::find($request->get("bid"));
         $bon->total = $bon->total + $request->get("biaya");
+        if (!$request->get("level1Status")) $bon->total_before = $bon->total_before + $request->get("biaya");
         $bon->save();
         return response()->json(["status" => "ok", "id" => $new->id]);
     }
@@ -1082,6 +1090,7 @@ class BonController extends Controller
 
         $bon = Bon::find($request->get("bid"));
         $bon->total = $bon->total + $request->get("biaya") - $request->get("biayaDeduct");
+        if (!$request->get("level1Status")) $bon->total_before = $bon->total_before + $request->get("biaya") - $request->get("biayaDeduct");
         $bon->save();
         return response()->json(["status" => "ok", "idNew" => $new->id]);
     }
@@ -1090,6 +1099,7 @@ class BonController extends Controller
     {
         $bon = Bon::find($req->get("bid"));
         $bon->total = $bon->total - $req->get("biaya");
+        if (!$req->get("level1Status")) $bon->total_before = $bon->total_before - $req->get("biaya");
         $bon->save();
         $aff = DetailBon::withTrashed()->find($req->get("id"))->delete();
         DetailBon::withTrashed()->where("detailbons_revision_id", $req->get("id"))->delete();
