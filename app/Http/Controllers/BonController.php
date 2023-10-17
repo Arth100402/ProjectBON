@@ -650,7 +650,7 @@ class BonController extends Controller
                 );
             }
             //apabila biaya perjalanan melebihi threshold change perevisi maka reset penerimaan
-            if (abs($request->get("biayaPerjalanan") - $bon->total_before) > $query->first()->thresholdChange) {
+            else if (abs($request->get("biayaPerjalanan") - $bon->total_before) > $query->first()->thresholdChange) {
                 $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->orWhere('accs.level', '!=', 0)->get();
                 foreach ($change as $item) {
                     if ($item->level == 0) continue;
