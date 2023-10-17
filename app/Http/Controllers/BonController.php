@@ -48,6 +48,12 @@ class BonController extends Controller
                         ->where('a1.level', DB::raw('a.level - 1'))
                         ->where('a1.status', 'Terima');
                 })->orWhere('a.level', 1);
+            })->whereExists(function ($query) {
+                $query->select('id')
+                    ->from('accs AS a1')
+                    ->whereColumn('a1.bons_id', 'a.bons_id')
+                    ->where('a1.level', 0)
+                    ->where('a1.status', 'Terima');
             })
             ->get();
         $data = $query;
@@ -85,7 +91,7 @@ class BonController extends Controller
                 array_push($remove, $item->bons_id);
                 $x = array_diff($x, $remove);
             }
-            if ($item->level == 0 && $item->status == 'Diproses') {
+            if ($item->level == 0 && ($item->status == 'Revisi' ||$item->status == 'Diproses')) {
                 array_push($level, $item->bons_id);
             }
         }
@@ -582,22 +588,6 @@ class BonController extends Controller
             ->first();
 
         $bon = Bon::find($id);
-        if (Auth::user()->jabatan_id == 9) {
-            if ($query2) {
-                $query2->status = "Revisi";
-            } else {
-                $newBon = new Acc;
-                $newBon->bons_id = $id;
-                $newBon->users_id = $bon->users_id;
-                $newBon->status = "Revisi";
-                $newBon->level = 0;
-                $newBon->save();
-            }
-
-            $history = DB::table('revisionhistory')->insert(
-                ['history' => 'Direvisi oleh ' . Auth::user()->name . ' untuk ' . $bon->user->name, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
-            );
-        }
         //apabila melebihi threshold level tertinggi maka tambah atasan
         if ($request->get("biayaPerjalanan") > $levelTertinggi->threshold) {
             $datas = DB::table("acc_access")
@@ -657,7 +647,22 @@ class BonController extends Controller
                 ['history' => 'Telah Direvisi', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
             );
         }
+        if (Auth::user()->jabatan_id == 9) {
+            if ($query2) {
+                $query2->status = "Revisi";
+            } else {
+                $newBon = new Acc;
+                $newBon->bons_id = $id;
+                $newBon->users_id = $bon->users_id;
+                $newBon->status = "Revisi";
+                $newBon->level = 0;
+                $newBon->save();
+            }
 
+            $history = DB::table('revisionhistory')->insert(
+                ['history' => 'Direvisi oleh ' . Auth::user()->name . ' untuk ' . $bon->user->name, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+            );
+        }
         $bon->total_before = $request->get("biayaPerjalanan");
         $bon->save();
         if (Auth::user()->jabatan_id == 9) {
