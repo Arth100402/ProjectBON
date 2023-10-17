@@ -91,7 +91,7 @@ class BonController extends Controller
                 array_push($remove, $item->bons_id);
                 $x = array_diff($x, $remove);
             }
-            if ($item->level == 0 && ($item->status == 'Revisi' ||$item->status == 'Diproses')) {
+            if ($item->level == 0 && ($item->status == 'Revisi' || $item->status == 'Diproses')) {
                 array_push($level, $item->bons_id);
             }
         }
@@ -582,12 +582,7 @@ class BonController extends Controller
             ->where('accs.bons_id', $id)
             ->where('accs.status', 'Revisi')
             ->get();
-        $query2 = DB::table('accs')
-            ->join('users', 'accs.users_id', '=', 'users.id')
-            ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name', 'accs.thresholdChange', 'accs.level', 'accs.status')
-            ->where('accs.bons_id', $id)
-            ->where('accs.level', 0)
-            ->first();
+
         $levelTertinggi = DB::table('accs')
             ->join('users', 'accs.users_id', '=', 'users.id')
             ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name', 'accs.thresholdChange', 'accs.threshold', 'accs.level', 'accs.status')
@@ -646,18 +641,28 @@ class BonController extends Controller
                 ['history' => 'Threshold Revisi melebihi batas threshold change, Status terima direset', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
             );
         } else {
-            $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->first();
-            $change->status = 'Diproses';
-            $change->save();
-            $bon->total = $request->get("biayaPerjalanan");
+            if (Auth::user()->jabatan_id != 9) {
+                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->first();
+                $change->status = 'Diproses';
+                $change->save();
+                $bon->total = $request->get("biayaPerjalanan");
+            }
 
             $history = DB::table('revisionhistory')->insert(
                 ['history' => 'Telah Direvisi', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
             );
         }
+
+        $query2 = Acc::join('users', 'accs.users_id', '=', 'users.id')
+            ->select('accs.bons_id', 'users.email', 'accs.bons_id', 'users.name', 'accs.thresholdChange', 'accs.level', 'accs.status')
+            ->where('accs.bons_id', $id)
+            ->where('accs.level', 0)
+            ->first();
         if (Auth::user()->jabatan_id == 9) {
             if ($query2) {
-                $query2->status = "Revisi";
+                Acc::where('bons_id', $id)
+                    ->where('level', 0)
+                    ->update(['status' => 'Revisi']);
             } else {
                 $newBon = new Acc;
                 $newBon->bons_id = $id;
@@ -767,21 +772,20 @@ class BonController extends Controller
     public function accAdmin(Request $request)
     {
         $id = $request->get('id');
-        $data = Acc::where('bons_id', $id)
-            ->where('users_id', Auth::user()->id)
-            ->first();
-        $data->status = 'Terima';
-        $data->save();
         $bon = Bon::find($id);
-        $datas = DB::table("acc_access")
-            ->where([
-                ["departId", Auth::user()->departement_id],
-                ["idPengaju", Auth::user()->id]
-            ])->get();
 
         $AS = Acc::where('bons_id', $id)->where("level", 0)->first("status");
+        $ASS = Acc::where('bons_id', $id)->where("status", "Revisi")->orderBy("level", "desc")->first();
         if ($AS->status == "Revisi") {
+            Acc::where('bons_id', $id)
+                ->where('level', 0)
+                ->update(['status' => 'Terima']);
         } else {
+            $datas = DB::table("acc_access")
+                ->where([
+                    ["departId", Auth::user()->departement_id],
+                    ["idPengaju", Auth::user()->id]
+                ])->get();
             for ($i = 0; $i < count($datas); $i++) {
                 $newBon = new Acc;
                 $newBon->bons_id = $bon->id;
@@ -798,6 +802,14 @@ class BonController extends Controller
                 ->where('bons_id', $id)
                 ->where('level', 1)
                 ->get();
+        }
+
+        if ($ASS->level != 0) {
+            Acc::where('bons_id', $id)
+            ->where("status", "Revisi")
+            ->orderBy("level", "desc")
+            ->first()
+            ->update(['status' => 'Diproses']);
         }
         $history = DB::table('revisionhistory')->insert(
             ['history' => 'Terima', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]

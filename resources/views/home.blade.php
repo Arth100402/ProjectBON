@@ -938,7 +938,7 @@
                     'id': id
                 },
                 success: function(data) {
-                    location.reload(); 
+                    location.reload();
                 },
                 error: function(err) {
                     console.log(err);
@@ -950,6 +950,7 @@
             $('#loadingModal').modal('show');
             setTimeout(function() {
                 $('#loadingModal').modal('hide');
+                location.reload();
             }, 5000);
             $.ajax({
                 type: 'POST',
@@ -959,7 +960,7 @@
                     'id': id
                 },
                 success: function(data) {
-                    location.reload(); 
+                    location.reload();
                 },
                 error: function(err) {
                     console.log(err);
@@ -987,7 +988,7 @@
                     'id': id
                 },
                 success: function(data) {
-                    location.reload(); 
+                    location.reload();
                 },
                 error: function(err) {
                     console.log(err);
