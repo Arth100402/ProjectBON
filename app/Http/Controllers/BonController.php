@@ -393,6 +393,14 @@ class BonController extends Controller
             ]);
             // DB::table("detailbons")->where("id", $id)->update(["detailbons_revision_id" => $id]);
         }
+        $newBon = new Acc;
+        $newBon->bons_id = $bon;
+        $newBon->users_id = Auth::user()->id;
+        $newBon->status = "Terima";
+        $newBon->level = 0;
+        $newBon->threshold = 0;
+        $newBon->thresholdChange = 0;
+        $newBon->save();
         $datas = DB::table("acc_access")
             ->where([
                 ["departId", Auth::user()->departement_id],
