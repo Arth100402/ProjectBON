@@ -588,94 +588,89 @@ class BonController extends Controller
             ->orderBy('accs.level', 'desc')
             ->first();
 
+        $bon = Bon::find($id);
         if (Auth::user()->jabatan_id == 9) {
-            $bon = Bon::find($id);
-            $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->get();
-            foreach ($change as $item) {
-                $item->status = 'Diproses';
-                $item->save();
-            }
             if ($query2) {
-                $query2->status = "Diproses";
+                $query2->status = "Revisi";
             } else {
                 $newBon = new Acc;
                 $newBon->bons_id = $id;
                 $newBon->users_id = $bon->users_id;
-                $newBon->status = "Diproses";
+                $newBon->status = "Revisi";
                 $newBon->level = 0;
                 $newBon->save();
             }
-            $bon->total = $request->get("biayaPerjalanan");
-            $bon->save();
 
             $history = DB::table('revisionhistory')->insert(
                 ['history' => 'Direvisi oleh ' . Auth::user()->name . ' untuk ' . $bon->user->name, 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
             );
+        }
+        //apabila melebihi threshold level tertinggi maka tambah atasan
+        if ($request->get("biayaPerjalanan") > $levelTertinggi->threshold) {
+            $datas = DB::table("acc_access")
+                ->where([
+                    ["departId", $userbon->depid],
+                    ["idPengaju", $userbon->uid]
+                ])->get();
+            Acc::where("bons_id", $id)->delete();
+            for ($i = 0; $i < count($datas); $i++) {
+                if ($datas[$i]->threshold < $request->get("biayaPerjalanan")) {
+                    $newAcc = new Acc;
+                    $newAcc->bons_id = $id;
+                    $newAcc->users_id = $datas[$i]->idAcc;
+                    $newAcc->status = "Diproses";
+                    $newAcc->level = $datas[$i]->level;
+                    $newAcc->threshold = $datas[$i]->threshold;
+                    $newAcc->thresholdChange = $datas[$i]->thresholdChange;
+                    $newAcc->save();
+                    continue;
+                }
+                break;
+            }
+            $newAcc = new Acc;
+            $newAcc->bons_id = $id;
+            $newAcc->users_id = $datas[$i]->idAcc;
+            $newAcc->status = "Diproses";
+            $newAcc->level = $datas[$i]->level;
+            $newAcc->threshold = $datas[$i]->threshold;
+            $newAcc->thresholdChange = $datas[$i]->thresholdChange;
+            $newAcc->save();
+            $history = DB::table('revisionhistory')->insert(
+                ['history' => 'Threshold melebihi batas threshold tertinggi, Menambah level Acc', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+            );
+        }
+        //apabila biaya perjalanan melebihi threshold change perevisi maka reset penerimaan
+        else if (abs($request->get("biayaPerjalanan") - $bon->total_before) > $query->first()->thresholdChange) {
+            $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->orWhere('accs.level', '!=', 0)->get();
+            foreach ($change as $item) {
+                if ($item->level == 0) continue;
+                $item->status = 'Diproses';
+                $item->keteranganAcc = null;
+                $item->keteranganRevisi = null;
+                $item->save();
+            }
+            $bon->total = $request->get("biayaPerjalanan");
+
+            $history = DB::table('revisionhistory')->insert(
+                ['history' => 'Threshold Revisi melebihi batas threshold change, Status terima direset', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+            );
+        } else {
+            $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->first();
+            $change->status = 'Diproses';
+            $change->save();
+            $bon->total = $request->get("biayaPerjalanan");
+
+            $history = DB::table('revisionhistory')->insert(
+                ['history' => 'Telah Direvisi', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
+            );
+        }
+
+        $bon->total_before = $request->get("biayaPerjalanan");
+        $bon->save();
+        if (Auth::user()->jabatan_id == 9) {
             Mail::to($userbon->email)->send(new revMail($userbon->id, $userbon->name));
             return redirect("/");
         } else {
-            $bon = Bon::find($id);
-            //apabila melebihi threshold level tertinggi maka tambah atasan
-            if ($request->get("biayaPerjalanan") > $levelTertinggi->threshold) {
-                $datas = DB::table("acc_access")
-                    ->where([
-                        ["departId", $userbon->depid],
-                        ["idPengaju", $userbon->uid]
-                    ])->get();
-                Acc::where("bons_id", $id)->delete();
-                for ($i = 0; $i < count($datas); $i++) {
-                    if ($datas[$i]->threshold < $request->get("biayaPerjalanan")) {
-                        $newAcc = new Acc;
-                        $newAcc->bons_id = $id;
-                        $newAcc->users_id = $datas[$i]->idAcc;
-                        $newAcc->status = "Diproses";
-                        $newAcc->level = $datas[$i]->level;
-                        $newAcc->threshold = $datas[$i]->threshold;
-                        $newAcc->thresholdChange = $datas[$i]->thresholdChange;
-                        $newAcc->save();
-                        continue;
-                    }
-                    break;
-                }
-                $newAcc = new Acc;
-                $newAcc->bons_id = $id;
-                $newAcc->users_id = $datas[$i]->idAcc;
-                $newAcc->status = "Diproses";
-                $newAcc->level = $datas[$i]->level;
-                $newAcc->threshold = $datas[$i]->threshold;
-                $newAcc->thresholdChange = $datas[$i]->thresholdChange;
-                $newAcc->save();
-                $history = DB::table('revisionhistory')->insert(
-                    ['history' => 'Threshold melebihi batas threshold tertinggi, Menambah level Acc', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
-                );
-            }
-            //apabila biaya perjalanan melebihi threshold change perevisi maka reset penerimaan
-            else if (abs($request->get("biayaPerjalanan") - $bon->total_before) > $query->first()->thresholdChange) {
-                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->orWhere('accs.status', 'Terima')->orWhere('accs.level', '!=', 0)->get();
-                foreach ($change as $item) {
-                    if ($item->level == 0) continue;
-                    $item->status = 'Diproses';
-                    $item->keteranganAcc = null;
-                    $item->keteranganRevisi = null;
-                    $item->save();
-                }
-                $bon->total = $request->get("biayaPerjalanan");
-
-                $history = DB::table('revisionhistory')->insert(
-                    ['history' => 'Threshold Revisi melebihi batas threshold change, Status terima direset', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
-                );
-            } else {
-                $change = Acc::where('accs.bons_id', $id)->where('accs.status', 'Revisi')->first();
-                $change->status = 'Diproses';
-                $change->save();
-                $bon->total = $request->get("biayaPerjalanan");
-
-                $history = DB::table('revisionhistory')->insert(
-                    ['history' => 'Telah Direvisi', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
-                );
-            }
-            $bon->total_before = $request->get("biayaPerjalanan");
-            $bon->save();
             if ($query->first()) {
                 Mail::to($query->first()->email)->send(new revMail($query->first()->bons_id, $query->first()->name));
                 return redirect()->route('bon.index');
@@ -777,25 +772,30 @@ class BonController extends Controller
                 ["departId", Auth::user()->departement_id],
                 ["idPengaju", Auth::user()->id]
             ])->get();
-        for ($i = 0; $i < count($datas); $i++) {
-            $newBon = new Acc;
-            $newBon->bons_id = $bon->id;
-            $newBon->users_id = $datas[$i]->idAcc;
-            $newBon->status = "Diproses";
-            $newBon->level = $datas[$i]->level;
-            $newBon->threshold = $datas[$i]->threshold;
-            $newBon->save();
-            if ($bon->total < $datas[$i]->threshold) break;
+
+        $AS = Acc::where('bons_id', $id)->where("level", 0)->first("status");
+        if ($AS->status == "Revisi") {
+        } else {
+            for ($i = 0; $i < count($datas); $i++) {
+                $newBon = new Acc;
+                $newBon->bons_id = $bon->id;
+                $newBon->users_id = $datas[$i]->idAcc;
+                $newBon->status = "Diproses";
+                $newBon->level = $datas[$i]->level;
+                $newBon->threshold = $datas[$i]->threshold;
+                $newBon->save();
+                if ($bon->total < $datas[$i]->threshold) break;
+            }
+            $query = DB::table('accs as a')
+                ->join('users as u', 'a.users_id', '=', 'u.id')
+                ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
+                ->where('bons_id', $id)
+                ->where('level', 1)
+                ->get();
         }
         $history = DB::table('revisionhistory')->insert(
             ['history' => 'Terima', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
         );
-        $query = DB::table('accs as a')
-            ->join('users as u', 'a.users_id', '=', 'u.id')
-            ->select('a.bons_id', 'u.id', 'u.name', 'a.level', 'u.email')
-            ->where('bons_id', $id)
-            ->where('level', 1)
-            ->get();
         if ($query->first()) {
             Mail::to($query->first()->email)->send(new Email($query->first()->bons_id, $query->first()->name));
             return redirect()->route('bon.index')->with('status', 'Bon telah di terima');
