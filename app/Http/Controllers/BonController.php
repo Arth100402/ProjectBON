@@ -148,9 +148,6 @@ class BonController extends Controller
                 if ($item->status == 'Revisi') {
                     array_push($remove, $item->bons_id);
                 }
-                if ($item->status == 'Terima') {
-                    array_push($terima, $item->bons_id);
-                }
             }
         }
 
@@ -161,11 +158,7 @@ class BonController extends Controller
             if (in_array($item->id, $x, true)) {
                 $item->editable = false;
             }
-            if (in_array($item->id, $terima, true)) {
-                $item->editable = false;
-            }
         }
-
         return response()->json([
             'data' => $data
         ]);

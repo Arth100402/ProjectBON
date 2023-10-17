@@ -78,7 +78,7 @@ Route::middleware("auth")->group(function () {
     ROUTE::post("/upadteThresChange", [SettingController::class, 'updateThrChange'])->name("setting.thrChg");
 });
 // Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
-Route::get("/test", [BonController::class, "jsonShowIndexSelf"]);
+Route::get("/test", [BonController::class, "indexAdmin"]);
 // Route::get("/test", function(){
 //     return DB::table('detailbons')->where('bons_id',3)->delete();
 // });
