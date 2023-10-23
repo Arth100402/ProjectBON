@@ -1,7 +1,13 @@
 {{-- require_once 'vendor/autoload.php' --}}
 <div class="panel card-background-color">
     <div class="panel-heading">
-        <h3>Detail Bon</h3>
+        <h3>Pengajuan Bon sementara</h3>
+    </div>
+    <div class="panel-body">
+        <p>Nama &emsp;&emsp;&emsp;&emsp;: {{ $detail[0]->uname }}</p><br>
+        <p>Departemen &emsp;: {{ $detail[0]->dname }} </p> <br>
+        <p>Tgl Pengajuan &ensp;: {{ $detail[0]->tglPengajuan }}</p><br>
+        <p>No. Bs &emsp;&emsp;&emsp;&emsp;: {{ $detail[0]->bid }}</p><br>
     </div>
     <div class="panel-body">
         <div class="table-wrapper table-responsive" style="height:30vh; overflow-y:scroll">
@@ -28,7 +34,7 @@
                             <td>{{ $d->asalKota }}</td>
                             <td>{{ $d->tujuan }}</td>
                             <td>{{ $d->idOpti }}</td>
-                            <td>{{ $d->name }}</td>
+                            <td>{{ $d->uname }}</td>
                             <td>{{ $d->noPaket }}</td>
                             <td>{{ $d->agenda }}</td>
                             <td>{{ $d->penggunaan }}</td>

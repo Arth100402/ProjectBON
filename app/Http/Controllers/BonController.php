@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
+use function PHPUnit\Framework\isNull;
 use function Ramsey\Uuid\v1;
 
 class BonController extends Controller
@@ -181,8 +182,8 @@ class BonController extends Controller
             ->where('detailbons.bons_id', '=', $id)
             ->get([
                 'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket', 'detailbons.deleted_at',
-                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
-                'users.name',
+                'bons.id as bid', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name as uname', 'departements.name as dname',
                 'projects.idOpti'
             ]);
         $revises = DB::table("revisionhistory")
@@ -215,8 +216,8 @@ class BonController extends Controller
             ->where('detailbons.bons_id', '=', $id)
             ->get([
                 'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket', 'detailbons.deleted_at',
-                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
-                'users.name',
+                'bons.id as bid', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name as uname', 'departements.name as dname',
                 'projects.idOpti'
             ]);
         $subquery = DB::table('accs AS a')
@@ -267,8 +268,8 @@ class BonController extends Controller
             ->where('detailbons.bons_id', '=', $id)
             ->get([
                 'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket', 'detailbons.deleted_at',
-                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
-                'users.name',
+                'bons.id as bid', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name as uname', 'departements.name as dname',
                 'projects.idOpti'
             ]);
         $subquery = DB::table('accs AS a')
@@ -318,8 +319,8 @@ class BonController extends Controller
             ->where('detailbons.bons_id', '=', $id)
             ->get([
                 'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket', 'detailbons.deleted_at',
-                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
-                'users.name',
+                'bons.id as bid', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name as uname', 'departements.name as dname',
                 'projects.idOpti'
             ]);
         $revises = DB::table("revisionhistory")
@@ -532,7 +533,15 @@ class BonController extends Controller
             ->where('detailbons.bons_id', $id)
             ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
         $level1 = Acc::where("bons_id", $id)->where("level", 1)->orWhere("level", 0)->first("status")["status"] == "Diproses";
-        return view('bon.edit', compact('bon', 'data', 'level1'));
+        $check = Acc::where("bons_id", $id)->where("status", "=", "Revisi")->first();
+        if ($check)
+        {
+            $acc = $check->thresholdChange;
+        }
+        else {
+            $acc = null;
+        }
+        return view('bon.edit', compact('bon', 'data', 'level1', 'acc'));
     }
     /**
      * Update the specified resource in storage.
@@ -781,6 +790,9 @@ class BonController extends Controller
                 ->where('level', 0)
                 ->update(['status' => 'Terima']);
         } else {
+            Acc::where('bons_id', $id)
+                ->where('level', 0)
+                ->update(['status' => 'Terima']);
             $datas = DB::table("acc_access")
                 ->where([
                     ["departId", Auth::user()->departement_id],
@@ -806,10 +818,10 @@ class BonController extends Controller
 
         if ($ASS->level != 0) {
             Acc::where('bons_id', $id)
-            ->where("status", "Revisi")
-            ->orderBy("level", "desc")
-            ->first()
-            ->update(['status' => 'Diproses']);
+                ->where("status", "Revisi")
+                ->orderBy("level", "desc")
+                ->first()
+                ->update(['status' => 'Diproses']);
         }
         $history = DB::table('revisionhistory')->insert(
             ['history' => 'Terima', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]
@@ -1028,8 +1040,8 @@ class BonController extends Controller
             ->where('detailbons.bons_id', '=', $id)
             ->get([
                 'detailbons.tglMulai', 'detailbons.tglAkhir', 'detailbons.asalKota', 'detailbons.tujuan', 'detailbons.agenda', 'detailbons.biaya', 'detailbons.projects_id', 'detailbons.penggunaan', 'detailbons.noPaket', 'detailbons.deleted_at',
-                'bons.id', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
-                'users.name',
+                'bons.id as bid', 'bons.tglPengajuan', 'bons.users_id', 'bons.total', 'bons.status',
+                'users.name as uname', 'departements.name as dname',
                 'projects.idOpti'
             ]);
         $acc = DB::table('accs')

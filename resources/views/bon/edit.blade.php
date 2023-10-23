@@ -196,10 +196,33 @@
         <button type="submit" id="submit" disabled class="btn btn-primary">Kirim</button>
         <a class="btn btn-danger" href="/">Batal Kirim</a>
     </form>
+    <div class="modal fade" id="warningModal" tabindex="-1" role="dialog" aria-labelledby="warningModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="warningModalLabel"><i class="fa fa-warning"></i>Peringatan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-danger">
+                    Revisi harga yang anda lakukan melebihi batas kewenangan pengaju revisi, Jika diteruskan maka status
+                    penerimaan akan direset kembali ke level awal, Silahkan hapus perubahan / modifikasi harga jika tidak
+                    ingin mengulang status penerimaan.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('javascript')
     <script>
         const bid = {!! $bon->id !!}
+        const btotalbefore = {!! $bon->total_before !!}
+        const accthresholdchange = {!! $acc ? $acc :'null' !!}
         const biayaPerjalanan = 0;
         const level1 = {!! $level1 ? 'true' : 'false' !!}
         const adminsss = {!! Auth::user()->jabatan_id == 9 ? 'true' : 'false' !!}
@@ -394,6 +417,12 @@
                         $("#keteranganError").remove();
                         if (!level1) $("#submit").attr("disabled", false);
                         if (adminsss) $("#submit").attr("disabled", false);
+                        if (accthresholdchange) {
+                            if (Math.abs($("#biayaPerjalanan").val() - btotalbefore) >
+                                accthresholdchange) {
+                                $('#warningModal').modal('show');
+                            }
+                        }
                     },
                     error: function(err) {
                         console.log(err);
@@ -522,6 +551,12 @@
                         })
                         if (!level1) $("#submit").attr("disabled", !notDeleted.length > 0);
                         if (adminsss) $("#submit").attr("disabled", !notDeleted.length > 0);
+                        if (accthresholdchange) {
+                            if (Math.abs($("#biayaPerjalanan").val() - btotalbefore) >
+                                accthresholdchange) {
+                                $('#warningModal').modal('show');
+                            }
+                        }
 
                     },
                     error: function(err) {
@@ -623,7 +658,12 @@
                         $("div#collapse" + id).attr("id", "collapse" + idNew)
                         if (!level1) $("#submit").attr("disabled", false);
                         if (adminsss) $("#submit").attr("disabled", false);
-
+                        if (accthresholdchange) {
+                            if (Math.abs($("#biayaPerjalanan").val() - btotalbefore) >
+                                accthresholdchange) {
+                                $('#warningModal').modal('show');
+                            }
+                        }
                     },
                     error: function(err) {
                         console.log(err);

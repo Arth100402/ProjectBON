@@ -33,8 +33,8 @@ Route::middleware("auth")->group(function () {
     Route::post('/getDetailSelf', [BonController::class, 'getDetailSelf'])->name('bon.getDetailSelf');
     Route::post('/getDetailHistory', [BonController::class, 'getDetailHistory'])->name('bon.getDetailHistory');
     Route::get('/jsonShowIndexSelf', [BonController::class, 'jsonShowIndexSelf'])->name('bon.jsonShowIndexSelf');
-    Route::post('/accBont/', [BonController::class, 'accBon'])->name('bon.accBon');
-    Route::post('/accBontThres/', [BonController::class, 'accBontThres'])->name('bon.accBontThres');
+    Route::post('/accBont', [BonController::class, 'accBon'])->name('bon.accBon');
+    Route::post('/accBontThres', [BonController::class, 'accBontThres'])->name('bon.accBontThres');
     Route::post('/decBon/{id}', [BonController::class, 'decBon'])->name('bon.decBon');
     Route::post('/revBon/{id}', [BonController::class, 'revBon'])->name('bon.revBon');
     Route::get('/HistoryAcc', [BonController::class, 'HistoryAcc'])->name('bon.HistoryAcc');
@@ -51,7 +51,7 @@ Route::middleware("auth")->group(function () {
     Route::post('/getDetailAdmin', [BonController::class, 'getDetailAdmin'])->name('bon.getDetailAdmin');
     Route::get('/admincreate', [BonController::class, "admincreate"])->name('admin.create');
     Route::post('/adminstore', [BonController::class, "adminstore"])->name('admin.store');
-    Route::post('/accAdmin/', [BonController::class, "accAdmin"])->name('admin.accAdmin');
+    Route::post('/accAdmin', [BonController::class, "accAdmin"])->name('admin.accAdmin');
 
 
     // FM
