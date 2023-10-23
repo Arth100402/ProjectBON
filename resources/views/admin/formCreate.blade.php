@@ -248,6 +248,7 @@
                 const agenda = $("#agenda").val()
                 const keter = $("#keterangan").val()
                 const regex = /^(?!.*\s\s)[a-zA-Z0-9\s\W]{3,}$/;
+                $("#select-sales").attr("disabled",true);
                 let biaya = parseInt($("#biaya").val());
                 let formatter = new Intl.NumberFormat('id-ID', {
                     style: 'currency',
@@ -346,6 +347,7 @@
                 $(this).parent().parent().remove()
                 if ($("#table-container tr").length < 1) {
                     $("#submit").attr("disabled", true);
+                    $("#select-sales").attr("disabled", false);
                 }
             });
             $(".datepick").on("click", function() {

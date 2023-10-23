@@ -280,6 +280,8 @@
                 const sales = $("#select-sales").val()
                 const proj = $("#select-ppc").val()
 
+                $("#select-sales").attr("disabled",true);
+
                 const regex = /^(?!.*\s\s)[a-zA-Z0-9\s\W]{3,}$/;
                 var biaya = parseInt($("#biaya").val());
                 let formatter = new Intl.NumberFormat('id-ID', {
@@ -406,6 +408,7 @@
                 const tr = $(this).parent().parent().parent()
                 const table = tr.next().find("#table-revise-container")
                 const id = $(tr).attr("data-id");
+                const sales = $("#select-sales").text().trim()
                 if ($(table).parent().parent().hasClass("in")) e.stopPropagation()
                 $(table).append(
                     `<tr><td><div class="form-group required">
@@ -432,7 +435,7 @@
                     '</td>' +
                     `<td><input type = "text" class="form-control" id="tujuan${id}" style="width:100px;"> ` +
                     '</td>' +
-                    `<td><input type = "text" class="form-control" id="select-sales${id}" readonly value = "{{ Auth::user()->name }}" style="width:100px;"> ` +
+                    `<td><input type = "text" class="form-control" id="select-sales${id}" readonly value = "${sales}" style="width:100px;"> ` +
                     '</td>' +
                     `<td><select class="form-control"  id="select-ppc${id}" style="width:150px;"></select> ` +
                     '</td>' +
