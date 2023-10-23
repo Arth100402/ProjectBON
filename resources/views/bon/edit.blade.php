@@ -46,6 +46,30 @@
         </div>
     @endif
     @csrf
+    <div class="form-group">
+        {{-- Admin --}}
+        @if (Auth::user()->jabatan_id == 9)
+            <div class="form-group">
+                <label for="sales">Pilih Sales: </label>
+                <select class="form-control" name="sales" id="select-sales" disabled>
+                    <option value="{{ $bon->users_id }}">{{ $bon->name }}</option>
+                </select>
+                @error('sales')
+                    <span class="text-danger">{{ $message }}</span>
+                @enderror
+            </div>
+        @else
+            <div class="form-group">
+                <label for="sales">Pilih Sales: </label>
+                <select class="form-control" name="sales" id="select-sales" disabled>
+                    <option value="{{ Auth::user()->id }}">{{ Auth::user()->name }}</option>
+                </select>
+                @error('sales')
+                    <span class="text-danger">{{ $message }}</span>
+                @enderror
+            </div>
+        @endif
+    </div>
     <div class="form-group required" style="min-width:25%; max-width:30%">
         <label for="tglMulai">Mulai Tanggal:</label><br>
         <div class="input-group datepick">
@@ -90,28 +114,6 @@
             <span class="text-danger">{{ $message }}</span>
         @enderror
     </div>
-    {{-- Admin --}}
-    @if (Auth::user()->jabatan_id == 9)
-        <div class="form-group">
-            <label for="sales">Pilih Sales: </label>
-            <select class="form-control" name="sales" id="select-sales" disabled>
-                <option value="{{ $bon->users_id }}">{{ $bon->name }}</option>
-            </select>
-            @error('sales')
-                <span class="text-danger">{{ $message }}</span>
-            @enderror
-        </div>
-    @else
-        <div class="form-group">
-            <label for="sales">Pilih Sales: </label>
-            <select class="form-control" name="sales" id="select-sales" disabled>
-                <option value="{{ Auth::user()->id }}">{{ Auth::user()->name }}</option>
-            </select>
-            @error('sales')
-                <span class="text-danger">{{ $message }}</span>
-            @enderror
-        </div>
-    @endif
     <div class="form-group">
         <label for="ppc">Pilih PPC: </label>
         <select class="form-control" name="ppc" id="select-ppc"></select>
@@ -124,6 +126,13 @@
         <input type="text" name="nopaket" id="nopaket" class="form-control" placeholder="Masukkan No Paket"
             disabled></select>
         @error('nopaket')
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label for="asalKota">Bendera:</label><br>
+        <input type="text" name="bendera" id="bendera" class="form-control" placeholder="Pilih PPC" disabled></select>
+        @error('bendera')
             <span class="text-danger">{{ $message }}</span>
         @enderror
     </div>
@@ -265,19 +274,26 @@
             initDTP("#tglAkhir", today)
 
             $("#select-ppc").select2({
-                placeholder: 'Tidak ada ID Opti',
+                placeholder: 'Tidak ada Opti Terpilih',
                 allowClear: true,
                 ajax: {
                     url: '{{ route('loadPPC') }}',
                     dataType: 'json',
-                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term,
+                            "_token": "{{ csrf_token() }}",
+                            id: $("#select-sales").val()
+                        };
+                    },
                     processResults: function(data) {
                         return {
                             results: $.map(data.data, function(item) {
                                 return {
-                                    text: item.namaOpti,
+                                    text: item.namaOpti + ' - ' + item.idOpti,
                                     id: item.id,
-                                    noPaket: item.noPaket
+                                    noPaket: item.noPaket,
+                                    bendera: item.bendera,
                                 }
                             })
                         };
@@ -287,8 +303,10 @@
             }).on("change", function(e) {
                 var selectedData = $(this).select2('data');
                 $('#nopaket').val(selectedData[0].noPaket);
+                $('#bendera').val(selectedData[0].bendera);
             }).on('select2:unselect', function(e) {
                 $('#nopaket').val('');
+                $('#bendera').val('');
             });
 
             $("#addDetail").on("click", function(e) {
@@ -302,6 +320,8 @@
                 const nopaket = $("#nopaket").val()
                 const sales = $("#select-sales").val()
                 const proj = $("#select-ppc").val()
+
+                $("#select-sales").attr("disabled", true);
 
                 const regex = /^(?!.*\s\s)[a-zA-Z0-9\s\W]{3,}$/;
                 var biaya = parseInt($("#biaya").val());
@@ -435,6 +455,7 @@
                 const tr = $(this).parent().parent().parent()
                 const table = tr.next().find("#table-revise-container")
                 const id = $(tr).attr("data-id");
+                const sales = $("#select-sales").text().trim()
                 if ($(table).parent().parent().hasClass("in")) e.stopPropagation()
                 $(table).append(
                     `<tr><td><div class="form-group required">
@@ -461,7 +482,7 @@
                     '</td>' +
                     `<td><input type = "text" class="form-control" id="tujuan${id}" style="width:100px;"> ` +
                     '</td>' +
-                    `<td><input type = "text" class="form-control" id="select-sales${id}" readonly value = "{{ Auth::user()->name }}" style="width:100px;"> ` +
+                    `<td><input type = "text" class="form-control" id="select-sales${id}" readonly value = "${sales}" style="width:100px;"> ` +
                     '</td>' +
                     `<td><select class="form-control"  id="select-ppc${id}" style="width:150px;"></select> ` +
                     '</td>' +
@@ -479,19 +500,26 @@
                 initDTP("#tglMulai" + id, today)
                 initDTP("#tglAkhir" + id, today)
                 $("#select-ppc" + id).select2({
-                    placeholder: 'Tidak ada ID Opti',
+                    placeholder: 'Tidak ada Opti Terpilih',
                     allowClear: true,
                     ajax: {
                         url: '{{ route('loadPPC') }}',
                         dataType: 'json',
-                        delay: 250,
+                        data: function(params) {
+                            return {
+                                q: params.term,
+                                "_token": "{{ csrf_token() }}",
+                                id: $("#select-sales").val()
+                            };
+                        },
                         processResults: function(data) {
                             return {
                                 results: $.map(data.data, function(item) {
                                     return {
-                                        text: item.namaOpti,
+                                        text: item.namaOpti + ' - ' + item.idOpti,
                                         id: item.id,
-                                        noPaket: item.noPaket
+                                        noPaket: item.noPaket,
+                                        bendera: item.bendera,
                                     }
                                 })
                             };
@@ -500,9 +528,11 @@
                     }
                 }).on("change", function(e) {
                     var selectedData = $(this).select2('data');
-                    $('#nopaket' + id).val(selectedData[0].noPaket);
+                    $('#nopaket').val(selectedData[0].noPaket);
+                    $('#bendera').val(selectedData[0].bendera);
                 }).on('select2:unselect', function(e) {
-                    $('#nopaket' + id).val('');
+                    $('#nopaket').val('');
+                    $('#bendera').val('');
                 });
             });
 

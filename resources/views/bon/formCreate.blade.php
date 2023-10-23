@@ -13,6 +13,15 @@
         </div>
     @endif
     @csrf
+    <div class="form-group">
+        <label for="sales">Pilih Sales: </label>
+        <select class="form-control" name="sales" id="select-sales" disabled>
+            <option value="{{ Auth::user()->id }}">{{ Auth::user()->name }}</option>
+        </select>
+        @error('sales')
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+    </div>
     <div class="form-group required" style="min-width:25%; max-width:30%">
         <label for="tglMulai">Mulai Tanggal:</label><br>
         <div class="input-group datepick">
@@ -64,15 +73,6 @@
             placeholder="Masukkan Kota Tujuan. Contoh : Surabaya" required>
         </select>
         @error('tujuan')
-            <span class="text-danger">{{ $message }}</span>
-        @enderror
-    </div>
-    <div class="form-group">
-        <label for="sales">Pilih Sales: </label>
-        <select class="form-control" name="sales" id="select-sales" disabled>
-            <option value="{{ Auth::user()->id }}">{{ Auth::user()->name }}</option>
-        </select>
-        @error('sales')
             <span class="text-danger">{{ $message }}</span>
         @enderror
     </div>

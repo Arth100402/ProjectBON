@@ -725,11 +725,18 @@ class BonController extends Controller
         return response()->json(compact("data", "dataRevision"));
     }
 
-    public function  loadPPC(Request $request)
+    public function loadPPC(Request $request)
     {
-        $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti", "noPaket"]);
+        $data = Project::where(function ($query) use ($request) {
+            $query->where("idOpti", "LIKE", "%$request->q%")
+                ->orWhere("namaOpti", "LIKE", "%$request->q%");
+        })
+            ->where("users_id", $request->id)
+            ->get(["id", "namaOpti", "noPaket", "idOpti", "bendera"]);
+
         return response()->json(["data" => $data]);
     }
+
 
     public function  loadSales(Request $request)
     {
