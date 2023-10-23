@@ -532,13 +532,11 @@ class BonController extends Controller
             ->join('users', 'detailbons.users_id', '=', 'users.id')
             ->where('detailbons.bons_id', $id)
             ->get(['detailbons.*', 'projects.namaOpti', 'projects.noPaket', 'users.name']);
-        $level1 = Acc::where("bons_id", $id)->where("level", 1)->orWhere("level", 0)->first("status")["status"] == "Diproses";
+        $level1 = Acc::where("bons_id", $id)->where("level", 1)->first("status")["status"] == "Diproses";
         $check = Acc::where("bons_id", $id)->where("status", "=", "Revisi")->first();
-        if ($check)
-        {
+        if ($check) {
             $acc = $check->thresholdChange;
-        }
-        else {
+        } else {
             $acc = null;
         }
         return view('bon.edit', compact('bon', 'data', 'level1', 'acc'));
@@ -812,6 +810,7 @@ class BonController extends Controller
                 $newBon->status = "Diproses";
                 $newBon->level = $datas[$i]->level;
                 $newBon->threshold = $datas[$i]->threshold;
+                $newBon->thresholdChange = $datas[$i]->thresholdChange;
                 $newBon->save();
                 if ($bon->total < $datas[$i]->threshold) break;
             }

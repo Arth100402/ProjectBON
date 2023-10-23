@@ -458,25 +458,41 @@
                 const sales = $("#select-sales").text().trim()
                 if ($(table).parent().parent().hasClass("in")) e.stopPropagation()
                 $(table).append(
-                    `<tr><td><div class="form-group required">
-                        <div class="input-group datepick">
-                            <input type="text" class="form-control dateTimePicker" id="tglMulai${id}"
-                                placeholder="Masukkan Tanggal Mulai" required readonly style="width:200px;">
-                            <div class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </div>
-                        </div>
-                        </div> ` +
+                    `
+                        <tr>
+                            <th>Mulai Tanggal</th>
+                            <th>Akhir Tanggal</th>
+                            <th>Asal Kota</th>
+                            <th>Tujuan</th>
+                            <th>Sales</th>
+                            <th>No PPC</th>
+                            <th>No Paket/SO/SQ</th>
+                            <th>Agenda</th>
+                            <th>Penggunaan</th>
+                            <th>Biaya</th>
+                            <th>Action</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group required">
+                                    <div class="input-group datepick">
+                                        <input type="text" class="form-control dateTimePicker" id="tglMulai${id}"
+                                            placeholder="Masukkan Tanggal Mulai" required readonly style="width:200px;">
+                                        <div class="input-group-addon">
+                                            <span class="glyphicon glyphicon-calendar"></span>
+                                        </div>
+                                    </div>
+                                </div> ` +
                     '</td>' +
                     `<td><div class="form-group required">
-                        <div class="input-group datepick">
-                            <input type="text" class="form-control dateTimePicker" id="tglAkhir${id}"
-                                placeholder="Masukkan Tanggal Mulai" required readonly style="width:200px;">
-                            <div class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </div>
-                        </div>
-                        </div>` +
+                                    <div class="input-group datepick">
+                                        <input type="text" class="form-control dateTimePicker" id="tglAkhir${id}"
+                                            placeholder="Masukkan Tanggal Mulai" required readonly style="width:200px;">
+                                        <div class="input-group-addon">
+                                            <span class="glyphicon glyphicon-calendar"></span>
+                                        </div>
+                                    </div>
+                                    </div>` +
                     '</td>' +
                     `<td><input type = "text" class="form-control" id="asalKota${id}" style="width:100px;"> ` +
                     '</td>' +
@@ -487,7 +503,7 @@
                     `<td><select class="form-control"  id="select-ppc${id}" style="width:150px;"></select> ` +
                     '</td>' +
                     `<td><input type="text"  id="nopaket${id}" class="form-control" placeholder="Masukkan No Paket"
-                            disabled style="width:150px;"></select> ` +
+                                disabled style="width:150px;"></select> ` +
                     '</td>' +
                     `<td><textarea class="form-control" row=10 col=10 id="agenda${id}" style="width:150px;"></textarea> ` +
                     '</td>' +
@@ -495,7 +511,9 @@
                     '</td>' +
                     `<td><input type = "number" min="0" step="1000" value="0" class="form-control" id="biaya${id}" style="width:100px;"> ` +
                     '</td>' +
-                    `<td><div style="display:flex;"><a class="btn btn-success add-revision" data-id="${id}"><i class="fa fa-plus-square-o"></i></a> &nbsp;<a class="btn btn-danger remove-revision"><i class="fa fa-times-circle"></i></a></div></td></tr>`
+                    `<td><div style="display:flex;"><a class="btn btn-success add-revision" data-id="${id}"><i class="fa fa-plus-square-o"></i></a> &nbsp;<a class="btn btn-danger remove-revision"><i class="fa fa-times-circle"></i></a></div>
+                        </td></tr></tr>
+                    `
                 )
                 initDTP("#tglMulai" + id, today)
                 initDTP("#tglAkhir" + id, today)
@@ -537,6 +555,7 @@
             });
 
             $(document).on("click", ".remove-revision", function() {
+                $(this).parent().parent().parent().prev().remove();
                 $(this).parent().parent().parent().remove();
             });
 
@@ -677,15 +696,20 @@
                         const originalDetail = $("tr[data-id='" + id + "']")
                         const cur_tr = $(Btn).parent().parent().parent();
                         $(originalDetail).addClass("lineStrike")
+                        // remove original detail button 
                         $(originalDetail).children().last().remove();
-                        $(cur_tr).prev().addClass("lineStrike")
-                        $(Btn).parent().parent().parent().remove()
+                        // remove row header & current header
+                        $(cur_tr).prev().remove()
+                        $(cur_tr).remove()
+                        // Add original detail to first row
                         $(table).prepend($(originalDetail).clone())
+                        // Replace original detail content with new revision
                         $(originalDetail).html(new_row)
                         $(originalDetail).removeClass("lineStrike")
                         $(originalDetail).attr("data-id", idNew);
                         $(originalDetail).attr("href", "#collapse" + idNew);
                         $("div#collapse" + id).attr("id", "collapse" + idNew)
+                        // Handling "Kirim" button 'disable' attribute
                         if (!level1) $("#submit").attr("disabled", false);
                         if (adminsss) $("#submit").attr("disabled", false);
                         if (accthresholdchange) {
@@ -773,7 +797,7 @@
                             '<td>' +
                             `<div style="display:flex;"><a class="btn btn-warning revision"><i class="fa fa-pencil"></i></a>&nbsp;<a class="btn btn-danger remove-detail"><i class="fa fa-times-circle"></i></a>` +
                             '</td></tr>'
-                        var row_child = `<td colspan="12" class="nopading" ><div id="collapse${item.id}" class="panel-collapse collapse padding table-responsive salmon">
+                        var row_child = `<td colspan="12" class="nopading" ><div id="collapse${item.id}" class="panel-collapse collapse table-responsive salmon">
                                         <table id="tableRevise" class="table table-hover">
                                         <tbody id="table-revise-container">`;
                         if (dataRevision != undefined || dataRevision != null) {
