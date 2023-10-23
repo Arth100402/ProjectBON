@@ -18,13 +18,11 @@ class CreateProjectsTable extends Migration
             $table->string('idOpti');
             $table->string('namaOpti');
             $table->string('instansi')->nullable();
-            $table->string('namaUser')->nullable();
             $table->unsignedBigInteger('customers_id');
             $table->foreign('customers_id')->references('id')->on('customers')->onDelete('cascade');
             $table->string('telepon')->nullable();
-            $table->string('jabatan')->nullable();
-            $table->string('sales')->nullable();
-            $table->string('alamatUser')->nullable();
+            $table->unsignedBigInteger('users_id');
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->date('tglBuat')->nullable();
             $table->date('tglRealisasi');
             $table->text('kebutuhan')->nullable();
@@ -45,6 +43,7 @@ class CreateProjectsTable extends Migration
             $table->integer('statusRegisterPortal')->nullable();
             $table->date('deadline');
             $table->string('noPaket');
+            $table->string('bendera');
             $table->timestamps();
             $table->softDeletes();
         });

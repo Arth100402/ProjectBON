@@ -13,6 +13,13 @@
         </div>
     @endif
     @csrf
+    <div class="form-group">
+        <label for="sales">Pilih Sales: </label>
+        <select class="form-control" name="sales" id="select-sales"></select>
+        @error('sales')
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+    </div>
     <div class="form-group required" style="min-width:25%; max-width:30%">
         <label for="tglMulai">Mulai Tanggal:</label><br>
         <div class="input-group datepick">
@@ -68,13 +75,6 @@
         @enderror
     </div>
     <div class="form-group">
-        <label for="sales">Pilih Sales: </label>
-        <select class="form-control" name="sales" id="select-sales"></select>
-        @error('sales')
-            <span class="text-danger">{{ $message }}</span>
-        @enderror
-    </div>
-    <div class="form-group">
         <label for="ppc">Pilih PPC: </label>
         <select class="form-control" name="ppc" id="select-ppc"></select>
         @error('ppc')
@@ -83,9 +83,15 @@
     </div>
     <div class="form-group">
         <label for="asalKota">No Paket/SO/SQ:</label><br>
-        <input type="text" name="nopaket" id="nopaket" class="form-control" placeholder="Masukkan No Paket"
-            disabled></select>
+        <input type="text" name="nopaket" id="nopaket" class="form-control" placeholder="Pilih PPC" disabled></select>
         @error('nopaket')
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="form-group">
+        <label for="asalKota">Bendera:</label><br>
+        <input type="text" name="bendera" id="bendera" class="form-control" placeholder="Pilih PPC" disabled></select>
+        @error('bendera')
             <span class="text-danger">{{ $message }}</span>
         @enderror
     </div>
@@ -215,19 +221,26 @@
             });
 
             $("#select-ppc").select2({
-                placeholder: 'Tidak ada ID Opti',
+                placeholder: 'Tidak ada Opti Terpilih',
                 allowClear: true,
                 ajax: {
                     url: '{{ route('loadPPC') }}',
                     dataType: 'json',
-                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term,
+                            "_token": "{{ csrf_token() }}",
+                            id: $("#select-sales").val()
+                        };
+                    },
                     processResults: function(data) {
                         return {
                             results: $.map(data.data, function(item) {
                                 return {
-                                    text: item.namaOpti,
+                                    text: item.namaOpti + ' - ' + item.idOpti,
                                     id: item.id,
-                                    noPaket: item.noPaket
+                                    noPaket: item.noPaket,
+                                    bendera: item.bendera,
                                 }
                             })
                         };
@@ -237,8 +250,10 @@
             }).on("change", function(e) {
                 var selectedData = $(this).select2('data');
                 $('#nopaket').val(selectedData[0].noPaket);
+                $('#bendera').val(selectedData[0].bendera);
             }).on('select2:unselect', function(e) {
                 $('#nopaket').val('');
+                $('#bendera').val('');
             });
 
             $("#addDetail").on("click", function(e) {
@@ -248,7 +263,7 @@
                 const agenda = $("#agenda").val()
                 const keter = $("#keterangan").val()
                 const regex = /^(?!.*\s\s)[a-zA-Z0-9\s\W]{3,}$/;
-                $("#select-sales").attr("disabled",true);
+                $("#select-sales").attr("disabled", true);
                 let biaya = parseInt($("#biaya").val());
                 let formatter = new Intl.NumberFormat('id-ID', {
                     style: 'currency',

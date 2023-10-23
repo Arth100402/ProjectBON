@@ -716,11 +716,18 @@ class BonController extends Controller
         return response()->json(compact("data", "dataRevision"));
     }
 
-    public function  loadPPC(Request $request)
+    public function loadPPC(Request $request)
     {
-        $data = Project::where("namaOpti", "LIKE", "%$request->q%")->get(["id", "namaOpti", "noPaket"]);
+        $data = Project::where(function ($query) use ($request) {
+            $query->where("idOpti", "LIKE", "%$request->q%")
+                ->orWhere("namaOpti", "LIKE", "%$request->q%");
+        })
+            ->where("users_id", $request->id)
+            ->get(["id", "namaOpti", "noPaket", "idOpti", "bendera"]);
+
         return response()->json(["data" => $data]);
     }
+
 
     public function  loadSales(Request $request)
     {
@@ -806,10 +813,10 @@ class BonController extends Controller
 
         if ($ASS->level != 0) {
             Acc::where('bons_id', $id)
-            ->where("status", "Revisi")
-            ->orderBy("level", "desc")
-            ->first()
-            ->update(['status' => 'Diproses']);
+                ->where("status", "Revisi")
+                ->orderBy("level", "desc")
+                ->first()
+                ->update(['status' => 'Diproses']);
         }
         $history = DB::table('revisionhistory')->insert(
             ['history' => 'Terima', 'bons_id' => $id, 'users_id' => Auth::user()->id, 'created_at' => now()]

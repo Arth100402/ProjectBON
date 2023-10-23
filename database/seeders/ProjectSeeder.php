@@ -21,12 +21,9 @@ class ProjectSeeder extends Seeder
                     "idOpti" => "idOpti" . ($i),
                     "namaOpti" => "namaOpti" . ($i),
                     "instansi" => "instansi" . ($i),
-                    "namaUser" => "namaUser" . ($i),
                     "customers_id" => ($i),
                     "telepon" => "08" . ($i) . rand(000000000, 999999999),
-                    "jabatan" => "Karyawan",
-                    "sales" => "sales" . ($i),
-                    "alamatUser" => "alamatUser" . ($i),
+                    "users_id" => ($i),
                     "tglBuat" => now(),
                     "tglRealisasi" => now(),
                     "kebutuhan" => "kebutuhan" . ($i),
@@ -46,7 +43,8 @@ class ProjectSeeder extends Seeder
                     "profitSingle" => rand(1, 50) * 100000,
                     "statusRegisterPortal" => 1,
                     "deadline" => date('Y-m-d', strtotime('+5 days')),
-                    "noPaket" => "1604-".($i)."SBY"
+                    "noPaket" => "1604-".($i)."SBY",
+                    "bendera" => "1604-".($i)."DIY"
                 ]
             ]);
         }
