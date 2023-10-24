@@ -189,6 +189,15 @@
                             </ul>
                         </li>
                     @endif
+                    @if (Auth::user()->jabatan_id >= 4)
+                        <li id="laporan">
+                            <a href="/laporan">
+                                <i class="icon-note"></i>
+                                <span class="title">Laporan</span>
+                                <span class="selected"></span>
+                            </a>
+                        </li>
+                    @endif
                 </ul>
                 <!-- END SIDEBAR MENU -->
             </div>
