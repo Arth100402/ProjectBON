@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\BonController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\SettingController;
 use App\Models\Bon;
+use App\Models\Laporan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +41,7 @@ Route::middleware("auth")->group(function () {
     Route::post('/revBon/{id}', [BonController::class, 'revBon'])->name('bon.revBon');
     Route::get('/HistoryAcc', [BonController::class, 'HistoryAcc'])->name('bon.HistoryAcc');
     Route::post('/loadDetailBon', [BonController::class, 'loadDetailBon'])->name('bon.loadDetailBon');
+
 
     Route::post("/bon/detail/addNew", [BonController::class, 'addNewDetail'])->name("bon.addNewDetail");
     Route::post("/bon/detail/addNewRevision", [BonController::class, 'addNewDetailRevision'])->name("bon.addNewDetailRevision");
@@ -76,6 +79,9 @@ Route::middleware("auth")->group(function () {
     ROUTE::post("/changeAcc", [SettingController::class, 'updateAcc'])->name("setting.changeAcc");
     ROUTE::post("/upadteThres", [SettingController::class, 'updateThr'])->name("setting.thr");
     ROUTE::post("/upadteThresChange", [SettingController::class, 'updateThrChange'])->name("setting.thrChg");
+
+    // Laporan Controller
+    Route::resource('/laporan', LaporanController::class);
 });
 // Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
 Route::get("/test", [BonController::class, "indexAdmin"]);
