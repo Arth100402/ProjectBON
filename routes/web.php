@@ -29,6 +29,7 @@ Route::middleware("auth")->group(function () {
     // BON Controller
     Route::resource('/bon', BonController::class);
     Route::get("/loadppc", [BonController::class, "loadPPC"])->name("loadPPC");
+    Route::get("/loadAllppc", [BonController::class, "loadAllPPC"])->name("loadAllPPC");
     Route::get("/loadsales", [BonController::class, "loadSales"])->name("loadSales");
     Route::post('/getDetail', [BonController::class, 'getDetail'])->name('bon.getDetail');
     Route::get('/jsonShowIndexAdmin', [BonController::class, 'jsonShowIndexAdmin'])->name('bon.jsonShowIndexAdmin');
@@ -82,6 +83,7 @@ Route::middleware("auth")->group(function () {
 
     // Laporan Controller
     Route::resource('/laporan', LaporanController::class);
+    Route::post("/querytglMulai", [LaporanController::class, 'filterBons'])->name('fb');
 });
 // Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
 Route::get("/test", [BonController::class, "indexAdmin"]);

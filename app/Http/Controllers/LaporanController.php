@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bon;
+use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use NumberFormatter;
 
 class LaporanController extends Controller
 {
@@ -13,7 +18,15 @@ class LaporanController extends Controller
      */
     public function index()
     {
-        return view('report');
+        $earliest = Bon::orderBy('tglPengajuan', "ASC")->first();
+        $latest = Bon::orderBy('tglPengajuan', "DESC")->first();
+        $all = Bon::join('users', "bons.users_id", "users.id")
+            ->join('detailbons', "detailbons.bons_id", "bons.id")
+            ->join('projects', "detailbons.projects_id", "projects.id")
+            ->where("users.departement_id", Auth::user()->departement_id)
+            ->get(["bons.tglPengajuan", "users.name", "projects.idOpti", "bons.total", "bons.status"]);
+        $total =  $this->formatPrice($all->sum("total"));
+        return view('report', compact('earliest', 'latest', "all", "total"));
     }
 
     /**
@@ -80,5 +93,49 @@ class LaporanController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function filterBons(Request $request)
+    {
+        $tglMulai = $this->convertDTPtoDatabaseDT($request->get("m"));
+        $tglAkhir = $this->convertDTPtoDatabaseDT($request->get("a"));
+        $pengaju = $request->get("p") ? `%` . $request->get("p") . `%` : "%%";
+        $opti = $request->get("o") ?  `%` . $request->get("o") . `%`  : "%%";
+        $q = Bon::join('users', "bons.users_id", "users.id")
+            ->join('detailbons', "detailbons.bons_id", "bons.id")
+            ->join('projects', "detailbons.projects_id", "projects.id")
+            ->whereBetween('bons.tglPengajuan', [$tglMulai, $tglAkhir])
+            ->where([
+                ["bons.users_id", "LIKE", $pengaju],
+                ["detailbons.projects_id", "LIKE", $opti],
+                ["users.departement_id", Auth::user()->departement_id]
+            ]);
+        switch ($request->get("s")) {
+            case 'placeholder':
+                $q->where(function ($query) {
+                    $query->whereIn("bons.status", ["Terima", "Tolak"])->orWhereNull("bons.status");
+                });
+                break;
+            case 'Menunggu':
+                $q->whereNull("bons.status");
+                break;
+            case 'Terima':
+                $q->where("bons.status", "Terima");
+                break;
+            default:
+                $q->where("bons.status",  "Tolak");
+                break;
+        }
+        $data = $q->get(["bons.tglPengajuan", "users.name", "projects.idOpti", "bons.total", "bons.status"]);
+        $total = $this->formatPrice($data->sum('total'));
+        return response()->json(compact('data', 'total', 'pengaju'));
+    }
+    private function convertDTPtoDatabaseDT($date)
+    {
+        return date("Y-m-d", strtotime(str_replace(" ", "", explode(",", $date)[1])));
+    }
+    private function formatPrice($price)
+    {
+        return (new NumberFormatter("id_ID", NumberFormatter::CURRENCY))->formatCurrency($price, "IDR");
     }
 }
