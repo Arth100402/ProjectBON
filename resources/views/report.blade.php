@@ -14,7 +14,7 @@
     <h3>Filter Data: </h3>
     <div class="container">
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="form-group required">
                     <label for="tglMulai">Mulai Tanggal:</label><br>
                     <div class="input-group datepick">
@@ -25,16 +25,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="btn-group" role="group" aria-label="...">
-                    <button type="button" class="btn btn-default btn-info" onclick="appendDate('day','#tglMulai')">+1
-                        Hari</button>
-                    <button type="button" class="btn btn-default btn-primary" onclick="appendDate('week','#tglMulai')">+1
-                        Minggu</button>
-                    <button type="button" class="btn btn-default btn-info" onclick="appendDate('month','#tglMulai')">+1
-                        Bulan</button>
-                </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="form-group required">
                     <label for="tglAkhir">Sampai Tanggal:</label><br>
                     <div class="input-group datepick">
@@ -45,16 +37,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="btn-group" role="group" aria-label="...">
-                    <button type="button" class="btn btn-default btn-info" onclick="appendDate('day','#tglMulai')">+1
-                        Hari</button>
-                    <button type="button" class="btn btn-default btn-primary" onclick="appendDate('week','#tglMulai')">+1
-                        Minggu</button>
-                    <button type="button" class="btn btn-default btn-info" onclick="appendDate('month','#tglMulai')">+1
-                        Bulan</button>
-                </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="form-group">
                     <label for="pengaju">Pilih Nama Pengaju: </label>
                     <select class="form-control" name="pengaju" id="select-pengaju"></select>
