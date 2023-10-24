@@ -24,9 +24,25 @@ class LaporanController extends Controller
             ->join('detailbons', "detailbons.bons_id", "bons.id")
             ->join('projects', "detailbons.projects_id", "projects.id")
             ->where("users.departement_id", Auth::user()->departement_id)
+            ->orderBy('bons.tglPengajuan')
             ->get(["bons.tglPengajuan", "users.name", "projects.idOpti", "bons.total", "bons.status"]);
         $total =  $this->formatPrice($all->sum("total"));
-        return view('report', compact('earliest', 'latest', "all", "total"));
+        $q = Bon::join('users', "bons.users_id", "users.id")
+            ->join('detailbons', "detailbons.bons_id", "bons.id")
+            ->join('projects', "detailbons.projects_id", "projects.id")
+            ->select(DB::raw("DATE(bons.tglPengajuan) as date"), DB::raw("AVG(bons.total) as avg_total"))
+            ->where([
+                ["users.departement_id", Auth::user()->departement_id]
+            ])
+            ->groupBy(DB::raw("DATE(bons.tglPengajuan)"))
+            ->orderBy('bons.tglPengajuan')
+            ->get();
+        dd($q);
+        $chartData = [['Date', 'Total']];
+        foreach ($q as $row) {
+            $chartData[] = [$row->date, $row->avg_total];
+        }
+        return view('report', compact('earliest', 'latest', "all", "total", "chartData"));
     }
 
     /**
@@ -109,7 +125,7 @@ class LaporanController extends Controller
                 ["bons.users_id", "LIKE", $pengaju],
                 ["detailbons.projects_id", "LIKE", $opti],
                 ["users.departement_id", Auth::user()->departement_id]
-            ]);
+            ])->orderBy('bons.tglPengajuan');
         switch ($request->get("s")) {
             case 'placeholder':
                 $q->where(function ($query) {
@@ -128,12 +144,14 @@ class LaporanController extends Controller
         }
         $data = $q->get(["bons.tglPengajuan", "users.name", "projects.idOpti", "bons.total", "bons.status"]);
         $total = $this->formatPrice($data->sum('total'));
-        return response()->json(compact('data', 'total', 'pengaju'));
+        return response()->json(compact('data', 'total'));
     }
+
     private function convertDTPtoDatabaseDT($date)
     {
         return date("Y-m-d", strtotime(str_replace(" ", "", explode(",", $date)[1])));
     }
+
     private function formatPrice($price)
     {
         return (new NumberFormatter("id_ID", NumberFormatter::CURRENCY))->formatCurrency($price, "IDR");

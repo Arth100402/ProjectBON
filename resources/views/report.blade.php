@@ -121,11 +121,13 @@
                 <p>Total :</p>
                 <p id="total">{{ $total }}</p>
             </div>
+            <div id="linechart" style="width: 900px; height: 500px"></div>
 
         </div>
     </div>
 @endsection
 @section('javascript')
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
         $(document).ready(function() {
             // Variables & Initialization
@@ -134,6 +136,29 @@
             const l = {!! $latest !!}.tglPengajuan
             initDTP("#tglMulai", e)
             initDTP("#tglAkhir", l)
+
+            google.charts.load('current', {
+                'packages': ['corechart']
+            });
+            google.charts.setOnLoadCallback(drawChart);
+
+            var data = {!! json_encode($chartData) !!};
+
+            function drawChart() {
+                var dataTable = google.visualization.arrayToDataTable(data);
+
+                var options = {
+                    title: 'Rata - Rata Total Pengeluaran Bon Sementara',
+                    curveType: 'function',
+                    legend: {
+                        position: 'bottom'
+                    },
+                    pointSize: 5
+                };
+
+                var chart = new google.visualization.LineChart(document.getElementById('linechart'));
+                chart.draw(dataTable, options);
+            }
             $("#select-status").select2({
                 placeholder: "Pilih status",
                 allowClear: true,
@@ -252,7 +277,73 @@
                     `
                     }
                     $(tb).html(c);
-                    $("#total").html(t)
+                    $("#total").html(t);
+
+                    // Graph
+
+                    var groupedData = {};
+                    d.forEach(function(row) {
+                        var date = row.tglPengajuan;
+                        if (!groupedData[date]) {
+                            groupedData[date] = {
+                                sum: 0,
+                                count: 0,
+                                entries: 0
+                            };
+                        }
+                        groupedData[date].sum += row.total;
+                        groupedData[date].count++;
+                        groupedData[date].entries++;
+                    });
+
+                    var averages = Object.keys(groupedData).map(function(date) {
+                        var avg = groupedData[date].sum / groupedData[date].count;
+                        return {
+                            tglPengajuan: date,
+                            total: avg,
+                            entries: groupedData[date].entries
+                        };
+                    });
+
+                    // Graph
+                    google.charts.load('current', {
+                        'packages': ['corechart']
+                    });
+                    google.charts.setOnLoadCallback(drawChart);
+
+                    function drawChart() {
+                        var data = new google.visualization.DataTable();
+                        data.addColumn('date', 'Date'); // Use 'date' type for the date
+                        data.addColumn('number', 'Total'); // Use 'number' type for the total
+                        data.addColumn({
+                            type: 'string',
+                            role: 'tooltip'
+                        }); // Use 'string' type for the tooltip
+
+                        // Loop through the averages array and add it to the DataTable.
+                        averages.forEach(function(row) {
+                            var dateParts = row.tglPengajuan.split('-');
+                            var date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
+                            var tooltip = 'Date: ' + row.tglPengajuan + '\n' + 'Entries: ' + row
+                                .entries + '\n' + 'Average: ' + row.total;
+                            data.addRow([date, row.total, tooltip]);
+                        });
+
+                        var options = {
+                            title: 'Rata-Rata Total Pengeluaran Bon Sementara',
+                            curveType: 'function',
+                            legend: {
+                                position: 'bottom'
+                            },
+                            pointSize: 5 // Size of the points on the line
+                        };
+
+                        var chart = new google.visualization.LineChart(document.getElementById(
+                            'linechart'));
+                        chart.draw(data, options);
+                    }
+
                 },
                 error: function(err) {
                     console.log(err);
