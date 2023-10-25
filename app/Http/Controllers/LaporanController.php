@@ -27,22 +27,7 @@ class LaporanController extends Controller
             ->orderBy('bons.tglPengajuan')
             ->get(["bons.tglPengajuan", "users.name", "projects.idOpti", "bons.total", "bons.status"]);
         $total =  $this->formatPrice($all->sum("total"));
-        $q = Bon::join('users', "bons.users_id", "users.id")
-            ->join('detailbons', "detailbons.bons_id", "bons.id")
-            ->join('projects', "detailbons.projects_id", "projects.id")
-            ->select(DB::raw("DATE(bons.tglPengajuan) as date"), DB::raw("AVG(bons.total) as avg_total"))
-            ->where([
-                ["users.departement_id", Auth::user()->departement_id]
-            ])
-            ->groupBy(DB::raw("DATE(bons.tglPengajuan)"))
-            ->orderBy('bons.tglPengajuan')
-            ->get();
-        dd($q);
-        $chartData = [['Date', 'Total']];
-        foreach ($q as $row) {
-            $chartData[] = [$row->date, $row->avg_total];
-        }
-        return view('report', compact('earliest', 'latest', "all", "total", "chartData"));
+        return view('report', compact('earliest', 'latest', "all", "total"));
     }
 
     /**

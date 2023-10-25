@@ -137,28 +137,8 @@
             initDTP("#tglMulai", e)
             initDTP("#tglAkhir", l)
 
-            google.charts.load('current', {
-                'packages': ['corechart']
-            });
-            google.charts.setOnLoadCallback(drawChart);
+            filterChangeListener();
 
-            var data = {!! json_encode($chartData) !!};
-
-            function drawChart() {
-                var dataTable = google.visualization.arrayToDataTable(data);
-
-                var options = {
-                    title: 'Rata - Rata Total Pengeluaran Bon Sementara',
-                    curveType: 'function',
-                    legend: {
-                        position: 'bottom'
-                    },
-                    pointSize: 5
-                };
-
-                var chart = new google.visualization.LineChart(document.getElementById('linechart'));
-                chart.draw(dataTable, options);
-            }
             $("#select-status").select2({
                 placeholder: "Pilih status",
                 allowClear: true,
