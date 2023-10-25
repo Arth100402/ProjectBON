@@ -84,6 +84,7 @@ Route::middleware("auth")->group(function () {
     // Laporan Controller
     Route::resource('/laporan', LaporanController::class);
     Route::post("/querytglMulai", [LaporanController::class, 'filterBons'])->name('fb');
+    Route::post("/convertToExcel", [LaporanController::class, 'convertToExcel'])->name('convertToExcel');
 });
 // Route::get("/test", [BonController::class, "jsonShowIndexAdmin"]);
 Route::get("/test", [BonController::class, "indexAdmin"]);

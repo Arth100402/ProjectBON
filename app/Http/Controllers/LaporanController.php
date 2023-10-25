@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\BonExport;
 use App\Models\Bon;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
@@ -130,6 +131,16 @@ class LaporanController extends Controller
         $data = $q->get(["bons.tglPengajuan", "users.name", "projects.idOpti", "bons.total", "bons.status"]);
         $total = $this->formatPrice($data->sum('total'));
         return response()->json(compact('data', 'total'));
+    }
+
+    public function convertToExcel(Request $request)
+    {
+        $tglMulai = $this->convertDTPtoDatabaseDT($request->get("mulai"));
+        $tglAkhir = $this->convertDTPtoDatabaseDT($request->get("akhir"));
+        $pengaju = $request->get("pengaju") ? `%` . $request->get("pengaju") . `%` : "%%";
+        $opti = $request->get("opti") ?  `%` . $request->get("opti") . `%`  : "%%";
+        $status = $request->get("status");
+        return (new BonExport($tglMulai, $tglAkhir, $pengaju, $opti, $status))->download("test.xlsx");
     }
 
     private function convertDTPtoDatabaseDT($date)
