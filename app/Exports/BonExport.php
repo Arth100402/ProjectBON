@@ -71,6 +71,8 @@ class BonExport implements FromCollection, WithHeadings
         }
         $data = $q->get(["bons.tglPengajuan", "users.name", "projects.idOpti", "bons.total", "bons.status"]);
         $total = $this->formatPrice($data->sum('total'));
+        $totalSum = $q->sum('bons.total');
+        $data[] = ['tglPengajuan' => ' ', 'name' => 'Total', 'idOpti' => ' ', 'total' => $totalSum, 'status' => ' '];
 
         return $data;
     }
