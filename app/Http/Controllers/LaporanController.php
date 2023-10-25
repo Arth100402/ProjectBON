@@ -8,6 +8,8 @@ use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Excel;
+use Maatwebsite\Excel\Facades\Excel as FacadesExcel;
 use NumberFormatter;
 
 class LaporanController extends Controller
@@ -135,11 +137,12 @@ class LaporanController extends Controller
 
     public function convertToExcel(Request $request)
     {
-        $tglMulai = $this->convertDTPtoDatabaseDT($request->get("mulai"));
-        $tglAkhir = $this->convertDTPtoDatabaseDT($request->get("akhir"));
-        $pengaju = $request->get("pengaju") ? `%` . $request->get("pengaju") . `%` : "%%";
-        $opti = $request->get("opti") ?  `%` . $request->get("opti") . `%`  : "%%";
-        $status = $request->get("status");
+        $inputs = explode("#", $request->get("inputs"));
+        $tglMulai = $this->convertDTPtoDatabaseDT($inputs[0]);
+        $tglAkhir = $this->convertDTPtoDatabaseDT($inputs[1]);
+        $pengaju = $request->get("pengaju") != "null" ? `%` . $inputs[2] . `%` : "%%";
+        $opti = $request->get("opti") != "null" ?  `%` . $inputs[3] . `%`  : "%%";
+        $status = $inputs[4];
         return (new BonExport($tglMulai, $tglAkhir, $pengaju, $opti, $status))->download("test.xlsx");
     }
 

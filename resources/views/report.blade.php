@@ -122,8 +122,11 @@
                 <p id="total">{{ $total }}</p>
             </div>
             <div id="linechart" style="width: 900px; height: 500px"></div>
-            <button type="button" class="btn btn-success" id="submit"><i class="fa fa-file-excel-o"></i> Export To
-                Excel</button>
+            <form action="{{ route('convertToExcel') }}" method="get" id="excelForm">
+                @csrf
+                <button type="submit" class="btn btn-success" id="submit"><i class="fa fa-file-excel-o"></i> Export To
+                    Excel</button>
+            </form>
         </div>
     </div>
 @endsection
@@ -213,31 +216,14 @@
 
         });
 
-        $("#submit").on("click", function() {
-            console.log("masuk button");
+        $("form#excelForm").on("submit", function(e) {
             const mulai = $("#tglMulai").val();
             const akhir = $("#tglAkhir").val();
             const pengaju = $("#select-pengaju").val();
             const opti = $("#select-opti").val();
             const status = $("#select-status").val() ? $("#select-status").val() : "placeholder";
-            $.ajax({
-                type: "POST",
-                url: "{{ route('convertToExcel') }}",
-                data: {
-                    "_token": "{{ csrf_token() }}",
-                    "mulai": mulai,
-                    "akhir": akhir,
-                    "pengaju": pengaju,
-                    "opti": opti,
-                    "status": status,
-                },
-                success: function(response) {
-                    console.log("success");
-                },
-                error: function(err) {
-                    console.log(err);
-                }
-            });
+            const c = `${mulai}#${akhir}#${pengaju}#${opti}#${status}`.replace(/\s+/g, '');
+            $(this).append(`<input type="hidden" name="inputs" value="${c}">`)
         });
 
 
